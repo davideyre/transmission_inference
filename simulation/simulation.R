@@ -70,7 +70,8 @@ commBeta = 0.000
 
 pStartPos= 0.0
 
-epsilon = 10 #mean delay to sampling
+sample.size = 5 #neg binomial size , for delay to sampling
+sample.mu = 10 #mean delay to sampling
 
 #recovery - neg binom distribution
 rec.size = 3
@@ -108,7 +109,7 @@ mutationRate = 2 #mutations per genome per year
 
 #save settings
 settings = list(bgroundBeta=bgroundBeta, wardBeta=wardBeta, hospBeta=hospBeta, 
-                commBeta=commBeta, pStartPos=pStartPos, epsilon=epsilon, rec.size=rec.size, rec.mu=rec.mu,
+                commBeta=commBeta, pStartPos=pStartPos, sample.size=sample.size, sample.mu=sample.mu, rec.size=rec.size, rec.mu=rec.mu,
                 spore.p=spore.p, directNe=directNe, introNe=introNe, bottleneck=bottleneck, nWards=nWards,
                 nPopulation=nPopulation, pAdmit=pAdmit, losMean=losMean, maxTime=maxTime, randomSeed=randomSeed)
 
@@ -148,7 +149,7 @@ for(pt in 1:nPopulation) {
     #patient starts infected
     print(paste("Patient", pt, "is alredy infected at t=1"))
     #simulate recovery time, accepting for now is approximation (as is sample time for these cases below)
-    t.sample = 1 + rpois(1, epsilon)
+    t.sample = 1 + rnbinom(1, sample.size, mu=sample.mu)
     t.rec = t.sample + rnbinom(1, rec.size, mu=rec.mu)
     infections[pt,] = c(1, -1, 4, t.sample, t.rec)
 
@@ -196,7 +197,7 @@ for(t in 2:maxTime) {
           #background infection has occured
           srcType = 3 #community background
           src = -1
-          t.sample = t + rpois(1, epsilon)
+          t.sample = t + rnbinom(1, sample.size, mu=sample.mu)
           t.rec = t.sample + rnbinom(1, rec.size, mu=rec.mu)
           infections[pt,] = c(t, src, srcType, t.sample, t.rec)
           print(paste("Patient", pt, "is infected in the community at time", t))
@@ -231,7 +232,7 @@ for(t in 2:maxTime) {
         if(runif(1)<(1-exp(-totalBetaI))) {
            #an infection has occured
            srcType = sample(x=c(0,1,2,5), size=1, prob=probSource) #sample type as ward Bground, ward, hospital, spore = 0,1,2,5
-           t.sample = t + rpois(1, epsilon)
+           t.sample = t + rnbinom(1, sample.size, mu=sample.mu)
            #get recovery time
            t.rec = t.sample + rnbinom(1, rec.size, mu=rec.mu)
            

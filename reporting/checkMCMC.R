@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_69114235"
+path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_23574379"
 
 #parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
 option_list = list(
@@ -53,7 +53,7 @@ burnIn = nrow(chain) * 0.2
 
 logistic = function(x) {return(1/(1+exp(-x)))}
 finalChain = chain[burnIn:nrow(chain),]
-finalChain = cbind(finalChain, logistic(finalChain$spore_prob))
+finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
 #plot(as.mcmc(finalChain))
 
 parmChainFile = paste(path, "inference/parm_plots.pdf", sep="")
@@ -96,14 +96,14 @@ write.csv(parmSummary, parmFile, row.names=F)
 
 
 #epsilon check
-getEll = function(lambda, dd) {
-  ll = sum(dpois(dd, lambda, log=T))
-  return(ll)
-}
-dd = sampleTimes[infectedPatients]-true.infTimes[infectedPatients]
-o.epsilon = optimise(getEll, c(0.1,10), dd, maximum = T)
-print("ML estimate of epsilon")
-print(o.epsilon$maximum)
+#getEll = function(lambda, dd) {
+#  ll = sum(dpois(dd, lambda, log=T))
+#  return(ll)
+#}
+#dd = sampleTimes[infectedPatients]-true.infTimes[infectedPatients]
+#o.epsilon = optimise(getEll, c(0.1,10), dd, maximum = T)
+#print("ML estimate of epsilon")
+#print(o.epsilon$maximum)
 
 
 #pairs(data.frame(cbind(finalChain$spore_prob, finalChain$beta1)))
