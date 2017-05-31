@@ -264,12 +264,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             nAccepted[15] = 0;
             
             
-            //display current parameter values - if possible improve to display ESS too
-            printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n  betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\n recSize: %0.4f\t recMu %0.4f\nCurrentLL:  %0.1f\n",
-                   chain[i-1].betaBgroundHosp, chain[i-1].betaWard, chain[i-1].betaHosp, chain[i-1].sampleEpsilon, chain[i-1].directNe, chain[i-1].introNe,
-                   chain[i-1].mu, chain[i-1].probStartInfLogit, logistic(chain[i-1].probStartInfLogit), chain[i-1].betaComm, chain[i-1].sporeProbLogit, logistic(chain[i-1].sporeProbLogit), chain[i-1].recSize, chain[i-1].recMu, chain[i-1].currentLL);
+            //display current parameter values
+            chain[i-1].displayLog();
             
-            
+            //display current LL for different components of likelihood
             double currentLLSample = llSample(infectedPatients, currentInfTimes, sampleTimes, currentParm);
             printf("LL sample, current: %0.3f\n", currentLLSample);
             
@@ -286,6 +284,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             double currentLLRecovery = llRecover(infectedPatients, sampleTimes, currentRecTimes, currentParm);
             printf("LL recovery, current: %0.3f\n\n", currentLLRecovery);
             
+            //estimate time remaining
             struct timeval currentSystemTime;
             gettimeofday(&currentSystemTime, NULL);
             double delta = ((currentSystemTime.tv_sec  - previousSystemTime.tv_sec) * 1000000u +

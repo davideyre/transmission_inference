@@ -53,8 +53,10 @@ public:
     };
 };
 
-//structure to hold paramters
-struct Parm {
+//class to hold paramters
+class Parm {
+    
+public:
     //parameters for model
     //"beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "betaSpore", "recSize", "recMu"
     double betaBgroundHosp;
@@ -99,6 +101,18 @@ struct Parm {
                 
             default: throw std::runtime_error( "Parameter structure: bad index\n" );
         }
+    }
+    
+private:
+    double logistic(double x) {
+        return 1/(1+exp(-x));
+    }
+    
+public:
+    void displayLog() {
+        printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n  betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\n recSize: %0.4f\t recMu %0.4f\nCurrentLL:  %0.1f\n\n",
+               betaBgroundHosp, betaWard, betaHosp, sampleEpsilon, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), recSize, recMu, currentLL);
+        
     }
     
 };
