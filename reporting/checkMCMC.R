@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Dropbox/Epi_WGS_MCMC/ward_hosp_comm_sim/simulation_2149"
+path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_69114235"
 
 #parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
 option_list = list(
