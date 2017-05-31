@@ -13,7 +13,7 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     FILE *fp;
     string fileName = filePath+"/chain_parameters.txt";
     fp = fopen(fileName.c_str(), "wb");
-    fprintf(fp, "beta0\tbeta1\tbeta2\tsampleSize\tsampleMu\tdirectNe\tintroNe\tmu\tbetacomm\tp_start_inf_logit\tspore_prob_logit\trec_size\trec_mu\tposterior\tll_trans\tll_genetic\tll_sampling\tll_recovery\n"); //header
+    fprintf(fp, "beta0\tbeta1\tbeta2\tsampleSize\tsampleMu\tdirectNe\tintroNe\tmu\tbetacomm\tspore_prob_logit\tp_start_inf_logit\trec_size\trec_mu\tposterior\tll_trans\tll_genetic\tll_sampling\tll_recovery\n"); //header
     for(int i=0; i<steps; i++) {
         fprintf(fp, "%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\n", chain[i].betaBgroundHosp, chain[i].betaWard, chain[i].betaHosp, chain[i].sampleSize, chain[i].sampleMu, chain[i].directNe, chain[i].introNe, chain[i].mu, chain[i].betaComm, chain[i].sporeProbLogit, chain[i].probStartInfLogit, chain[i].recSize, chain[i].recMu, chain[i].currentLL, chain[i].currentLLTrans, chain[i].currentLLGenetic, chain[i].currentLLSample, chain[i].currentLLRecovery);
     }
