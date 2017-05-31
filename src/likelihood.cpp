@@ -566,16 +566,16 @@ double getPrior(Parm &parm) {
     double priorDirectNe = dgamma(parm.directNe, 2, 2, 1); //dexp(parm.directNe, 1, 1);
     double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
     double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
-    double priorStartInf = dunif(getStartInfP(parm),0,1,1);
+    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1);
     double priorBetaComm = dexp(parm.betaComm, 1, 1);
-    double priorSporeProb = dnorm(parm.sporeProbLogit, 0, 10, 1); //dunif(parm.sporeProbLogit, 0, 1, 1); //dbeta(parm.sporeProbLogit, 2.5, 5, 1); ///dgamma(parm.sporeProbLogit, 5, 0.06, 1);
+    double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //dunif(parm.sporeProbLogit, 0, 1, 1); //dbeta(parm.sporeProbLogit, 2.5, 5, 1); ///dgamma(parm.sporeProbLogit, 5, 0.06, 1);
     //dunif(parm.sporeProbLogit, 0, 1, 1); //dgamma(parm.sporeProbLogit, 10, 0.03, 1);//for gamma specify by shape and scale (note default in R is shape and rate), shape*scale=mean
     //dnorm(parm.sporeProbLogit, 0.15, 0.05, 1); //spore prob between 0.05 and 0.3, spore durations tail up to 15-100 days
-    double priorBetaSpore = dgamma(parm.betaSpore, 2, 0.004, 1); //dexp(parm.betaSpore, 100, 1);
+    //double priorBetaSpore = dgamma(parm.betaSpore, 2, 0.004, 1); //dexp(parm.betaSpore, 100, 1);
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
     double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorEpsilon +
-    priorDirectNe + priorIntroNe + priorMu + priorStartInf + priorBetaComm + priorSporeProb + priorBetaSpore + priorRecSize + priorrecMu;
+    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + /*priorBetaSpore + */ priorRecSize + priorrecMu;
     return(prior);
 }
 

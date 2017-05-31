@@ -67,7 +67,7 @@ struct Parm {
     double probStartInfLogit;
     double betaComm;
     double sporeProbLogit; //for geometric distn
-    double betaSpore;
+    //double betaSpore;
     double recSize;
     double recMu;
     
@@ -87,7 +87,7 @@ struct Parm {
             case 7 : return probStartInfLogit;
             case 8 : return betaComm;
             case 9 : return sporeProbLogit;
-            case 10 : return betaSpore;
+            //case 10 : return betaSpore;
             case 11 : return recSize;
             case 12 : return recMu;
                 

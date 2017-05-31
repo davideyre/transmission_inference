@@ -265,9 +265,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             
             //display current parameter values - if possible improve to display ESS too
-            printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInf: %0.6f\t  betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\tbetaSpore %0.5f\n recSize: %0.4f\t recMu %0.4f\nPosterior:  %0.1f\n",
-                   chain[i-1][0], chain[i-1][1], chain[i-1][2], chain[i-1][3], chain[i-1][4], chain[i-1][5],
-                   chain[i-1][6], chain[i-1][7], chain[i-1][8], chain[i-1][9], logistic(chain[i-1][9]), chain[i-1][10], chain[i-1][11], chain[i-1][12], chain[i-1][13]);
+            printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n  betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\n recSize: %0.4f\t recMu %0.4f\nCurrentLL:  %0.1f\n",
+                   chain[i-1].betaBgroundHosp, chain[i-1].betaWard, chain[i-1].betaHosp, chain[i-1].sampleEpsilon, chain[i-1].directNe, chain[i-1].introNe,
+                   chain[i-1].mu, chain[i-1].probStartInfLogit, logistic(chain[i-1].probStartInfLogit), chain[i-1].betaComm, chain[i-1].sporeProbLogit, logistic(chain[i-1].sporeProbLogit), chain[i-1].recSize, chain[i-1].recMu, chain[i-1].currentLL);
             
             
             double currentLLSample = llSample(infectedPatients, currentInfTimes, sampleTimes, currentParm);
@@ -302,56 +302,61 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         
         //PARAMETER UPDATES
         for (int parmIndex=0; parmIndex<13; parmIndex++) {
-            //iterate through beta0, beta1, beta2, epsilon, directNe, introNe, mu, pStartInf, betaComm, sporeProb, betaSpore, recSize, recMu
-            //1. proposal distribution, i.e. proposed change in value of beta
-            proposedValue = currentParm[parmIndex] + rnorm(0 , sigma[parmIndex]);
-            proposedParm = currentParm; proposedParm[parmIndex] = proposedValue;
-            if(proposedValue <= 0 & parmIndex !=9) {
-                //if invalid proposed value skip this step
-                chain[i][parmIndex] = chain[i-1][parmIndex];
-            }
-            else if((parmIndex==7 /*| parmIndex==9*/) & (proposedValue>1)) {
-                //invalid value, skip this step
-                chain[i][parmIndex] = chain[i-1][parmIndex];
-            }
-            else {
+            if (parmIndex != 10) {
+                //ignore parameter 10 - betaSpore, not in use                
                 
-                if(parmIndex==9) {
-                    getSporeForceSummary(proposedSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, proposedParm);
-                    proposedLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-                                            currentSporeI, proposedSporeForceSummary,
-                                            wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap, proposedParm);
+                //iterate through beta0, beta1, beta2, epsilon, directNe, introNe, mu, pStartInf, betaComm, sporeProb, betaSpore, recSize, recMu
+                //1. proposal distribution, i.e. proposed change in value of beta
+                proposedValue = currentParm[parmIndex] + rnorm(0 , sigma[parmIndex]);
+                proposedParm = currentParm; proposedParm[parmIndex] = proposedValue;
+                if(proposedValue <= 0 & parmIndex !=7 & parmIndex !=9) {
+                    //if invalid proposed value skip this step
+                    chain[i][parmIndex] = chain[i-1][parmIndex];
+                }
+                else if((parmIndex==7 /*| parmIndex==9*/) & (proposedValue>1)) {
+                    //invalid value, skip this step
+                    chain[i][parmIndex] = chain[i-1][parmIndex];
                 }
                 else {
-                    //2. Compute the probability of accepting the proposed jump.
-                    proposedLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-                                            currentSporeI, currentSporeForceSummary,
-                                            wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap, proposedParm);
-                }
-                
-
-
-                probAccept = min( log(1), proposedLL -  currentLL);
-                //3. Accept proposed jump with probability pAccept
-                if ( log(runif(0,1)) < probAccept ) {
-
-                    chain[i][parmIndex] = proposedValue; // accept the proposed jump
-                    nAccepted[parmIndex] += 1; // increment the accepted counter
-                    //printf("Move accepted for parameter %d at iteration %d (current: %0.4f, proposed %0.4f\n", parmIndex, i, currentParm[parmIndex], proposedValue);
-                    currentParm = proposedParm; //update for next parameter
-                    currentLL = proposedLL;
                     
-                    //if updating spore probabity update the sporeforce and summary
-                    if(parmIndex ==9) {
-                        currentSporeForceSummary = proposedSporeForceSummary;
+                    if(parmIndex==9) {
+                        getSporeForceSummary(proposedSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, proposedParm);
+                        proposedLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
+                                                currentSporeI, proposedSporeForceSummary,
+                                                wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap, proposedParm);
                     }
+                    else {
+                        //2. Compute the probability of accepting the proposed jump.
+                        proposedLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
+                                                currentSporeI, currentSporeForceSummary,
+                                                wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap, proposedParm);
+                    }
+                    
+                    
+                    
+                    probAccept = min( log(1), proposedLL -  currentLL);
+                    //3. Accept proposed jump with probability pAccept
+                    if ( log(runif(0,1)) < probAccept ) {
+                        
+                        chain[i][parmIndex] = proposedValue; // accept the proposed jump
+                        nAccepted[parmIndex] += 1; // increment the accepted counter
+                        //printf("Move accepted for parameter %d at iteration %d (current: %0.4f, proposed %0.4f\n", parmIndex, i, currentParm[parmIndex], proposedValue);
+                        currentParm = proposedParm; //update for next parameter
+                        currentLL = proposedLL;
+                        
+                        //if updating spore probabity update the sporeforce and summary
+                        if(parmIndex ==9) {
+                            currentSporeForceSummary = proposedSporeForceSummary;
+                        }
+                        
+                    }
+                    else {
+                        // reject the proposed jump, stay at current position
+                        chain[i][parmIndex] = currentParm[parmIndex];
+                        //printf("Move rejected for parameter %d at iteration %d (current: %0.4f, proposed %0.4f\n", parmIndex, i, currentParm[parmIndex], proposedValue);
+                    }
+                }
 
-                }
-                else {
-                    // reject the proposed jump, stay at current position
-                    chain[i][parmIndex] = currentParm[parmIndex];
-                    //printf("Move rejected for parameter %d at iteration %d (current: %0.4f, proposed %0.4f\n", parmIndex, i, currentParm[parmIndex], proposedValue);
-                }
             }
             
         } //end 13 parameter updates
@@ -1258,7 +1263,7 @@ int main(int argc, const char * argv[]) {
     startParm.probStartInfLogit = logit(0.01);
     startParm.betaComm = 0.005;
     startParm.sporeProbLogit = 0.5;
-    startParm.betaSpore = 0.002;
+    //startParm.betaSpore = 0.002;
     startParm.recSize = 3;
     startParm.recMu = 30;
     
