@@ -226,19 +226,19 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
             
             //Pr(infected by specific source)
             double probInfSource;
-            if (infSourceType[patient] == 3) {
+            if (infSourceType[patient] == SrcType::BGROUND_COMM) {
                 //background - community
                 probInfSource = parm.betaComm/betaI * probInf;
-            } else if (infSourceType[patient] == 0) {
+            } else if (infSourceType[patient] == SrcType::BGROUND_HOSP) {
                 //background - hospital
                 probInfSource = parm.betaBgroundHosp/betaI * probInf;
-            } else if (infSourceType[patient] == 1) {
+            } else if (infSourceType[patient] == SrcType::WARD) {
                 //ward  - all sources equally likelly so number of infectious inidivudals cancels top and bottom
                 probInfSource = parm.betaWard/betaI * probInf;
-            } else if (infSourceType[patient] == 2) {
+            } else if (infSourceType[patient] == SrcType::HOSP) {
                 //hospital - as above
                 probInfSource = parm.betaHosp/betaI * probInf;
-            } else if (infSourceType[patient] == 5) {
+            } else if (infSourceType[patient] == SrcType::SPORE) {
                 //spore
                 int ward = ptLocation[patient][t];
                 double specificSporeDuration = sporeI[t][ward][infSources[patient]];
@@ -325,7 +325,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         double p = 1/(1+(1/(2*mu*Ne)));
         vector<int> potentialNN;
         for (int nn : infectedPatients) {
-            if (nn!=patient & (infSourceType[nn]==0 | infSourceType[nn]==3)) {
+            if (nn!=patient & (infSourceType[nn]== SrcType::BGROUND_HOSP | infSourceType[nn] == SrcType::BGROUND_COMM)) {
                 //nearest neighbours defined for now as any case (may wish to consider only comparing to the first case of every cluster
                 potentialNN.push_back(nn);
             }
@@ -424,7 +424,9 @@ double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector
         //log likelihood for patient not infected = 0
         //therefore, determine log likelihood for infected patients
         if(infTimes[patient]>-1) { //infected patients only
-            if (infSourceType[patient]==0 | infSourceType[patient]==3 | infSourceType[patient]==4) { //infected by hospital or community background or at start
+            if (infSourceType[patient]== SrcType::BGROUND_HOSP |
+                infSourceType[patient]== SrcType::BGROUND_COMM |
+                infSourceType[patient]== SrcType::START_POS) { //infected by hospital or community background or at start
                 ll += llGeneticSingle(infectedPatients, sampleTimes, patient, -1, infSourceType, geneticDist, geneticMap, nPatients, parm);
             }
             else {

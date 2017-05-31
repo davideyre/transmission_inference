@@ -130,7 +130,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
     int minRecoveryTime; //minimum time step can recover in
     
     for (trans transmission : onwardTransmission[proposedPatient]) {
-        if(transmission.srcType!=5){
+        if(transmission.srcType != SrcType::SPORE){
             transmissionTimes.push_back(transmission.t); //add to vector of transmission times provided not spore transmission
         }
     }
@@ -151,7 +151,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
     
     //determine if new recovery time interfers with any existing spore transmission
     for (trans transmission : onwardTransmission[proposedPatient]) {
-        if(transmission.srcType==5){
+        if(transmission.srcType == SrcType::SPORE){
             //iterate over spore transmissions from this patient
             int sporeError = 9; //default spore error
             
@@ -274,7 +274,7 @@ int proposeInfectionTimeInitial(int proposedPatient,
     //define interval to move in, can be from t=1 onwards until time interval before first onward transmission or sampling time
     int onwardTransmissionMin = maxTime;
     for (trans transmission : onwardTransmission[proposedPatient]) {
-        if(transmission.t<onwardTransmissionMin & transmission.srcType!=5) {
+        if(transmission.t<onwardTransmissionMin & transmission.srcType != SrcType::SPORE) {
             onwardTransmissionMin = transmission.t; // exclude spore transmission
         }
     }
@@ -315,13 +315,13 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
     else {
         //add background source to lists
         sourceList.push_back(-1);
-        sourceTypeList.push_back(0);
+        sourceTypeList.push_back(SrcType::BGROUND_HOSP);
         
         //potential ward sources
         for (int srcPt : wardLog[proposedInfTime][ward]) {
             if (infTimes[srcPt]!=-1 & infTimes[srcPt]<proposedInfTime & recoveryTimes[srcPt]>proposedInfTime & srcPt!=proposedPatient) {
                 sourceList.push_back(srcPt);
-                sourceTypeList.push_back(1);
+                sourceTypeList.push_back(SrcType::WARD);
                 
             }
         }
@@ -332,7 +332,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                 for (int srcPt : wardLog[proposedInfTime][nonWard]) {
                     if (infTimes[srcPt]!=-1 & infTimes[srcPt]<proposedInfTime & recoveryTimes[srcPt]>proposedInfTime & srcPt!=proposedPatient) {
                         sourceList.push_back(srcPt);
-                        sourceTypeList.push_back(2);
+                        sourceTypeList.push_back(SrcType::HOSP);
                         
                     }
                 }
@@ -343,7 +343,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
         for (int srcPt = 0; srcPt<nPatients; srcPt ++) {
             if(sporeI[proposedInfTime][ward][srcPt]>0 & srcPt!=proposedPatient) {
                 sourceList.push_back(srcPt);
-                sourceTypeList.push_back(5);
+                sourceTypeList.push_back(SrcType::SPORE);
                 
             }
         }
@@ -352,7 +352,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
         if(sourceList.size()==1) {
             //if no ward or hospital sources assign to background
             output.sourceList = {-1};
-            output.sourceTypeList = {0};
+            output.sourceTypeList = {SrcType::BGROUND_COMM};
             output.sourceProbabilities = {1.0};
         }
         else {
@@ -382,15 +382,15 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
             
             //calculate the other likelihoods
             for (int srcIndex = 1; srcIndex<sourceList.size(); srcIndex++) {
-                if( sourceTypeList[srcIndex] == 1) {
+                if( sourceTypeList[srcIndex] == SrcType::WARD) {
                     //infection from same ward
                     sourceLogLikelihood[srcIndex] = log(parm.betaWard) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex], infSourceType, geneticDist, geneticMap, nPatients, parm);
                 }
-                if( sourceTypeList[srcIndex] == 2) {
+                if( sourceTypeList[srcIndex] == SrcType::HOSP) {
                     //infection from hospital
                     sourceLogLikelihood[srcIndex] = log(parm.betaHosp) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex], infSourceType, geneticDist, geneticMap, nPatients, parm);
                 }
-                if( sourceTypeList[srcIndex] == 5) {
+                if( sourceTypeList[srcIndex] == SrcType::SPORE) {
                     //infection from spore
                     
                     //get the relative infectious level of this spore
@@ -427,7 +427,7 @@ Src proposeConditionalSource(vector<int> &infectedPatients, int proposedPatient,
     Src output; //struct of type Src to store output
     
     if(sampleTimes[proposedPatient]==0) {
-        output = {-1, 4, 1};
+        output = {-1, SrcType::START_POS, 1};
     }
     
     else {
@@ -438,11 +438,11 @@ Src proposeConditionalSource(vector<int> &infectedPatients, int proposedPatient,
         if(sourceList.sourceList.size()==1) {
             if(sourceList.sourceTypeList[0] == 0) {
                 //if no ward or hospital sources assign to background - hospital
-                output = {-1, 0, 1};
+                output = {-1, SrcType::BGROUND_HOSP, 1};
             }
             else {
                 //in community, i.e. only one source, assign to community
-                output = {-1, 3, 1};
+                output = {-1, SrcType::BGROUND_COMM, 1};
             }
             
         }

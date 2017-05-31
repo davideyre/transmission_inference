@@ -1,18 +1,15 @@
 To do
 =====
 
-Code
-----
-1. Switch parm to be a struct for ease of reading code
-2. Switch infSrcType to be enum, and move out of struct.h
-3. Convert handling of never infected cases to be ward totals by day
-
-
 Inference
 ---------
 
 1. Update duration from infection to sampling to follow Gamma distn rather than Poisson
 2. Update handling of directNe and introNe to reflect recent discussion
+
+Code
+----
+1. Convert handling of never infected cases to be ward totals by day
 
 
 Testing
