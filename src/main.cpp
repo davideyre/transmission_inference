@@ -431,7 +431,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             
             //propose the patient was positive at admission with probability q - IMPLEMENT THIS AND HR TO GO WITH IT
-            double q = 0.01;
+            double q = 0.0000001;
             
             if (runif(0,1) < q) {
                 //propose patient was positive at time zero, infTime=0, infSource=-1, infSourceType=4

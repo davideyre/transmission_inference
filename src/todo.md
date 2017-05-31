@@ -3,6 +3,8 @@ To do
 
 Testing
 -------
+
+0. Issue with proposals for starting positive, gets stuck in start positve state - investigate this, disabled temporarily for now by making this move very unlikely, may relate to sample likelihood calculation where start infected -- check this
 1. Testing following conversion of sampling interval to neg. binomial and other code updates
 2. Testing starting positive simualtions, and related MCMC updates
 
