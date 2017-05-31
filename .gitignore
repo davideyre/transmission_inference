@@ -3,3 +3,6 @@
 build/
 transmission_inference.xcodeproj
 sim_data/
+
+# R
+.Rhistory
