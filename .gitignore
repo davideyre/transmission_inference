@@ -2,3 +2,4 @@
 .DS_Store
 build/
 transmission_inference.xcodeproj
+sim_data/

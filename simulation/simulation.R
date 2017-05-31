@@ -47,7 +47,7 @@ library(RColorBrewer)
 
 ##output
 
-outDirRoot = "/Users/davideyre/Dropbox/Epi_WGS_MCMC/ward_hosp_comm_sim/"
+outDirRoot = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/"
 seed = as.numeric(gsub("0.", "", as.character(round(runif(1),8))))
 simulation = paste("simulation_", seed, sep="")
 outDirBase = paste(outDirRoot, simulation, sep="")
@@ -400,7 +400,7 @@ write.table(siLog, file = paste(outDir, "/siLog.txt", sep=""),
 print("siLog file written")
 
 #run coalescent simulation
-cmd = paste("/usr/local/bin/python /Users/davideyre/Dropbox/Epi_WGS_MCMC/ward_hosp_comm_sim/simCoalescent.py", 
+cmd = paste("/usr/local/bin/python /Users/davideyre/Dropbox/Transmission_Inference/xcode_project/simulation/simCoalescent.py", 
             " -p ", directNe,
             " -c ", introNe,
             " -b ", bottleneck,
@@ -499,7 +499,7 @@ print("genetic distances from snps written")
 
 
 ##plot the true transmission tree
-cmd = paste('/usr/local/bin/python /Users/davideyre/Dropbox/Epi_WGS_MCMC/ward_hosp_comm_sim/plot_transmission_trees.py -f ', 
+cmd = paste('/usr/local/bin/python /Users/davideyre/Dropbox/Transmission_Inference/xcode_project/simulation/plot_transmission_trees.py -f ', 
             outDirBase)
 print(cmd)
 system(cmd)
