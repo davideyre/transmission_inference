@@ -13,9 +13,9 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     FILE *fp;
     string fileName = filePath+"/chain_parameters.txt";
     fp = fopen(fileName.c_str(), "wb");
-    fprintf(fp, "beta0\tbeta1\tbeta2\tepsilon\tdirectNe\tintroNe\tmu\tstart_inf\tbetacomm\tspore_prob\tbeta_spore\trec_size\trec_mu\tposterior\tll_trans\tll_genetic\tll_sampling\tll_recovery\n"); //header
+    fprintf(fp, "beta0\tbeta1\tbeta2\tepsilon\tdirectNe\tintroNe\tmu\tstart_inf\tbetacomm\tspore_prob\trec_size\trec_mu\tposterior\tll_trans\tll_genetic\tll_sampling\tll_recovery\n"); //header
     for(int i=0; i<steps; i++) {
-        fprintf(fp, "%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\n", chain[i][0], chain[i][1], chain[i][2], chain[i][3], chain[i][4], chain[i][5], chain[i][6], chain[i][7], chain[i][8], chain[i][9], chain[i][10], chain[i][11], chain[i][12], chain[i][13], chain[i][14], chain[i][15], chain[i][16], chain[i][17]);
+        fprintf(fp, "%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\t%0.10f\n", chain[i][0], chain[i][1], chain[i][2], chain[i][3], chain[i][4], chain[i][5], chain[i][6], chain[i][7], chain[i][8], chain[i][9], chain[i][11], chain[i][12], chain[i][13], chain[i][14], chain[i][15], chain[i][16], chain[i][17]);
     }
     fclose(fp);
     
