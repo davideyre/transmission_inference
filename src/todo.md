@@ -1,26 +1,30 @@
 To do
 =====
 
-Move cleaned repo back to Xcode
+Code
+----
+1. Switch parm to be a struct for ease of reading code
+2. Switch infSrcType to be enum, and move out of struct.h
+3. Convert handling of never infected cases to be ward totals by day
 
 
-1. Testing with starting positive, and updates
+Inference
+---------
 
-2. Correlation of sporeProb and betaSpore - better proposal distn
-
-3. Fix directNe
-
-4. Review problems with under-estimate of introNe
-
-5.
-- switch parm to be struct
-- switch infSrcType to be enum, and move out of struct.h
-6.
-- convert infection time proposal distribution to normal, to increase tail size
+1. Update duration from infection to sampling to follow Gamma distn rather than Poisson
+2. Update handling of directNe and introNe to reflect recent discussion
 
 
+Testing
+-------
+1. Testing starting positive simualtions, and related MCMC updates
 
-Unresolved issues
-- recovery periods that are long tend to be under-estimated, end up using prior to constrain
-- correlation of sporeProb and betaSpore
 
+Application
+-----------
+1. Apply to WGS1400 dataset
+
+
+Possibles
+---------
+1. Allow for false negative tests, i.e. augmentation of sampled, but negative cases
