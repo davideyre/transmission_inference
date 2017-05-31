@@ -64,7 +64,7 @@ struct Parm {
     double directNe;
     double introNe;
     double mu;
-    double probStartInf;
+    double probStartInfLogit;
     double betaComm;
     double sporeProbLogit; //for geometric distn
     double betaSpore;
@@ -84,7 +84,7 @@ struct Parm {
             case 4 : return directNe;
             case 5 : return introNe;
             case 6 : return mu;
-            case 7 : return probStartInf;
+            case 7 : return probStartInfLogit;
             case 8 : return betaComm;
             case 9 : return sporeProbLogit;
             case 10 : return betaSpore;
@@ -113,7 +113,8 @@ double logit(double x);
 //function to return spore prob
 double getSporeP(Parm &parm);
 
-
+//function to return start infected prob
+double getStartInfP(Parm &parm);
 
 
 #endif /* struct_h */

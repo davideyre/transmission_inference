@@ -16,8 +16,6 @@ double llTransAvoid(vector<int> &infectedPatients, vector<int> &uninfectedPatien
                vector<vector<int>> &ptLocation,
                vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, Parm &parm) {
     
-    
-    //parm[0:2] = beta0, beta1, beta2
     double ll = 0.00;
     
     //ll for uninfectedPatients
@@ -28,7 +26,7 @@ double llTransAvoid(vector<int> &infectedPatients, vector<int> &uninfectedPatien
     int admissionDuration = 0;
     
     // Pr(not infected at start) //
-    double probNotStartInf = 1 - parm[7];
+    double probNotStartInf = 1 - getStartInfP(parm);
     ll += nUninfected*log(probNotStartInf);
     
     //get counts of number of each type of day uninfected patients exposed to
@@ -61,11 +59,11 @@ double llTransAvoid(vector<int> &infectedPatients, vector<int> &uninfectedPatien
     
     int nonAdmissionDuration = (nUninfected*maxTime) - admissionDuration;
     
-    double logProbAvoidInf = -((parm[0] * admissionDuration) //hospital background
-                               + (parm[1] * wardInfDays) //ward infection force
-                               + (parm[2] * hospInfDays) //across hospital infection force
-                               + (parm[8] * nonAdmissionDuration) //community background
-                               + (parm[1] * sporeInfDays ) //ward-based spore force
+    double logProbAvoidInf = -((parm.betaBgroundHosp * admissionDuration) //hospital background
+                               + (parm.betaWard * wardInfDays) //ward infection force
+                               + (parm.betaHosp * hospInfDays) //across hospital infection force
+                               + (parm.betaComm * nonAdmissionDuration) //community background
+                               + (parm.betaWard * sporeInfDays ) //ward-based spore force
                                );
     ll += logProbAvoidInf;
     return (ll);
@@ -83,7 +81,6 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
                vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, Parm &parm) {
      
     
-    //parm[0:2] = beta0, beta1, beta2
     double ll = 0.00;
     
     //ll for uninfectedPatients
@@ -94,7 +91,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
     int admissionDuration = 0;
     
     // Pr(not infected at start) //
-    double probNotStartInf = 1 - parm[7];
+    double probNotStartInf = 1 - getStartInfP(parm);
     ll += nUninfected*log(probNotStartInf);
     
     //get counts of number of each type of day uninfected patients exposed to
@@ -127,11 +124,11 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
 
     int nonAdmissionDuration = (nUninfected*maxTime) - admissionDuration;
 
-    double logProbAvoidInf = -((parm[0] * admissionDuration) //hospital background
-                                         + (parm[1] * wardInfDays) //ward infection force
-                                         + (parm[2] * hospInfDays) //across hospital infection force
-                                         + (parm[8] * nonAdmissionDuration) //community background
-                                         + (parm[1] * sporeInfDays ) //ward-based spore force
+    double logProbAvoidInf = -((parm.betaBgroundHosp * admissionDuration) //hospital background
+                                         + (parm.betaWard * wardInfDays) //ward infection force
+                                         + (parm.betaHosp * hospInfDays) //across hospital infection force
+                                         + (parm.betaComm * nonAdmissionDuration) //community background
+                                         + (parm.betaWard * sporeInfDays ) //ward-based spore force
                                          );
     ll += logProbAvoidInf;
 
@@ -144,7 +141,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
         //infected pateints
         if (infTimes[patient] == 0) {
             //patients infected at start
-            ll += log(parm[7]); //probabilty that start infected
+            ll += log(getStartInfP(parm)); //probabilty that start infected
         }
         
         else {
@@ -153,7 +150,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
             // Pr(not infected at start) * Pr(avoid infection up until t-1) * Pr(infecetd at t) * Pr(infected by specific source)
             
             // Pr(not infected at start) //
-            double probNotStartInf = 1 - parm[7];
+            double probNotStartInf = 1 - getStartInfP(parm);
             
             // Pr(avoid infection up until t-1)
             // as written can account for patients infected on day of admission, i.e. probAvoidInf==1
@@ -191,11 +188,11 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
             
             int nonAdmissionDuration = infTimes[patient] - 1 - admissionDuration + 1;
             
-            double logProbAvoidInf = -((parm[0] * admissionDuration) //hospital background
-                                         + (parm[1] * wardInfDays) //ward infection force
-                                         + (parm[2] * hospInfDays) //across hospital infection force
-                                         + (parm[8] * nonAdmissionDuration) //community background
-                                         + (parm[1] * sporeInfDays ) //ward-based spore force
+            double logProbAvoidInf = -((parm.betaBgroundHosp * admissionDuration) //hospital background
+                                         + (parm.betaWard * wardInfDays) //ward infection force
+                                         + (parm.betaHosp * hospInfDays) //across hospital infection force
+                                         + (parm.betaComm * nonAdmissionDuration) //community background
+                                         + (parm.betaWard * sporeInfDays ) //ward-based spore force
                                          );
             
             //Pr(infecetd at t)
@@ -204,7 +201,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
             //if in community
             double betaI;
             if(ptLocation[patient][t]==-1) {
-                betaI = parm[8];
+                betaI = parm.betaComm;
             } else {
             //if in hospital
                 int ward = ptLocation[patient][t]; //location on when infected
@@ -221,7 +218,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
                 //spores decay according to geometric distribution
                 double sporeIt = sporeForceSummary[t][ward];
                 
-                betaI = parm[0] + (parm[1] * wardIt) + (parm[2] * hospIt) + (parm[1] * sporeIt);
+                betaI = parm.betaBgroundHosp + (parm.betaWard * wardIt) + (parm.betaHosp * hospIt) + (parm.betaWard * sporeIt);
             }
             
             double probInf = 1 - exp(-betaI);
@@ -231,23 +228,23 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
             double probInfSource;
             if (infSourceType[patient] == 3) {
                 //background - community
-                probInfSource = parm[8]/betaI * probInf;
+                probInfSource = parm.betaComm/betaI * probInf;
             } else if (infSourceType[patient] == 0) {
                 //background - hospital
-                probInfSource = parm[0]/betaI * probInf;
+                probInfSource = parm.betaBgroundHosp/betaI * probInf;
             } else if (infSourceType[patient] == 1) {
                 //ward  - all sources equally likelly so number of infectious inidivudals cancels top and bottom
-                probInfSource = parm[1]/betaI * probInf;
+                probInfSource = parm.betaWard/betaI * probInf;
             } else if (infSourceType[patient] == 2) {
                 //hospital - as above
-                probInfSource = parm[2]/betaI * probInf;
+                probInfSource = parm.betaHosp/betaI * probInf;
             } else if (infSourceType[patient] == 5) {
                 //spore
                 int ward = ptLocation[patient][t];
                 double specificSporeDuration = sporeI[t][ward][infSources[patient]];
                 double specificSporeLevel = pow((1-getSporeP(parm)), specificSporeDuration);
                 // prob(infected) * prob(infected by spore) * prob(infected by specific spore), total spore force cancels top and bottom
-                probInfSource = probInf * (parm[1]  / betaI ) * (specificSporeLevel) ;
+                probInfSource = probInf * (parm.betaWard  / betaI ) * (specificSporeLevel) ;
                 //if(patient==338) printf("%0.4f\t%0.4f\t%0.4f\n", probInf, betaI, specificSporeLevel);
                 
                 if(specificSporeLevel==0) {
@@ -276,7 +273,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
 
 //log likelihood contribution from sampling times - p(S | I, parm)
 double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
-    // epsilon = parm[3]
+    // epsilon = parm.sampleEpsilon
     double ll = 0.00;
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
     for(int i : infectedPatients) {
@@ -284,11 +281,11 @@ double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int
         int dd = sampleTimes[i] - infTimes[i];
         if(infTimes[i]>0) {
             //infected after t=0
-            ll += dpois(dd, parm[3], 1);
+            ll += dpois(dd, parm.sampleEpsilon, 1);
         }
         else {
             int ddNotInfected = dd - 1; //were not infected until before this interval, e.g. sample t=2, infected t<=0
-            ll += log(1 - ppois(ddNotInfected, parm[3], 1, 0));
+            ll += log(1 - ppois(ddNotInfected, parm.sampleEpsilon, 1, 0));
         }
     }
     return ll;
@@ -298,9 +295,9 @@ double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int
 
 //log likelihood contribution for recovery, p(R | I, parm)
 double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector<int> &recTimes, Parm &parm) {
-    //"recSize", "recMu" = parm[11] and parm[12]
-    double recSize = parm[11];
-    double recMu = parm[12];
+    //"recSize", "recMu" = parm.recSize and parm.recMu
+    double recSize = parm.recSize;
+    double recMu = parm.recMu;
     double recProb = recSize / (recSize + recMu);
 
     double ll = 0;
@@ -318,12 +315,11 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 //genetic log likelihood for single patient pair
 double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
                        vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
-    //parm[4:6] = directNe, introNe, mu
     double ll;
     if (transmissionSource==-1) {
         //likelihood for genetic distance based on import, i.e. source type =0
-        double Ne = parm[5];
-        double mu = parm[6];
+        double Ne = parm.introNe;
+        double mu = parm.mu;
         //snp ~ Pois(2 * mu * v) and v ~Exp(1/Ne)
         //hence snp ~ Geom(p), where p = p = 1/(1+(1/Ne))
         double p = 1/(1+(1/(2*mu*Ne)));
@@ -384,8 +380,8 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         int srcIndex = geneticMap.at(transmissionSource);
         double snp = geneticDist[ptIndex][srcIndex];
         double time = fabs(sampleTimes[patient] - sampleTimes[transmissionSource]);
-        double Ne = parm[4];
-        double mu = parm[6];
+        double Ne = parm.directNe;
+        double mu = parm.mu;
         
         
         if(snp>160) {
@@ -446,7 +442,6 @@ double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector
 
 //log likelihood contribution from the genetic distance matrix - p(G | I, S, parm)
 double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
-    //parm[4:6] = directNe, introNe, mu
     double ll = 0.00;
     #pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
     for (int patient : infectedPatients) {
@@ -455,8 +450,8 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
         
         if (infSources[patient]==-1) { //infected by hospital or community background or at start
             //likelihood for genetic distance based on import, i.e. source type =0
-            double Ne = parm[5];
-            double mu = parm[6];
+            double Ne = parm.introNe;
+            double mu = parm.mu;
             //snp ~ Pois(2 * mu * v) and v ~Exp(1/Ne)
             //hence snp ~ Geom(p), where p = p = 1/(1+(1/Ne)), and PDF (1-p)p^snp
             double p = 1/(1+(1/(2*mu*Ne)));
@@ -524,8 +519,8 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             int srcIndex = geneticMap.at(sourcePatient);
             double snp = geneticDist[ptIndex][srcIndex];
             double time = fabs(sampleTimes[patient] - sampleTimes[sourcePatient]);
-            double Ne = parm[4];
-            double mu = parm[6];
+            double Ne = parm.directNe;
+            double mu = parm.mu;
             
             
             if(snp>170) {
@@ -564,21 +559,21 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
 
 //prior
 double getPrior(Parm &parm) {
-    double priorBeta0 = dgamma(parm[0], 2, 0.002, 1); //dexp(parm[0], 100, 1);
-    double priorBeta1 = dgamma(parm[1], 2, 0.002, 1); //dexp(parm[1], 100, 1);
-    double priorBeta2 = dgamma(parm[2], 2, 0.002, 1); //dexp(parm[2], 100, 1);
-    double priorEpsilon = dgamma(parm[3], 3, 1/0.5, 1);; //rgamma(1000,3,0.5)
-    double priorDirectNe = dgamma(parm[4], 2, 2, 1); //dexp(parm[4], 1, 1);
-    double priorIntroNe = dgamma(parm[5], 2, 10000, 1); //dexp(parm[5], 100, 1);
-    double priorMu = dnorm(parm[6], 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
-    double priorStartInf = dunif(parm[7],0,1,1);
-    double priorBetaComm = dexp(parm[8], 1, 1);
-    double priorSporeProb = dnorm(parm[9], 0, 10, 1); //dunif(parm[9], 0, 1, 1); //dbeta(parm[9], 2.5, 5, 1); ///dgamma(parm[9], 5, 0.06, 1);
-    //dunif(parm[9], 0, 1, 1); //dgamma(parm[9], 10, 0.03, 1);//for gamma specify by shape and scale (note default in R is shape and rate), shape*scale=mean
-    //dnorm(parm[9], 0.15, 0.05, 1); //spore prob between 0.05 and 0.3, spore durations tail up to 15-100 days
-    double priorBetaSpore = dgamma(parm[10], 2, 0.004, 1); //dexp(parm[10], 100, 1);
-    double priorRecSize = dnorm(parm[11], 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
-    double priorrecMu = dnorm(parm[12], 30, 3, 1);   //dgamma(parm[12], 5, 1/0.15, 1); //in the 5 to 60 range
+    double priorBeta0 = dgamma(parm.betaBgroundHosp, 2, 0.002, 1); //dexp(parm.betaBgroundHosp, 100, 1);
+    double priorBeta1 = dgamma(parm.betaWard, 2, 0.002, 1); //dexp(parm.betaWard, 100, 1);
+    double priorBeta2 = dgamma(parm.betaHosp, 2, 0.002, 1); //dexp(parm.betaHosp, 100, 1);
+    double priorEpsilon = dgamma(parm.sampleEpsilon, 3, 1/0.5, 1);; //rgamma(1000,3,0.5)
+    double priorDirectNe = dgamma(parm.directNe, 2, 2, 1); //dexp(parm.directNe, 1, 1);
+    double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
+    double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
+    double priorStartInf = dunif(getStartInfP(parm),0,1,1);
+    double priorBetaComm = dexp(parm.betaComm, 1, 1);
+    double priorSporeProb = dnorm(parm.sporeProbLogit, 0, 10, 1); //dunif(parm.sporeProbLogit, 0, 1, 1); //dbeta(parm.sporeProbLogit, 2.5, 5, 1); ///dgamma(parm.sporeProbLogit, 5, 0.06, 1);
+    //dunif(parm.sporeProbLogit, 0, 1, 1); //dgamma(parm.sporeProbLogit, 10, 0.03, 1);//for gamma specify by shape and scale (note default in R is shape and rate), shape*scale=mean
+    //dnorm(parm.sporeProbLogit, 0.15, 0.05, 1); //spore prob between 0.05 and 0.3, spore durations tail up to 15-100 days
+    double priorBetaSpore = dgamma(parm.betaSpore, 2, 0.004, 1); //dexp(parm.betaSpore, 100, 1);
+    double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
+    double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorEpsilon +
     priorDirectNe + priorIntroNe + priorMu + priorStartInf + priorBetaComm + priorSporeProb + priorBetaSpore + priorRecSize + priorrecMu;
     return(prior);

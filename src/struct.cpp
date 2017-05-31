@@ -30,6 +30,12 @@ double logit(double x) {
 
 //function to return spore prob
 double getSporeP(Parm &parm) {
-    double pSpore = logistic(parm[9]);
+    double pSpore = logistic(parm.sporeProbLogit);
     return(pSpore);
+}
+
+//function to return start infected prob
+double getStartInfP(Parm &parm) {
+    double pStartInf = logistic(parm.probStartInfLogit);
+    return(pStartInf);
 }

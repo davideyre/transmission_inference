@@ -265,7 +265,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             
             //display current parameter values - if possible improve to display ESS too
-            printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInf: %0.6f\t  betaComm: %0.7f\n parm[9]: %0.4f\tsporeProb: %0.4f\tbetaSpore %0.5f\n recSize: %0.4f\t recMu %0.4f\nPosterior:  %0.1f\n",
+            printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInf: %0.6f\t  betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\tbetaSpore %0.5f\n recSize: %0.4f\t recMu %0.4f\nPosterior:  %0.1f\n",
                    chain[i-1][0], chain[i-1][1], chain[i-1][2], chain[i-1][3], chain[i-1][4], chain[i-1][5],
                    chain[i-1][6], chain[i-1][7], chain[i-1][8], chain[i-1][9], logistic(chain[i-1][9]), chain[i-1][10], chain[i-1][11], chain[i-1][12], chain[i-1][13]);
             
@@ -1255,7 +1255,7 @@ int main(int argc, const char * argv[]) {
     startParm.directNe =  1;
     startParm.introNe = 500;
     startParm.mu = 2/365.25;
-    startParm.probStartInf = 0.01;
+    startParm.probStartInfLogit = logit(0.01);
     startParm.betaComm = 0.005;
     startParm.sporeProbLogit = 0.5;
     startParm.betaSpore = 0.002;
