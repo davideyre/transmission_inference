@@ -1,6 +1,7 @@
 To do
 =====
 
+Move cleaned repo back to Xcode
 
 
 1. Testing with starting positive, and updates
@@ -23,4 +24,3 @@ Unresolved issues
 - recovery periods that are long tend to be under-estimated, end up using prior to constrain
 - correlation of sporeProb and betaSpore
 
-chk
