@@ -37,7 +37,7 @@ void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime
                   vector<vector<int>> &ptLocation);
 
 void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int> &infectedPatients, vector<vector<vector<int>>> &sporeI,
-                          int maxTime, int nWards, int nPatients, vector<int> &infTimes, vector<double> parm);
+                          int maxTime, int nWards, int nPatients, vector<int> &infTimes, Parm parm);
 
 
 //function to get vector of days an intpatient - inPtDays[patient][ward] = {times...} (whereas wardLog[time][ward] = {patients...})

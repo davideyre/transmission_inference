@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void runTest(vector<int> &infectedPatients, vector<int> &uninfectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes, vector<double> &parm,
+void runTest(vector<int> &infectedPatients, vector<int> &uninfectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes, Parm &parm,
              vector<int> &infSources, vector<int> &infSourceType,
              vector<vector<vector<int>>> &sporeI, vector<vector<vector<double>>> &sporeForce, vector<vector<double>> &sporeForceSummary,
              vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap, vector<vector<vector<int>>> &wardLog,

@@ -24,6 +24,7 @@
 #include "likelihood.hpp"
 #include "export.hpp"
 #include "testing.hpp"
+#include "struct.hpp"
 
 #include "optionparser.hpp"
 
@@ -36,9 +37,9 @@ using namespace std;
 
 
 //function to run MCMC
-void doMCMC(vector<vector<double>> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainRecTimes, vector<vector<int>> &chainInfSources,
+void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainRecTimes, vector<vector<int>> &chainInfSources,
               vector<vector<int>> &chainInfSourceTypes,
-              int steps, vector<double> startParm, vector<double> startSigma,
+              int steps, Parm startParm, vector<double> startSigma,
               vector<int> &sampleTimes,
               vector<vector<vector<int>>> &wardLog,
               int nPatients, int nWards, int maxTime,
@@ -151,8 +152,8 @@ void doMCMC(vector<vector<double>> &chain, vector<vector<int>> &chainInfTimes, v
     vector<double> sigma = startSigma;
     
     //variables used during MCMC
-    vector<double> currentParm; currentParm.resize(13); currentParm = chain[0];
-    vector<double> proposedParm; proposedParm.resize(13);
+    Parm currentParm; currentParm = chain[0];
+    Parm proposedParm;
     double proposedValue, probAccept;
     
     //current and proposed values
@@ -1245,22 +1246,36 @@ int main(int argc, const char * argv[]) {
 
     
     
-    //parameters: "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "betaSpore", "recoverSize", "recMu", 
-    vector<double> startParm = {0.005, 0.005, 0.005, 5, 1, 500, 2/365.25, 0.01, 0.005, 0.5, 0.002, 3, 30};
+    //parameters: "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "betaSpore", "recoverSize", "recMu",
+    Parm startParm;
+    startParm.betaBgroundHosp = 0.005;
+    startParm.betaWard = 0.005;
+    startParm.betaHosp = 0.005;
+    startParm.sampleEpsilon = 5;
+    startParm.directNe =  1;
+    startParm.introNe = 500;
+    startParm.mu = 2/365.25;
+    startParm.probStartInf = 0.01;
+    startParm.betaComm = 0.005;
+    startParm.sporeProbLogit = 0.5;
+    startParm.betaSpore = 0.002;
+    startParm.recSize = 3;
+    startParm.recMu = 30;
+    
     vector<double> startSigma = {0.001, 0.001, 0.001, 1, 0.2, 100, 0.01, 0.001, 0.0005, 0.1, 0.001, 0.1, 0.1};
     
     
     //2d vector for results = columns: "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm"; rows = each iteration
     //2d vectors for infection times, infection sources, and source types, columns for each patient, row = each iteration
-    vector<vector<double>> chain;
+    vector<Parm> chain;
     vector<vector<int>> chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes;
     
-    //set up sizes of 2d vector
-    chain.resize(steps); chainInfTimes.resize(steps); chainInfSources.resize(steps);
+    //set up sizes of chain for parameters and various times as 2d vectors
+    chain.resize(steps);
+    chainInfTimes.resize(steps); chainInfSources.resize(steps);
     chainInfSourceTypes.resize(steps); chainRecTimes.resize(steps);
     
     for (int i = 0; i<steps; i++) {
-        chain[i].resize(18);
         chainInfTimes[i].resize(nPatients);
         chainInfSources[i].resize(nPatients);
         chainInfSourceTypes[i].resize(nPatients);

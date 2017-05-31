@@ -29,7 +29,7 @@ double logit(double x) {
 
 
 //function to return spore prob
-double getSporeP(vector<double> &parm) {
+double getSporeP(Parm &parm) {
     double pSpore = logistic(parm[9]);
     return(pSpore);
 }

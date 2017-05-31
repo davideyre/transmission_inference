@@ -11,10 +11,11 @@
 
 #include <fstream>
 #include <vector>
+#include "struct.hpp"
 
 using namespace std;
 
-void exportChain(vector<vector<double>> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
+void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
                  vector<vector<int>> &chainRecTimes, int steps, string filePath);
 
 #endif /* export_hpp */

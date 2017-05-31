@@ -14,7 +14,7 @@ double llTransAvoid(vector<int> &infectedPatients, vector<int> &uninfectedPatien
                vector<vector<vector<int>>> &wardLog,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
-               vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, vector<double> &parm) {
+               vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, Parm &parm) {
     
     
     //parm[0:2] = beta0, beta1, beta2
@@ -80,7 +80,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
                vector<vector<vector<int>>> &wardLog,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
-               vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, vector<double> &parm) {
+               vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, Parm &parm) {
      
     
     //parm[0:2] = beta0, beta1, beta2
@@ -275,7 +275,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
 
 
 //log likelihood contribution from sampling times - p(S | I, parm)
-double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<double> parm) {
+double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
     // epsilon = parm[3]
     double ll = 0.00;
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
@@ -297,7 +297,7 @@ double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int
 
 
 //log likelihood contribution for recovery, p(R | I, parm)
-double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector<int> &recTimes, vector<double> parm) {
+double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector<int> &recTimes, Parm &parm) {
     //"recSize", "recMu" = parm[11] and parm[12]
     double recSize = parm[11];
     double recMu = parm[12];
@@ -317,7 +317,7 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 
 //genetic log likelihood for single patient pair
 double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
-                       vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, vector<double> parm) {
+                       vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
     //parm[4:6] = directNe, introNe, mu
     double ll;
     if (transmissionSource==-1) {
@@ -421,7 +421,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
 
 
 //log likelihood over all pairs calling the llGeneticSingle function (slower x4, but used for testing only)
-double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, vector<double> parm) {
+double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
     
     double ll = 0.00;
     for (int patient=0; patient < nPatients; patient++) {
@@ -445,7 +445,7 @@ double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector
 
 
 //log likelihood contribution from the genetic distance matrix - p(G | I, S, parm)
-double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, vector<double> parm) {
+double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
     //parm[4:6] = directNe, introNe, mu
     double ll = 0.00;
     #pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
@@ -563,7 +563,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
 
 
 //prior
-double getPrior(vector<double>parm) {
+double getPrior(Parm &parm) {
     double priorBeta0 = dgamma(parm[0], 2, 0.002, 1); //dexp(parm[0], 100, 1);
     double priorBeta1 = dgamma(parm[1], 2, 0.002, 1); //dexp(parm[1], 100, 1);
     double priorBeta2 = dgamma(parm[2], 2, 0.002, 1); //dexp(parm[2], 100, 1);
@@ -591,7 +591,7 @@ double targetDist (vector<int> &infectedPatients, vector<int> &uninfectedPatient
                    vector<vector<vector<int>>> &wardLog,
                    vector<vector<vector<int>>> &inPtDays,
                    vector<vector<int>> &ptLocation,
-                   vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap, vector<double> &parm) {
+                   vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap, Parm &parm) {
 
     
     double td = llTrans(infectedPatients, uninfectedPatients, infTimes, infSourceType, infSources, sporeI, sporeForceSummary, wardLog, inPtDays, ptLocation, wardI, nPatients, nWards, maxTime, parm) +

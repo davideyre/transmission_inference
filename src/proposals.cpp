@@ -295,7 +295,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                              vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap,
                              int nWards,
-                             int nPatients, vector<double> parm) {
+                             int nPatients, Parm &parm) {
     SrcList output; //struct of type SrcList to store output
     
     vector<int> sourceList; //vector of sources
@@ -423,7 +423,7 @@ Src proposeConditionalSource(vector<int> &infectedPatients, int proposedPatient,
                              vector<vector<vector<int>>> &wardLog, vector<int> infSourceType, vector<vector<vector<int>>> &sporeI,
                              vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap,
-                             int nWards, int nPatients, vector<double> parm) {
+                             int nWards, int nPatients, Parm &parm) {
     Src output; //struct of type Src to store output
     
     if(sampleTimes[proposedPatient]==0) {

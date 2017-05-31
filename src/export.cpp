@@ -8,7 +8,7 @@
 
 #include "export.hpp"
 
-void exportChain(vector<vector<double>> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
+void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
                  vector<vector<int>> &chainRecTimes, int steps, string filePath) {
     FILE *fp;
     string fileName = filePath+"/chain_parameters.txt";

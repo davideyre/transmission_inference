@@ -55,6 +55,7 @@ public:
 
 //structure to hold paramters
 struct Parm {
+    //parameters for model
     //"beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "betaSpore", "recSize", "recMu"
     double betaBgroundHosp;
     double betaWard;
@@ -65,11 +66,43 @@ struct Parm {
     double mu;
     double probStartInf;
     double betaComm;
-    double sporeProb; //for geometric distn
+    double sporeProbLogit; //for geometric distn
     double betaSpore;
     double recSize;
     double recMu;
+    
+    //likelihood values stored with parameters in chain
+    double currentLL, currentLLTrans, currentLLGenetic, currentLLSample, currentLLRecovery;
+
+    //allow retrival by numerical index
+    double &operator[]( size_t idx ) {
+        switch( idx ) {
+            case 0 : return betaBgroundHosp;
+            case 1 : return betaWard;
+            case 2 : return betaHosp;
+            case 3 : return sampleEpsilon;
+            case 4 : return directNe;
+            case 5 : return introNe;
+            case 6 : return mu;
+            case 7 : return probStartInf;
+            case 8 : return betaComm;
+            case 9 : return sporeProbLogit;
+            case 10 : return betaSpore;
+            case 11 : return recSize;
+            case 12 : return recMu;
+                
+            case 13 : return currentLL;
+            case 14 : return currentLLTrans;
+            case 15 : return currentLLGenetic;
+            case 16 : return currentLLSample;
+            case 17 : return currentLLRecovery;
+                
+            default: throw std::runtime_error( "Parameter structure: bad index\n" );
+        }
+    }
+    
 };
+
 
 //convert negative/positive number to 0 to 1 scale
 double logistic(double x);
@@ -78,7 +111,7 @@ double logistic(double x);
 double logit(double x);
 
 //function to return spore prob
-double getSporeP(vector<double> &parm);
+double getSporeP(Parm &parm);
 
 
 

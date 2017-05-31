@@ -142,7 +142,7 @@ void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime
 
 
 
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int> &infectedPatients, vector<vector<vector<int>>> &sporeI, int maxTime, int nWards, int nPatients, vector<int> &infTimes, vector<double> parm) {
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int> &infectedPatients, vector<vector<vector<int>>> &sporeI, int maxTime, int nWards, int nPatients, vector<int> &infTimes, Parm parm) {
     //pre-calculate the sum of spore force of infection - [t][ward]
 
     //reset current values of spore force summary to be zero
