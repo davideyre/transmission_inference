@@ -273,19 +273,23 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
 
 //log likelihood contribution from sampling times - p(S | I, parm)
 double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
-    // epsilon = parm.sampleEpsilon
     double ll = 0.00;
+    // neg. binomial distributed time between infection and sampling
+    double sampleSize = parm.sampleSize;
+    double sampleMu = parm.sampleMu;
+    double sampleProb = sampleSize / (sampleSize + sampleMu);
+    
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
     for(int i : infectedPatients) {
         //for all infected patients
         int dd = sampleTimes[i] - infTimes[i];
         if(infTimes[i]>0) {
             //infected after t=0
-            ll += dpois(dd, parm.sampleEpsilon, 1);
+            ll += dnbinom(dd, sampleSize, sampleProb, 1);
         }
         else {
             int ddNotInfected = dd - 1; //were not infected until before this interval, e.g. sample t=2, infected t<=0
-            ll += log(1 - ppois(ddNotInfected, parm.sampleEpsilon, 1, 0));
+            ll += log(1 - pnbinom(ddNotInfected, sampleSize, sampleProb, 1, 0));
         }
     }
     return ll;
@@ -295,6 +299,7 @@ double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int
 
 //log likelihood contribution for recovery, p(R | I, parm)
 double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector<int> &recTimes, Parm &parm) {
+    //neg binomial distributed time between sampling and recovery
     //"recSize", "recMu" = parm.recSize and parm.recMu
     double recSize = parm.recSize;
     double recMu = parm.recMu;
@@ -564,20 +569,18 @@ double getPrior(Parm &parm) {
     double priorBeta0 = dgamma(parm.betaBgroundHosp, 2, 0.002, 1); //dexp(parm.betaBgroundHosp, 100, 1);
     double priorBeta1 = dgamma(parm.betaWard, 2, 0.002, 1); //dexp(parm.betaWard, 100, 1);
     double priorBeta2 = dgamma(parm.betaHosp, 2, 0.002, 1); //dexp(parm.betaHosp, 100, 1);
-    double priorEpsilon = dgamma(parm.sampleEpsilon, 3, 1/0.5, 1);; //rgamma(1000,3,0.5)
+    double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
+    double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-20
     double priorDirectNe = dgamma(parm.directNe, 2, 2, 1); //dexp(parm.directNe, 1, 1);
     double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
     double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
-    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1);
+    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1); //relatively uniform over 0 to 1
     double priorBetaComm = dexp(parm.betaComm, 1, 1);
-    double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //dunif(parm.sporeProbLogit, 0, 1, 1); //dbeta(parm.sporeProbLogit, 2.5, 5, 1); ///dgamma(parm.sporeProbLogit, 5, 0.06, 1);
-    //dunif(parm.sporeProbLogit, 0, 1, 1); //dgamma(parm.sporeProbLogit, 10, 0.03, 1);//for gamma specify by shape and scale (note default in R is shape and rate), shape*scale=mean
-    //dnorm(parm.sporeProbLogit, 0.15, 0.05, 1); //spore prob between 0.05 and 0.3, spore durations tail up to 15-100 days
-    //double priorBetaSpore = dgamma(parm.betaSpore, 2, 0.004, 1); //dexp(parm.betaSpore, 100, 1);
+    double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //relatively uniform over 0 to 1
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
     double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
-    double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorEpsilon +
-    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + /*priorBetaSpore + */ priorRecSize + priorrecMu;
+    double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorSampleSize + priorSampleMu +
+    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + priorRecSize + priorrecMu;
     return(prior);
 }
 

@@ -58,18 +58,16 @@ class Parm {
     
 public:
     //parameters for model
-    //"beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "betaSpore", "recSize", "recMu"
     double betaBgroundHosp;
     double betaWard;
     double betaHosp;
-    double sampleEpsilon;
+    double sampleSize, sampleMu; //neg binomial parameters for time between infection and sampling
     double directNe;
     double introNe;
     double mu;
     double probStartInfLogit;
     double betaComm;
     double sporeProbLogit; //for geometric distn
-    //double betaSpore;
     double recSize;
     double recMu;
     
@@ -82,14 +80,14 @@ public:
             case 0 : return betaBgroundHosp;
             case 1 : return betaWard;
             case 2 : return betaHosp;
-            case 3 : return sampleEpsilon;
-            case 4 : return directNe;
-            case 5 : return introNe;
-            case 6 : return mu;
-            case 7 : return probStartInfLogit;
+            case 3 : return sampleSize;
+            case 4 : return sampleMu;
+            case 5 : return directNe;
+            case 6 : return introNe;
+            case 7 : return mu;
             case 8 : return betaComm;
             case 9 : return sporeProbLogit;
-            //case 10 : return betaSpore;
+            case 10 : return probStartInfLogit;
             case 11 : return recSize;
             case 12 : return recMu;
                 
@@ -110,8 +108,8 @@ private:
     
 public:
     void displayLog() {
-        printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\t epsilon: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n  betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\n recSize: %0.4f\t recMu %0.4f\nCurrentLL:  %0.1f\n\n",
-               betaBgroundHosp, betaWard, betaHosp, sampleEpsilon, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), recSize, recMu, currentLL);
+        printf("Current Values\n beta0: %0.5f\t beta1: %0.5f\t beta2: %0.5f\n sampleSize: %0.4f\t sampleMu: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\n recSize: %0.4f\t recMu %0.4f\n\nCurrentLL:  %0.1f\n",
+               betaBgroundHosp, betaWard, betaHosp, sampleSize, sampleMu, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), recSize, recMu, currentLL);
         
     }
     
