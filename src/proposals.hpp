@@ -27,25 +27,14 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
                          double delta,
                          vector<vector<int>> &ptLocation);
 
+//function for initiating infection times (at start or after move from being infected at t=0
+int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes);
+
 //function to propose a new recovery time
 int proposeRecoveryTime(int proposedPatient, int currentRecTime,
                         vector<vector<trans>> &onwardTransmission, vector<int> &sampleTimes, int maxTime, double delta,
                         vector<vector<int>> &ptLocation, vector<int> &infTimes);
 
-/*
-//function for independence sampler for infection time, based on current value of episilon
-int proposeInfectionTimeConditional(int proposedPatient,
-                         vector<vector<trans>> &onwardTransmission,
-                         vector<int> &sampleTimes,
-                         int maxTime,
-                         double epsilon);
-*/
-
-//function for initiating infection times (at start or after move from being infected at t=0
-int proposeInfectionTimeInitial(int proposedPatient,
-                                    vector<vector<trans>> &onwardTransmission,
-                                    vector<int> &sampleTimes,
-                                    int maxTime);
 
 //get list of sources and their probabilities for a given patient and infection time, and parameter set
 SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,

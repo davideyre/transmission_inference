@@ -153,7 +153,7 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int>
     }
     
     for (int sporePt: infectedPatients) {
-        for (int t = infTimes[sporePt]; t<=maxTime; t++) { //can only add spore after infected, hence start from there
+        for (int t = max({0, infTimes[sporePt]}); t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
             for (int ward = 0; ward<nWards; ward++) {
                 int sporeDuration = sporeI[t][ward][sporePt];
                 if(sporeDuration>0) {

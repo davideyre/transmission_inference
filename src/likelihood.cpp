@@ -139,8 +139,8 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
     
     for(int patient : infectedPatients) {
         //infected pateints
-        if (infTimes[patient] == 0) {
-            //patients infected at start
+        if (infTimes[patient] < 0) {
+            //patients infected before start
             ll += log(getStartInfP(parm)); //probabilty that start infected
         }
         
@@ -273,25 +273,20 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
 
 //log likelihood contribution from sampling times - p(S | I, parm)
 double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
-    double ll = 0.00;
+   
     // neg. binomial distributed time between infection and sampling
     double sampleSize = parm.sampleSize;
     double sampleMu = parm.sampleMu;
     double sampleProb = sampleSize / (sampleSize + sampleMu);
     
+    double ll = 0;
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
-    for(int i : infectedPatients) {
+    for(int pt : infectedPatients) {
         //for all infected patients
-        int dd = sampleTimes[i] - infTimes[i];
-        if(infTimes[i]>0) {
-            //infected after t=0
-            ll += dnbinom(dd, sampleSize, sampleProb, 1);
-        }
-        else {
-            int ddNotInfected = dd - 1; //were not infected until before this interval, e.g. sample t=2, infected t<=0
-            ll += log(1 - pnbinom(ddNotInfected, sampleSize, sampleProb, 1, 0));
-        }
+        int dd = sampleTimes[pt] - infTimes[pt];
+        ll += dnbinom(dd, sampleSize, sampleProb, 1);
     }
+    
     return ll;
 }
 
@@ -307,11 +302,12 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 
     double ll = 0;
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
-    for(int i : infectedPatients) {
+    for(int pt : infectedPatients) {
         //for those patients with infections
-        int dd = recTimes[i] - sampleTimes[i];
+        int dd = recTimes[pt] - sampleTimes[pt];
         ll += dnbinom(dd, recSize, recProb, 1);
         }
+    
     return ll;
 }
 
@@ -450,7 +446,7 @@ double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector
 //log likelihood contribution from the genetic distance matrix - p(G | I, S, parm)
 double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
     double ll = 0.00;
-    #pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
+    //#pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
     for (int patient : infectedPatients) {
         //log likelihood for patient not infected = 0
         //therefore, determine log likelihood for infected patients only

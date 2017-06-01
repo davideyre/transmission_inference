@@ -65,10 +65,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     int updateN = round(nInfected*0.1); // select a subset of patients to update times for at each iteration, e.g. 10%
     bool debugPt = false;
     
-    
 
-    
-    
     //reshape the ward log - inPtDays[patient][ward] = {times...} (whereas wardLog[time][ward] = {patients...})
     vector<vector<vector<int>>> inPtDays = getInPtDays(nPatients, maxTime, nWards, wardLog);
     //reshape again: ptLocation[patient][time] = wardId
@@ -90,8 +87,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     //set starting values for infection times and infection sources
     vector<int> startInfTimes, startInfSources, startInfSourceTypes, startRecTimes;
     
-    //vector<double> startPChooseSource;
+    //loop over all patients
     for(int patient=0; patient<nPatients; patient++) {
+        
         if(sampleTimes[patient]==-1) {
             //uninfected patients remain uninfected
             startInfTimes.push_back(-1);
@@ -99,45 +97,41 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             startInfSourceTypes.push_back(-1);
             startRecTimes.push_back(-1);
         }
+        
         else {
             //infected patients
-            //sample an infection time using the starting value of epsilon
-            //parameters - "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm"
-            double e  = startParm[3];
-            double recSize = startParm[11];
-            double recMu = startParm[12];
-            double recProb = recSize / (recSize + recMu);
-            int infTime = sampleTimes[patient] - rpois(e);
+
+            //infection time and source
+            int infTime = proposeInfectionTimeInitial(patient, sampleTimes);
+            startInfTimes.push_back(infTime);
+            startInfSources.push_back(-1); //background source - assume all from background initially
             
-            if(infTime<1) {
+            //recovery time
+            double recSize = startParm.recSize;
+            double recMu = startParm.recMu;
+            double recProb = recSize / (recSize + recMu);
+            int t_rec = sampleTimes[patient] + rnbinom(recSize, recProb); //assume initial recovery times (approx as assume for this infected at t=0)
+            startRecTimes.push_back(t_rec);
+            
+            //infection source type
+            if(infTime<0) {
                 //start infected
-                startInfTimes.push_back(0); //store as zero, but actually may be earlier
-                startInfSources.push_back(-1); //background source
-                startInfSourceTypes.push_back(4); //start infected source type
-                int t_rec = sampleTimes[patient] + rnbinom(recSize, recProb); //assume initial recovery times (approx as assume for this infected at t=0)
-                startRecTimes.push_back(t_rec);
+                startInfSourceTypes.push_back(SrcType::START_POS); //start infected source type
             }
             else {
-                startInfTimes.push_back(infTime);
-                //set source of all infections as background initially, check location at sampling time
-                startInfSources.push_back(-1);
+                //check location at sampling time
                 if(ptLocation[patient][infTime]>-1) {
-                    startInfSourceTypes.push_back(0); //inpatient
+                    startInfSourceTypes.push_back(SrcType::BGROUND_HOSP); //inpatient
                 }
                 else {
-                    startInfSourceTypes.push_back(3); //community
+                    startInfSourceTypes.push_back(SrcType::BGROUND_COMM); //community
                 }
-                int t_rec = sampleTimes[patient] + rnbinom(recSize, recProb);
-                startRecTimes.push_back(t_rec);
             }
 
         } // end infected patient
     } //end patient loop
     
-    //startSporeDurations = sporeDurations; // TEMP OVER_RIDE TO FIX WHEN IMPLEMENT AUGMENTATION
-    
 
-    
     //initialise chain with parameter starting values
     chain[0] = startParm;
     chainInfTimes[0] = startInfTimes;
@@ -226,16 +220,13 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     double proposedLL;
     
     
-    //clock_t previousSystemTime = clock();
-    
+    //get time at start of MCMC
     struct timeval previousSystemTime;
     gettimeofday(&previousSystemTime, NULL);
-
 
     
     //generate random walk
     for(int i=1; i<steps; i++) {
-        //printf("Starting iteration %d\n", i);
         
         //PARAMETER AND TUNING REPORTING
         //every 100 steps
@@ -403,16 +394,13 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         random_shuffle(begin(patientUpdateList), end(patientUpdateList)); //shuffle the patient list - UPDATE TO TAKE SEED
         patientUpdateList.resize(updateN); //keep only the first 10%
 
-        
+        //loop through patients to update infection times and sources
         for (int proposedPatientIndex : patientUpdateList) {
             
-            double hastingsRatio; //store log hastings ratio
-            int proposedInfTime; //store the new proposed infection time
-            
-            //loop through patient infection times to update
             //printf("Updating patient: %d\n", proposedPatientIndex);
             int proposedPatient = infectedPatients[proposedPatientIndex];
             
+            //debugging code
             debugPt = false;
             if (proposedPatient==-1) {
                 printf("i=%d, patient=%d, current LL: %0.3f\n", i, proposedPatient, currentLL);
@@ -423,132 +411,89 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             
             
+            //set proposed values to current values
             proposedInfTimes = currentInfTimes;
             proposedInfSources = currentInfSources;
             proposedInfSourceTypes = currentInfSourceTypes;
-            
+            proposedSporeI = currentSporeI;
             vector<vector<trans>> proposedOnwardTransmission = onwardTransmission;
             
+            double hastingsRatio = 0; //store log hastings ratio
             
-            //propose the patient was positive at admission with probability q - IMPLEMENT THIS AND HR TO GO WITH IT
-            double q = 0.0000001;
+            //propose infection infection time
+            double sdInfTime = 2.5; //sd for normal distribution for infection time updates
+            int proposedInfTime = proposeInfectionTime(proposedPatient, currentInfTimes[proposedPatient], onwardTransmission,
+                                                      sampleTimes, maxTime, sdInfTime, ptLocation);
+
+            //proposedInfTime = infTimes[proposedPatient]; //over-ride for testing
             
-            if (runif(0,1) < q) {
-                //propose patient was positive at time zero, infTime=0, infSource=-1, infSourceType=4
-                proposedInfTime = 0;
-                proposedInfTimes[proposedPatient] = proposedInfTime;
-                proposedInfSources[proposedPatient] = -1;
-                proposedInfSourceTypes[proposedPatient] = 4;
-                
-                if (currentInfTimes[proposedPatient] == 0) {
-                    hastingsRatio = 0;
+            //check if proposed time invalid - if so, reject move, and move to next patient
+            if(proposedInfTime == std::numeric_limits<int>::min()) {
+                //reject move and exit
+                chainInfTimes[i] = currentInfTimes;
+                chainInfSources[i] = currentInfSources;
+                chainInfSourceTypes[i] = currentInfSourceTypes;
+                if (debugPt) {
+                    printf("Patient %d: new infection time proposed invalid (previous %d), move rejected\n\n",
+                           proposedPatient, currentInfTimes[proposedPatient]);
                 }
-                else {
-                    //hastings ratio - prob(-->current) / prob(-->proposed)
-                    hastingsRatio = log((1-q) / q);
-                }
-                
+                continue;
             }
             
-            else {
-                //patient acquired infection after t=0
-                //calculate hastings ratio for proposing start time >0 and then propose infection time
-                if (currentInfTimes[proposedPatient] > 0) {
-                    //if already have infection time after t=0
-                    hastingsRatio = 0;
-                    //new time - adjust using random walk
-                    double delta = 2.5;
-                    proposedInfTime = proposeInfectionTime(proposedPatient, currentInfTimes[proposedPatient], onwardTransmission,
-                                                           sampleTimes, maxTime, delta, ptLocation);
-                    
-                }
-                else {
-                    //if currently have infection time, t=0
-                    hastingsRatio = log(q / (1-q));
-                    //propose infection time conditional on epsilon - this avoids poor mixing where get stuck at t=0 as infection time
-                    //proposedInfTime =  proposeInfectionTimeConditional(proposedPatient, onwardTransmission, sampleTimes, maxTime, currentParm[3]);
-                    
-                    proposedInfTime = proposeInfectionTimeInitial(proposedPatient, onwardTransmission, sampleTimes, maxTime);
-                    
-                    //adjust hastings ratio - log PDF at current - log PDF at proposed
-                    int currentInterval = sampleTimes[proposedPatient] - currentInfTimes[proposedPatient];
-                    int proposedInterval = sampleTimes[proposedPatient] - proposedInfTime;
-                    hastingsRatio += dpois(currentInterval, currentParm[3], 1) - dpois(proposedInterval, currentParm[3], 1);
-                    
-                }
-                
-                //proposedInfTime = infTimes[proposedPatient]; //over-ride for testing
-                
-                if(proposedInfTime == std::numeric_limits<int>::min()) { //i.e. isNaN(proposedInfTime) == True
-                    //reject move and exit
-                    chainInfTimes[i] = currentInfTimes;
-                    chainInfSources[i] = currentInfSources;
-                    chainInfSourceTypes[i] = currentInfSourceTypes;
-                    if (debugPt) {
-                        printf("Patient %d: new infection time proposed invalid (previous %d), move rejected\n\n",
-                               proposedPatient, currentInfTimes[proposedPatient]);
-                    }
-                    continue;
-                }
-                
-                proposedInfTimes[proposedPatient] = proposedInfTime;
-                
-                if (debugPt) {
-                    printf("Patient %d: new infection time proposed: %d (previous %d) [sample time %d]\n",
-                            proposedPatient, proposedInfTime, currentInfTimes[proposedPatient], sampleTimes[proposedPatient]);
-                }
-                
-                
-                //propose a new source
-                // the only changes here are to the infection time of the proposed patient
-                // and so can use currentInfTimes, currentRecTimes, and currentSporeI to determine the new sources, as the proposed patient specifically excluded in the function
-                Src proposedSource = proposeConditionalSource(infectedPatients, proposedPatient, proposedInfTime, currentInfTimes, sampleTimes, currentRecTimes,
-                                                                      wardLog, currentInfSourceTypes, currentSporeI, ptLocation,
-                                                                      geneticDist, geneticMap, nWards, nPatients, currentParm);
-                
-                
-                proposedInfSources[proposedPatient] = proposedSource.srcIndex;
-                proposedInfSourceTypes[proposedPatient] = proposedSource.srcRoute;
-                
-                
-                //Hastings ratio calculation - helper - probability of proposing new source (current --> proposed)
-                double pChooseSourceProposed = proposedSource.srcP;
-                
-                //calculate the probability of choosing the current source with the current sampling time (proposed --> current)
-                // i.e. assuming that next move is to reverse the one above
-                // as only thing that changes is proposed patient can still use currentInfTimes, currentRecTimes, currentSporeI
-                double pChooseSourceCurrent;
-                SrcList srcProbsCurrent = getSourceProb(infectedPatients, proposedPatient, currentInfTimes[proposedPatient], currentInfTimes, sampleTimes, currentRecTimes,
-                                      wardLog, currentInfSourceTypes, currentSporeI, ptLocation,
-                                      geneticDist, geneticMap,
-                                      nWards, nPatients, currentParm);
-                
-                for (int ii=0; ii<srcProbsCurrent.sourceList.size(); ii++) {
-                    //iterate over current sources
-                    if(srcProbsCurrent.sourceList[ii] ==  currentInfSources[proposedPatient]) {
-                        pChooseSourceCurrent = srcProbsCurrent.sourceProbabilities[ii];
-                        break;
-                    }
-                }
-                
-                
-                //log hastings ratio for conditional algorithm, prob(-->current) / prob(-->proposed)
-                // p(a-->b) = prob(choose Tinf) * p(choose src | Tinf)
-                // prob(choose Tinf) cancels top and bottom
-                hastingsRatio += log(pChooseSourceCurrent) - log(pChooseSourceProposed);
-                
-                
-                if (debugPt) {
-                    printf("Patient %d: new source %d (route %d) [previous %d (%d)] - Hastings ratio: %0.4f\n", proposedPatient,
-                           proposedSource.srcIndex, proposedSource.srcRoute,
-                           currentInfSources[proposedPatient], currentInfSourceTypes[proposedPatient],
-                           hastingsRatio);
-                }
-                
-                
-            } //end of else vs propose positive at t=0
+            
+            proposedInfTimes[proposedPatient] = proposedInfTime;
             
             
+            if (debugPt) {
+                printf("Patient %d: new infection time proposed: %d (previous %d) [sample time %d]\n",
+                        proposedPatient, proposedInfTime, currentInfTimes[proposedPatient], sampleTimes[proposedPatient]);
+            }
+            
+            
+            //propose a new source based on new infection time
+            // the only changes by this time point are to the infection time of the proposed patient
+            // and so can use currentInfTimes, currentRecTimes, and currentSporeI to determine the new sources, as the proposed patient specifically excluded in the function
+            Src proposedSource = proposeConditionalSource(infectedPatients, proposedPatient, proposedInfTime, currentInfTimes, sampleTimes, currentRecTimes,
+                                                                  wardLog, currentInfSourceTypes, currentSporeI, ptLocation,
+                                                                  geneticDist, geneticMap, nWards, nPatients, currentParm);
+            
+            proposedInfSources[proposedPatient] = proposedSource.srcIndex;
+            proposedInfSourceTypes[proposedPatient] = proposedSource.srcRoute;
+            
+            
+            //Hastings ratio calculation - helper - probability of proposing new source (current --> proposed)
+            double pChooseSourceProposed = proposedSource.srcP;
+            
+            //calculate the probability of choosing the current source with the current sampling time (proposed --> current)
+            // i.e. assuming that next move is to reverse the one above
+            // as only thing that changes is proposed patient can still use currentInfTimes, currentRecTimes, currentSporeI
+            double pChooseSourceCurrent;
+            SrcList srcProbsCurrent = getSourceProb(infectedPatients, proposedPatient, currentInfTimes[proposedPatient], currentInfTimes, sampleTimes, currentRecTimes,
+                                  wardLog, currentInfSourceTypes, currentSporeI, ptLocation,
+                                  geneticDist, geneticMap,
+                                  nWards, nPatients, currentParm);
+            
+            for (int ii=0; ii<srcProbsCurrent.sourceList.size(); ii++) {
+                //iterate over current sources
+                if(srcProbsCurrent.sourceList[ii] ==  currentInfSources[proposedPatient]) {
+                    pChooseSourceCurrent = srcProbsCurrent.sourceProbabilities[ii];
+                    break;
+                }
+            }
+            
+            
+            //log hastings ratio for conditional algorithm, prob(-->current) / prob(-->proposed)
+            // p(a-->b) = prob(choose Tinf) * p(choose src | Tinf)
+            // prob(choose Tinf) cancels top and bottom
+            hastingsRatio += log(pChooseSourceCurrent) - log(pChooseSourceProposed);
+            
+            
+            if (debugPt) {
+                printf("Patient %d: new source %d (route %d) [previous %d (%d)] - Hastings ratio: %0.4f\n", proposedPatient,
+                       proposedSource.srcIndex, proposedSource.srcRoute,
+                       currentInfSources[proposedPatient], currentInfSourceTypes[proposedPatient],
+                       hastingsRatio);
+            }
             
             //update list of onward transmissions
             //remove old onward transmission
@@ -579,13 +524,12 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //determine proposed infectious individuals on wards under new infection time
             proposedWardI = getWardI(nPatients, maxTime, nWards, proposedInfTimes, currentRecTimes, wardLog);
+            
             //update sporeI to reflect new infection times (as ward discharges while infectious may have changed)
-            proposedSporeI = currentSporeI;
             updateSporeI(proposedSporeI, proposedPatient, maxTime, nPatients, nWards, proposedInfTimes, currentRecTimes, ptLocation);
-
             getSporeForceSummary(proposedSporeForceSummary, infectedPatients, proposedSporeI, maxTime, nWards, nPatients, proposedInfTimes, currentParm);
             
-
+            //debugging code
             if(debugPt) {
                 double currentLLSample = llSample(infectedPatients, currentInfTimes, sampleTimes, currentParm);
                 double proposedLLSample = llSample(infectedPatients, proposedInfTimes, sampleTimes, currentParm);
@@ -614,8 +558,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
             }
             
-            
-            
+
             //2. Compute the probability of accepting the proposed jump.
             proposedLL = targetDist(infectedPatients, uninfectedPatients, proposedInfTimes, sampleTimes, currentRecTimes, proposedInfSources, proposedInfSourceTypes,
                                     proposedSporeI, proposedSporeForceSummary,
@@ -661,30 +604,29 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             
             
-        } //end of loop over proposed patietns to update
+        } //end of loop over proposed patients to update infection times and sources
         
         
-
+        // UPDATE RECOVERY TIMES //
         
+        // Hastings ratio here = 0, as updates are proposed symmetrically
+        double hastingsRatio = 0;
         
-        //UPDATE RECOVERY TIMES
-            // Hastings ratio here = 0, as updates are proposed symmetrically
+        //loop over all patients to be updated
         for (int proposedPatientIndex : patientUpdateList) {
             int proposedPatient = infectedPatients[proposedPatientIndex];
             
             debugPt = false;
             if (proposedPatient==-1) debugPt= true;
             
-            
-            int proposedRecTime; //store the new proposed recovery time
-            
-            double hastingsRatio = 0;
+            //set proposed recovery times to current times, and spore similarlly
             proposedRecTimes = currentRecTimes;
+            proposedSporeI = currentSporeI;
             
-            //propose new recovery time - RETURN TO THIS TO REVIEW WHAT HAPPENS WHEN SET TO INFECTED AT t=0
-            int deltaRec = 10;
-            proposedRecTime = proposeRecoveryTime(proposedPatient, currentRecTimes[proposedPatient],
-                                                  onwardTransmission, sampleTimes, maxTime, deltaRec, ptLocation, currentInfTimes);
+            //propose new recovery time
+            int sdRecTime = 10;
+            int proposedRecTime = proposeRecoveryTime(proposedPatient, currentRecTimes[proposedPatient],
+                                                      onwardTransmission, sampleTimes, maxTime, sdRecTime, ptLocation, currentInfTimes);
             
             //proposedRecTime = recoveryTimes[proposedPatient];//temp OVER-RIDE for TESTING
             
@@ -708,7 +650,6 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             //determine proposed infectious individuals on wards under new recovery time
             proposedWardI = getWardI(nPatients, maxTime, nWards, currentInfTimes, proposedRecTimes, wardLog);
             //update sporeI to reflect new recovery time
-            proposedSporeI = currentSporeI;
             updateSporeI(proposedSporeI, proposedPatient, maxTime, nPatients, nWards, currentInfTimes, proposedRecTimes, ptLocation);
             getSporeForceSummary(proposedSporeForceSummary, infectedPatients, proposedSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
             
@@ -760,7 +701,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 
         
         
-        // DISRUPTION STEP TO DATA AUGMENTATION - UPDATES INFECTION TIMES TO ALLOW REVERSAL OF TRANSMISSION DIRECTIONS
+        // DISRUPTION STEP TO DATA AUGMENTATION - UPDATES INFECTION TIMES AS A BLOCK FOR A SUBSET OF CASES TO ALLOW REVERSAL OF TRANSMISSION DIRECTIONS //
         int useDisruption = 0;
         if(i>20) useDisruption = 1;
         if (useDisruption == 1) {
@@ -895,17 +836,14 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 // 4. sample new infection times - this is done symmetrically so Hastings ratio for time update is 0
                 for (int node : nodeSet) {
                     
-                    int delta = 4;
+                    int sdDisruptInfTime = 4;
                     int proposedInfTime = proposeInfectionTime(node, currentInfTimes[node], proposedOnwardTransmission,
-                                                           sampleTimes, maxTime, delta, ptLocation);
+                                                           sampleTimes, maxTime, sdDisruptInfTime, ptLocation);
                     if(proposedInfTime == std::numeric_limits<int>::min()) {
-                        //keep current infection time
-                        proposedInfTime = currentInfTimes[node];
+                        proposedInfTime = currentInfTimes[node]; //keep current infection time
                     }
                     
                     proposedInfTimes[node] = proposedInfTime;
-                    
-                    
                 }
                 
                 if (debugDisrupt) {
@@ -919,8 +857,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 // 4B) sample new recovery times as well, to avoid recovery times being fixed by on-ward transmission requirements
                 proposedRecTimes = currentRecTimes;
                 for(int node : nodeSet) {
-                    int delta = 5;
-                    int proposedRecoveryTime = proposeRecoveryTime(node, currentRecTimes[node], proposedOnwardTransmission, sampleTimes, maxTime, delta, ptLocation, proposedInfTimes);
+                    int sdDisruptRecTime = 5;
+                    int proposedRecoveryTime = proposeRecoveryTime(node, currentRecTimes[node], proposedOnwardTransmission,
+                                                                   sampleTimes, maxTime, sdDisruptRecTime, ptLocation, proposedInfTimes);
                     if(proposedRecoveryTime == std::numeric_limits<int>::min()) {
                         //keep current infection time
                         proposedRecoveryTime = currentRecTimes[node];
@@ -941,7 +880,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 //currentInfSourceTypes - is used to determine genetic likelihood - use this for all updates current --> proposed updates
                 // and converse (proposedInfSourceTypes) for proposed --> current updates
                 
-                double hastingsRatio = 0.00;
+                double hastingsRatio = 0;
                 
                 for (int node : nodeSet) {
                     
