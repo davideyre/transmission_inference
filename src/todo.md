@@ -4,7 +4,7 @@ To do
 Testing
 -------
 
-1. Suit of test scenarios to repeat including all possibilities - initially try 1 of each
+1. Suite of test scenarios to repeat including all possibilities - initially try 1 of each
 
 
 Inference
