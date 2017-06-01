@@ -28,7 +28,7 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
                          vector<vector<int>> &ptLocation);
 
 //function for initiating infection times (at start or after move from being infected at t=0
-int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes);
+int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes, Parm parm);
 
 //function to propose a new recovery time
 int proposeRecoveryTime(int proposedPatient, int currentRecTime,

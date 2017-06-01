@@ -102,7 +102,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             //infected patients
 
             //infection time and source
-            int infTime = proposeInfectionTimeInitial(patient, sampleTimes);
+            int infTime = proposeInfectionTimeInitial(patient, sampleTimes, startParm);
             startInfTimes.push_back(infTime);
             startInfSources.push_back(-1); //background source - assume all from background initially
             
@@ -345,24 +345,24 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         
         
         
-        //over-ride - fix 9 paramters
+        //over-ride - fix paramters
         
-        //TRUE values  - "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm"
-        
-        //chain[i][0] = 0.005;
-        //chain[i][1] = 0.005;
-        //chain[i][2] = 0.002;
-        //chain[i][3] = 10;
-        //chain[i][4] = 1;
-        //chain[i][5] = 10000;
-        //chain[i][6] = 0.005475702;
-        //chain[i][7] = 0.000001;
-        //chain[i][8] = 0.000001;
-        //chain[i][9] = 0.2;
-        //chain[i][10] = 0.002;
-        //chain[i][11] = 3;
-        //chain[i][12] = 30;
-        
+        //TRUE values
+        /*
+        chain[i].betaBgroundHosp = 0.002;
+        chain[i].betaWard = 0.005;
+        chain[i].betaHosp = 0.0000001;
+        chain[i].sampleSize = 5;
+        chain[i].sampleMu = 10;
+        chain[i].directNe = 1;
+        chain[i].introNe = 10000;
+        chain[i].mu = 0.005475702;
+        chain[i].betaComm = 0.000001;
+        chain[i].sporeProbLogit = logit(0.2);
+        chain[i].probStartInfLogit = logit(0.00001);
+        chain[i].recSize = 3;
+        chain[i].recMu = 30;
+        */
         
         
         //over-ride for data augmentation
@@ -382,7 +382,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                                currentSporeI, currentSporeForceSummary,
                              wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap,currentParm);
          getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
-         */
+        */
         // end over-ride
 
         
@@ -1011,6 +1011,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             
         } //end of disruption section
+        
         
         double currentLLSample = llSample(infectedPatients, currentInfTimes, sampleTimes, currentParm);
         double currentLLGenetic = llGenetic(infectedPatients, currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, geneticMap, nPatients, currentParm);

@@ -113,12 +113,13 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
 
 
 //function for initiating infection times (at start of inference) - all initialised to be at or after start of data, i.e. t=0
-int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes)  {
+int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes, Parm parm)  {
     
     //as all initial infections are set to be from background, don't need to check for onward transmission
     
-    //propose infection time between t=0 and point must have been infectious from (sampling or onward transmission)
-    int proposedInfTime = floor(runif(0, sampleTimes[proposedPatient]+1));
+    //propose infection time sampling from negative binomial distribution
+    double sampleProb = parm.sampleSize / (parm.sampleSize + parm.sampleMu);
+    int proposedInfTime = sampleTimes[proposedPatient] - rnbinom(parm.sampleSize, sampleProb);
     return proposedInfTime;
 }
 
