@@ -624,7 +624,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             proposedSporeI = currentSporeI;
             
             //propose new recovery time
-            int sdRecTime = 10;
+            int sdRecTime = 5;
             int proposedRecTime = proposeRecoveryTime(proposedPatient, currentRecTimes[proposedPatient],
                                                       onwardTransmission, sampleTimes, maxTime, sdRecTime, ptLocation, currentInfTimes);
             

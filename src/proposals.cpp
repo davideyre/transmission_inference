@@ -142,7 +142,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
     int minRecoveryTime; //minimum time step can recover in
     
     for (trans transmission : onwardTransmission[proposedPatient]) {
-        if(transmission.srcType != SrcType::SPORE){
+        if(transmission.srcType != SrcType::SPORE & transmission.victim != -1){
             transmissionTimes.push_back(transmission.t); //add to vector of transmission times provided not spore transmission
         }
     }
