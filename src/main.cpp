@@ -479,7 +479,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 //proposedInfTime = infTimes[proposedPatient]; //over-ride for testing
                 
-                if(proposedInfTime==-1) { 
+                if(proposedInfTime == std::numeric_limits<int>::min()) { //i.e. isNaN(proposedInfTime) == True
                     //reject move and exit
                     chainInfTimes[i] = currentInfTimes;
                     chainInfSources[i] = currentInfSources;
@@ -688,7 +688,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //proposedRecTime = recoveryTimes[proposedPatient];//temp OVER-RIDE for TESTING
             
-            if(proposedRecTime==-1) {
+            if(proposedRecTime == std::numeric_limits<int>::min()) {
                 //reject move and exit
                 chainRecTimes[i] = currentRecTimes;
                 if (debugPt) {
@@ -898,7 +898,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     int delta = 4;
                     int proposedInfTime = proposeInfectionTime(node, currentInfTimes[node], proposedOnwardTransmission,
                                                            sampleTimes, maxTime, delta, ptLocation);
-                    if(proposedInfTime ==-1) {
+                    if(proposedInfTime == std::numeric_limits<int>::min()) {
                         //keep current infection time
                         proposedInfTime = currentInfTimes[node];
                     }
@@ -921,7 +921,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 for(int node : nodeSet) {
                     int delta = 5;
                     int proposedRecoveryTime = proposeRecoveryTime(node, currentRecTimes[node], proposedOnwardTransmission, sampleTimes, maxTime, delta, ptLocation, proposedInfTimes);
-                    if(proposedRecoveryTime ==-1) {
+                    if(proposedRecoveryTime == std::numeric_limits<int>::min()) {
                         //keep current infection time
                         proposedRecoveryTime = currentRecTimes[node];
                     }

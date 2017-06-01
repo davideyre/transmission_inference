@@ -46,7 +46,8 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
     
     if (proposedInfTime<1 | proposedInfTime>endTime) {
         //impossible move - reject
-        proposedInfTime = -1;
+        proposedInfTime = std::numeric_limits<int>::min();;
+        
         return proposedInfTime;
     }
     
@@ -100,7 +101,7 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
                     
                     //onward transmission depends on being discharged while infectious
                     //printf("Proposed infection time does not allow for a transmission requiring a discharge while infectious, move rejected\n");
-                    proposedInfTime = -1; //impossible move, reject and exit
+                    proposedInfTime = std::numeric_limits<int>::min(); //impossible move, reject and exit
                     return(proposedInfTime);
                 }
 
@@ -144,7 +145,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
     }
     
     if(proposedRecTime< minRecoveryTime) {
-        proposedRecTime = -1; //impossible move, reject and exit
+        proposedRecTime = std::numeric_limits<int>::min();;; //impossible move, reject and exit
         return(proposedRecTime);
     }
     
@@ -212,7 +213,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
                     printf("ERROR - HALT\n\n");
                 }
                 */
-                proposedRecTime = -1; //impossible move, reject and exit
+                proposedRecTime = std::numeric_limits<int>::min(); //impossible move, reject and exit
                 return(proposedRecTime);
             }
             
