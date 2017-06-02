@@ -318,16 +318,25 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
                        vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
     double ll;
     if (transmissionSource==-1) {
-        //likelihood for genetic distance based on import, i.e. source type =0
-        double Ne = parm.introNe;
-        double mu = parm.mu;
+        //likelihood for genetic distance based on import:
+        
+        //for a pair of samples taken from the overall population at the same time -
         //snp ~ Pois(2 * mu * v) and v ~Exp(1/Ne)
         //hence snp ~ Geom(p), where p = p = 1/(1+(1/Ne))
-        double p = 1/(1+(1/(2*mu*Ne)));
+        double p = 1/(1+(1/(2*parm.mu*parm.introNe)));
+        
+        //have one member of pair of samples, multiple possible ways to choose other member of pair
+            // pick one at random - estimate of llGeneticSingle then too unstable
+            // determine the mean SNP distance and use this to calculate ll - CURRENTLY implemented
+            // determine the mean probability and use the log of this as as the ll
+        
+        //find all possible comparison samples, the 'nearest neighbours'
+            //nearest neighbours defined for now as the first case of every cluster
         vector<int> potentialNN;
         for (int nn : infectedPatients) {
-            if (nn!=patient & (infSourceType[nn]== SrcType::BGROUND_HOSP | infSourceType[nn] == SrcType::BGROUND_COMM)) {
-                //nearest neighbours defined for now as any case (may wish to consider only comparing to the first case of every cluster
+            if (nn!=patient & (infSourceType[nn]== SrcType::BGROUND_HOSP
+                               | infSourceType[nn] == SrcType::BGROUND_COMM
+                               | infSourceType[nn] == SrcType::START_POS)) {
                 potentialNN.push_back(nn);
             }
         }
@@ -336,6 +345,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         
         int nPotentialNN = (int)potentialNN.size();
         int ptIndex = geneticMap.at(patient);
+        
         /*
         double probNN = 0;
         for(int nn: potentialNN) {
@@ -346,8 +356,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         }
         ll = log(probNN/nPotentialNN);
          */
-        
-        
+
         
         //get average SNP difference to all potential NN
         double snpSum = 0.0;
@@ -360,18 +369,6 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         //use mean SNPs to calculate prob of NN
         double meanSnp = snpSum / nPotentialNN;
         double probNN = (1-p) * pow(p,meanSnp);
-        
-        
-        /*
-        
-        //pick a NN at random and get snp distance
-        int nnRandomIndex = floor(runif(0, nPotentialNN));
-        int nnRandom = potentialNN[nnRandomIndex];
-        int srcIndex = geneticMap.at(nnRandom);
-        double snp = geneticDist[ptIndex][srcIndex];
-        double probNN = (1-p) * pow(p,snp);
-        */
-        
         ll = log(probNN);
         
     }
@@ -384,31 +381,16 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         double Ne = parm.directNe;
         double mu = parm.mu;
         
+        //ll += log(exp(time/2/Ne+log(igamma(1+snp,mu*time+time/2/Ne)))
+        //          * pow(2*mu, snp)
+        //          / factorial(snp)/Ne/pow((2*mu+1/Ne),(snp+1)));
         
-        if(snp>160) {
-            //over-ride to deal with factorial having upper limit, this will be an issue for distances >170, can scale though if needed in inputs
-            ll = -numeric_limits<double>::infinity();
-        }
-        else {
-            //ll = log(exp(time/2/Ne+log(igamma(1+snp,mu*time+time/2/Ne)))
-            //          * pow(2*mu, snp)
-            //          / factorial(snp)/Ne/pow((2*mu+1/Ne),(snp+1)));
-            ll = time/2/Ne +
-                    log(igamma(1+snp,mu*time+time/2/Ne)) +
-                    snp*log(2*mu) -
-                    log(factorial(snp)) -
-                    log(Ne) -
-                    (snp+1)*log(2*mu+1/Ne);
-
-        }
-        /*
-        ll = time/2/Ne +
-        log(igamma(1+snp,mu*time+time/2/Ne)) +
-        snp*log(2*mu) -
-        logFactorial(snp) -
-        log(Ne) -
-        (snp+1)*log(2*mu+1/Ne);
-        */
+        ll += time/2/Ne +
+                log(igamma(1+snp,mu*time+time/2/Ne)) +
+                snp*log(2*mu) -
+                logFactorial(snp) -
+                log(Ne) -
+                (snp+1)*log(2*mu+1/Ne);
         
     }
 
@@ -417,29 +399,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
 }
 
 
-//log likelihood over all pairs calling the llGeneticSingle function (slower x4, but used for testing only)
-double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
-    
-    double ll = 0.00;
-    for (int patient=0; patient < nPatients; patient++) {
-        //log likelihood for patient not infected = 0
-        //therefore, determine log likelihood for infected patients
-        if(infTimes[patient]>-1) { //infected patients only
-            if (infSourceType[patient]== SrcType::BGROUND_HOSP |
-                infSourceType[patient]== SrcType::BGROUND_COMM |
-                infSourceType[patient]== SrcType::START_POS) { //infected by hospital or community background or at start
-                ll += llGeneticSingle(infectedPatients, sampleTimes, patient, -1, infSourceType, geneticDist, geneticMap, nPatients, parm);
-            }
-            else {
-                //likelihood for direct transmission
-                int sourcePatient = infSources[patient];
-                ll += llGeneticSingle(infectedPatients, sampleTimes, patient, sourcePatient, infSourceType, geneticDist, geneticMap, nPatients, parm);
-                
-            }
-        }
-    }
-    return ll;
-}
+
 
 
 
@@ -483,6 +443,10 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
              ll += log(probNN/nPotentialNN);
              */
             
+            //wilson approach (composite.pairwise.clonalpac): is take the mean of the pairwise log-likelihoods, which I think is equivalent to
+            //taking the mean of the SNPs - to check
+            // then applies correction factor to log likelihood of sum(1/(1:(n-1))), check justification for this again
+            
             
             //get average SNP difference to all potential NN
             double snpSum = 0.0;
@@ -513,7 +477,8 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
         else {
             //likelihood for direct transmission - ward, hospital or spore
             
-            //tight bootleneck forces early coalescnce and therefore forces Ne lower - i.e. bottleneck puts upper limit on Ne (most marked effect when generation time small)
+            //tight bootleneck forces early coalescence with a host and therefore forces Ne lower
+            // - i.e. bottleneck puts upper limit on Ne (most marked effect when generation time small)
             
             //sampling of source long after transmission, provides diversity within 2 hosts and tends to inflate Ne
             
@@ -525,31 +490,16 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             double Ne = parm.directNe;
             double mu = parm.mu;
             
+            //ll += log(exp(time/2/Ne+log(igamma(1+snp,mu*time+time/2/Ne)))
+            //          * pow(2*mu, snp)
+            //          / factorial(snp)/Ne/pow((2*mu+1/Ne),(snp+1)));
             
-            if(snp>170) {
-                //over-ride to deal with factorial having upper limit, this will be an issue for distances >170, can scale though if needed in inputs
-                ll += -numeric_limits<double>::infinity();
-            }
-            else {
-                //ll += log(exp(time/2/Ne+log(igamma(1+snp,mu*time+time/2/Ne)))
-                //          * pow(2*mu, snp)
-                //          / factorial(snp)/Ne/pow((2*mu+1/Ne),(snp+1)));
-                ll += time/2/Ne +
-                        log(igamma(1+snp,mu*time+time/2/Ne)) +
-                        snp*log(2*mu) -
-                        log(factorial(snp)) -
-                        log(Ne) -
-                        (snp+1)*log(2*mu+1/Ne);
-            }
-            
-            /*
             ll += time/2/Ne +
-            log(igamma(1+snp,mu*time+time/2/Ne)) +
-            snp*log(2*mu) -
-            logFactorial(snp) -
-            log(Ne) -
-            (snp+1)*log(2*mu+1/Ne);
-            */
+                    log(igamma(1+snp,mu*time+time/2/Ne)) +
+                    snp*log(2*mu) -
+                    logFactorial(snp) -
+                    log(Ne) -
+                    (snp+1)*log(2*mu+1/Ne);
         }
     }
     
@@ -599,3 +549,33 @@ double targetDist (vector<int> &infectedPatients, vector<int> &uninfectedPatient
     return td;
 }
 
+
+
+
+//NOT CURRENTLY USED
+
+
+
+//log likelihood over all pairs calling the llGeneticSingle function (slower x4, but used for testing only)
+double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
+    
+    double ll = 0.00;
+    for (int patient=0; patient < nPatients; patient++) {
+        //log likelihood for patient not infected = 0
+        //therefore, determine log likelihood for infected patients
+        if(infTimes[patient]>-1) { //infected patients only
+            if (infSourceType[patient]== SrcType::BGROUND_HOSP |
+                infSourceType[patient]== SrcType::BGROUND_COMM |
+                infSourceType[patient]== SrcType::START_POS) { //infected by hospital or community background or at start
+                ll += llGeneticSingle(infectedPatients, sampleTimes, patient, -1, infSourceType, geneticDist, geneticMap, nPatients, parm);
+            }
+            else {
+                //likelihood for direct transmission
+                int sourcePatient = infSources[patient];
+                ll += llGeneticSingle(infectedPatients, sampleTimes, patient, sourcePatient, infSourceType, geneticDist, geneticMap, nPatients, parm);
+                
+            }
+        }
+    }
+    return ll;
+}

@@ -52,6 +52,9 @@ double igamma (double a, double z);
 //factorial function
 double factorial (double x);
 
+//function to return log factorial
+double logFactorial(double x);
+
 //function to get vector of infected patients
 vector<int> getInfectedPatients(vector<int> &sampleTimes, int nPatients);
 
@@ -64,7 +67,6 @@ vector<double> normaliseLL(vector<double> sourceLikelihood);
 //choose item based on vector of probabilities, return the index of the chosen item
 int sampleProbVector(vector<double> sourceProbability);
 
-//function to return log factorial
-double logFactorial(int n);
+
 
 #endif /* tools_hpp */
