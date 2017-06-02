@@ -78,8 +78,8 @@ rec.size = 3
 rec.mu = 30
 
 #spore decay - geometric distn
-#hist(rgeom(1000,0.25))
-spore.p = 0.2
+#hist(rgeom(1000,0.7))
+spore.p = 0.6
 
 #genetic parameters
 directNe = 1 #within host population size
