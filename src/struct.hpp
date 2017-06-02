@@ -9,6 +9,7 @@
 #ifndef struct_h
 #define struct_h
 #include <vector>
+#include <stdexcept> //required for runtime_error
 #define MATHLIB_STANDALONE
 #include <Rmath.h>
 

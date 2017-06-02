@@ -36,6 +36,8 @@ RMath
 To install standalone Rmath on mac OS, see section 2 and 9 in https://cran.r-project.org/doc/manuals/r-release/R-admin.html:
 
 * download R source
+* tar -xvzf R-3.3.3.tar.gz
+* rm R-3.3.3.tar.gz
 * in directory ./configure
 * cd src/nmath/standalone
 * make
@@ -70,6 +72,20 @@ Compile on linux - GEL
 
 On GEL cannot install Rmath to standard location, therefore
 g++ -o test *.cpp -std=c++11 -I /home/local/GEL/davide/bin/R/include -L /home/local/GEL/davide/bin/R/lib -Wl,-rpath,/home/local/GEL/davide/bin/R/lib -lRmath -lpthread
+
+Compile on linux - ResComp
+----------------------
+
+module purge
+module load R/3.3.2
+
+#files in `R RHOME`/include and `R RHOME`/lib, e.g.
+
+
+On GEL cannot install Rmath to standard location, therefore
+module load gcc/5.4.0
+cd /well/bag/deyre/analysis/transmission_inference/src
+g++ -o ../transmission *.cpp -std=c++11 -I /apps/well/R/3.3.2/lib64/R/include -L /apps/well/R/3.3.2/lib64/R/lib -Wl,-rpath,/apps/well/R/3.3.2/lib64/R/lib -lRmath -lpthread
 
 
 Compile on linux - ARC
