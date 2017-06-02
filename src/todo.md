@@ -1,16 +1,17 @@
 To do
 =====
 
-Testing
--------
-
-1. Suite of test scenarios to repeat including all possibilities - initially try 1 of each
-
 
 Inference
 ---------
 
 1. Update handling of directNe and introNe to reflect recent discussion
+
+
+Testing
+-------
+
+1. Suite of test scenarios to repeat including all possibilities - initially try 1 of each
 
 
 Code

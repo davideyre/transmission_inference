@@ -348,41 +348,41 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         //over-ride - fix paramters
         
         //TRUE values
-        /*
-        chain[i].betaBgroundHosp = 0.002;
-        chain[i].betaWard = 0.005;
-        chain[i].betaHosp = 0.0000001;
-        chain[i].sampleSize = 5;
-        chain[i].sampleMu = 10;
-        chain[i].directNe = 1;
-        chain[i].introNe = 10000;
-        chain[i].mu = 0.005475702;
-        chain[i].betaComm = 0.000001;
-        chain[i].sporeProbLogit = logit(0.2);
-        chain[i].probStartInfLogit = logit(0.00001);
-        chain[i].recSize = 3;
-        chain[i].recMu = 30;
-        */
+        
+//        chain[i].betaBgroundHosp = 0.002;
+//        chain[i].betaWard = 0.005;
+//        chain[i].betaHosp = 0.0000001;
+//        chain[i].sampleSize = 5;
+//        chain[i].sampleMu = 10;
+//        chain[i].directNe = 1;
+//        chain[i].introNe = 10000;
+//        chain[i].mu = 0.005475702;
+//        chain[i].betaComm = 0.000001;
+//        chain[i].sporeProbLogit = logit(0.2);
+//        chain[i].probStartInfLogit = logit(0.00001);
+//        chain[i].recSize = 3;
+//        chain[i].recMu = 30;
+        
         
         
         //over-ride for data augmentation
-        /*
-        currentInfTimes = infTimes;
-        currentRecTimes = recoveryTimes;
-        currentInfSources = infSources;
-        currentInfSourceTypes = infSourceTypes;
-        currentWardI = getWardI(nPatients, maxTime, nWards, currentInfTimes, currentRecTimes, wardLog);
-        getSporeI(currentSporeI, infectedPatients, nPatients, maxTime, nWards, infTimes, currentRecTimes, ptLocation);
-        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
+        
+//        currentInfTimes = infTimes;
+//        currentRecTimes = recoveryTimes;
+//        currentInfSources = infSources;
+//        currentInfSourceTypes = infSourceTypes;
+//        currentWardI = getWardI(nPatients, maxTime, nWards, currentInfTimes, currentRecTimes, wardLog);
+//        getSporeI(currentSporeI, infectedPatients, nPatients, maxTime, nWards, infTimes, currentRecTimes, ptLocation);
+//        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
        
         //generic over-ride
     
-        currentParm = chain[i];
-        currentLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-                               currentSporeI, currentSporeForceSummary,
-                             wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap,currentParm);
-         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
-        */
+//        currentParm = chain[i];
+//        currentLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
+//                               currentSporeI, currentSporeForceSummary,
+//                             wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap,currentParm);
+//         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
+        
         // end over-ride
 
         
