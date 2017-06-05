@@ -2,12 +2,6 @@ To do
 =====
 
 
-Inference
----------
-
-1. Update handling of directNe and introNe to reflect recent discussion
-
-
 Testing
 -------
 
@@ -17,6 +11,7 @@ Testing
 Code
 ----
 1. Convert handling of never infected cases to be ward totals by day
+2. Switch all vectors to be sized on infected cases
 
 
 Application
