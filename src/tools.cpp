@@ -77,8 +77,9 @@ void getSporeI(vector<vector<vector<int>>> &sporeI, vector<int> &infectedPatient
         }
         
         //set spores for each discharge while still infectious, i.e. from time step after infected to time step before recovery
-        int currentWard = ptLocation[pt][infTimes[pt]+1];
-        for(int t = infTimes[pt]+1; t<= min({recTimes[pt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
+        int t0 = max({0, infTimes[pt]+1});
+        int currentWard = ptLocation[pt][t0];
+        for(int t = t0; t<= min({recTimes[pt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
             if(ptLocation[pt][t] != currentWard & currentWard!=-1) {
                 
                 //discharge has occured
@@ -123,8 +124,9 @@ void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime
     }
     
     //set spores for each discharge while still infectious, i.e. from time step after infected to time step before recovery
-    int currentWard = ptLocation[updatePt][infTimes[updatePt]+1];
-    for(int t = infTimes[updatePt]+1; t<= min({recTimes[updatePt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
+    int t0 = max({0, infTimes[updatePt]+1});
+    int currentWard = ptLocation[updatePt][t0];
+    for(int t = t0; t<= min({recTimes[updatePt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
         if(ptLocation[updatePt][t] != currentWard & currentWard!=-1) {
             
             //discharge has occured
