@@ -329,6 +329,8 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
             // pick one at random - estimate of llGeneticSingle then too unstable
             // determine the mean SNP distance and use this to calculate ll - CURRENTLY implemented
             // determine the mean probability and use the log of this as as the ll
+            // determine the mean(log(prob)) and multiply by sum(1/(1:(n-1))) to reflect information available
+
         
         //find all possible comparison samples, the 'nearest neighbours'
             //nearest neighbours defined for now as the first case of every cluster
@@ -341,10 +343,32 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
             }
         }
         
-        
-        
+
         int nPotentialNN = (int)potentialNN.size();
         int ptIndex = geneticMap.at(patient);
+        
+        //adjustment to ll for composite pairwise case, i.e. from R: sum(1/(1:(n-1)))
+        double  llCorrection = 0;
+        if (nPotentialNN==1) {
+            llCorrection = 1;
+        }
+        else {
+            for (int i=1; i<nPotentialNN; i++) {
+                llCorrection += (double)1/i;
+            }
+        }
+        
+        //llCorrection = 1;
+        
+        double sumLLAllPairs = 0;
+        for(int nn: potentialNN) {
+            int srcIndex = geneticMap.at(nn);
+            double snp = geneticDist[ptIndex][srcIndex];
+            sumLLAllPairs += log(1-p) + snp*log(p);
+            
+        }
+        
+        ll = llCorrection * sumLLAllPairs / nPotentialNN;
         
         /*
         double probNN = 0;
@@ -357,7 +381,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         ll = log(probNN/nPotentialNN);
          */
 
-        
+        /*
         //get average SNP difference to all potential NN
         double snpSum = 0.0;
         for(int nn: potentialNN) {
@@ -370,6 +394,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         double meanSnp = snpSum / nPotentialNN;
         double probNN = (1-p) * pow(p,meanSnp);
         ll = log(probNN);
+         */
         
     }
     else {
@@ -448,6 +473,33 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             // then applies correction factor to log likelihood of sum(1/(1:(n-1))), check justification for this again
             
             
+            //adjustment to ll for composite pairwise case, i.e. from R: sum(1/(1:(n-1)))
+            double  llCorrection = 0;
+            if (nPotentialNN == 1) {
+                llCorrection = 1;
+            }
+            else {
+                for (int i=1; i<nPotentialNN; i++) {
+                    llCorrection += (double)1/i;
+                }
+            }
+            
+            //llCorrection = 1;
+            
+            double sumLLAllPairs = 0;
+            for(int nn: potentialNN) {
+                int srcIndex = geneticMap.at(nn);
+                double snp = geneticDist[ptIndex][srcIndex];
+                sumLLAllPairs += log(1-p) + snp*log(p);
+                
+            }
+            
+            ll += llCorrection * sumLLAllPairs / nPotentialNN;
+            
+            /*
+            double lltest = sumLLAllPairs / nPotentialNN;
+
+            
             //get average SNP difference to all potential NN
             double snpSum = 0.0;
             for(int nn: potentialNN) {
@@ -458,18 +510,20 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             
             //use mean SNPs to calculate prob of NN
             double meanSnp = snpSum / nPotentialNN;
-            double probNN = (1-p) * pow(p,meanSnp);
-             
-            /*
+            double logProbNN = log(1-p) + meanSnp*log(p);
+            */
             
+            /*
+            // random selection
             int nnRandomIndex = floor(runif(0, nPotentialNN));
             int nnRandom = potentialNN[nnRandomIndex];
             int srcIndex = geneticMap.at(nnRandom);
             double snp = geneticDist[ptIndex][srcIndex];
             double probNN = (1-p) * pow(p,snp);
+            ll += log(probNN);
              */
             
-            ll += log(probNN);
+            //ll += logProbNN;
 
             //ll += llNN;
         }
