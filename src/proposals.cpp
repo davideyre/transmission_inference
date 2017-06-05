@@ -334,6 +334,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                         //infection from same ward
                         sourceLogLikelihood[srcIndex] = log(parm.betaWard) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex],
                                                                                              infSourceType, geneticDist, geneticMap, nPatients, parm);
+                        
                     }
                     if( sourceTypeList[srcIndex] == SrcType::HOSP) {
                         //infection from hospital
@@ -349,7 +350,6 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                         
                         sourceLogLikelihood[srcIndex] = log(parm.betaWard * specificSporeLevel) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex],
                                                                                                                   infSourceType, geneticDist, geneticMap, nPatients, parm);
-                        
                     }
                     
                 }
