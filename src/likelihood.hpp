@@ -45,9 +45,6 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 //log likelihood contribution from the genetic distance matrix - p(G | I, S, parm)
 double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm);
 
-//log likelihood over all pairs calling the llGeneticSingle function (slower x4, but used for testing only)
-double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm);
-
 
 //genetic log likelihood for single patient pair
 double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,

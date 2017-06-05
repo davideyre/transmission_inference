@@ -483,34 +483,3 @@ double targetDist (vector<int> &infectedPatients, vector<int> &uninfectedPatient
     
     return td;
 }
-
-
-
-
-//NOT CURRENTLY USED
-
-
-
-//log likelihood over all pairs calling the llGeneticSingle function (slower x4, but used for testing only)
-double llGeneticAlt(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
-    
-    double ll = 0.00;
-    for (int patient=0; patient < nPatients; patient++) {
-        //log likelihood for patient not infected = 0
-        //therefore, determine log likelihood for infected patients
-        if(infTimes[patient]>-1) { //infected patients only
-            if (infSourceType[patient]== SrcType::BGROUND_HOSP |
-                infSourceType[patient]== SrcType::BGROUND_COMM |
-                infSourceType[patient]== SrcType::START_POS) { //infected by hospital or community background or at start
-                ll += llGeneticSingle(infectedPatients, sampleTimes, patient, -1, infSourceType, geneticDist, geneticMap, nPatients, parm);
-            }
-            else {
-                //likelihood for direct transmission
-                int sourcePatient = infSources[patient];
-                ll += llGeneticSingle(infectedPatients, sampleTimes, patient, sourcePatient, infSourceType, geneticDist, geneticMap, nPatients, parm);
-                
-            }
-        }
-    }
-    return ll;
-}
