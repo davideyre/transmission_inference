@@ -348,6 +348,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         int nPotentialNN = (int)potentialNN.size();
         int ptIndex = geneticMap.at(patient);
         
+        /*
         //adjustment to ll for composite pairwise case, i.e. from R: sum(1/(1:(n-1)))
         double  llCorrection = 0;
         if (nPotentialNN==1) {
@@ -359,7 +360,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
             }
         }
         
-        //llCorrection = 1;
+        llCorrection = 1;
         
         double sumLLAllPairs = 0;
         for(int nn: potentialNN) {
@@ -382,9 +383,9 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         ll = log(probNN/nPotentialNN);
          */
 
-        /*
+        
         //get average SNP difference to all potential NN
-        double snpSum = 0.0;
+        double snpSum = 0;
         for(int nn: potentialNN) {
             int srcIndex = geneticMap.at(nn);
             double snp = geneticDist[ptIndex][srcIndex];
@@ -393,9 +394,9 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         
         //use mean SNPs to calculate prob of NN
         double meanSnp = snpSum / nPotentialNN;
-        double probNN = (1-p) * pow(p,meanSnp);
-        ll = log(probNN);
-         */
+        double logProbNN = log(1-p) + meanSnp*log(p);
+        ll = logProbNN;
+        
     }
     else {
         //likelihood for direct transmission
@@ -473,7 +474,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             //taking the mean of the SNPs - to check
             // then applies correction factor to log likelihood of sum(1/(1:(n-1))), check justification for this again
             
-            
+            /*
             //adjustment to ll for composite pairwise case, i.e. from R: sum(1/(1:(n-1)))
             double  llCorrection = 0;
             if (nPotentialNN == 1) {
@@ -485,7 +486,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
                 }
             }
             
-            //llCorrection = 1;
+            llCorrection = 1;
             
             double sumLLAllPairs = 0;
             for(int nn: potentialNN) {
@@ -500,7 +501,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             /*
             double lltest = sumLLAllPairs / nPotentialNN;
 
-            
+            */
             //get average SNP difference to all potential NN
             double snpSum = 0.0;
             for(int nn: potentialNN) {
@@ -512,7 +513,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             //use mean SNPs to calculate prob of NN
             double meanSnp = snpSum / nPotentialNN;
             double logProbNN = log(1-p) + meanSnp*log(p);
-            */
+            ll += logProbNN;
             
             /*
             // random selection
