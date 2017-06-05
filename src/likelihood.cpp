@@ -317,6 +317,7 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
                        vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
     double ll;
+    
     if (transmissionSource==-1) {
         //likelihood for genetic distance based on import:
         
@@ -395,7 +396,6 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         double probNN = (1-p) * pow(p,meanSnp);
         ll = log(probNN);
          */
-        
     }
     else {
         //likelihood for direct transmission
@@ -406,16 +406,17 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         double Ne = parm.directNe;
         double mu = parm.mu;
         
-        //ll += log(exp(time/2/Ne+log(igamma(1+snp,mu*time+time/2/Ne)))
+        //ll = log(exp(time/2/Ne+log(igamma(1+snp,mu*time+time/2/Ne)))
         //          * pow(2*mu, snp)
         //          / factorial(snp)/Ne/pow((2*mu+1/Ne),(snp+1)));
         
-        ll += time/2/Ne +
-                log(igamma(1+snp,mu*time+time/2/Ne)) +
-                snp*log(2*mu) -
-                logFactorial(snp) -
-                log(Ne) -
-                (snp+1)*log(2*mu+1/Ne);
+        ll = time/2/Ne +
+        logIgamma(1+snp,mu*time+time/2/Ne) +
+        snp*log(2*mu) -
+        logFactorial(snp) -
+        log(Ne) -
+        (snp+1)*log(2*mu+1/Ne);
+
         
     }
 
@@ -549,11 +550,12 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             //          / factorial(snp)/Ne/pow((2*mu+1/Ne),(snp+1)));
             
             ll += time/2/Ne +
-                    log(igamma(1+snp,mu*time+time/2/Ne)) +
-                    snp*log(2*mu) -
-                    logFactorial(snp) -
-                    log(Ne) -
-                    (snp+1)*log(2*mu+1/Ne);
+            logIgamma(1+snp,mu*time+time/2/Ne) +
+            snp*log(2*mu) -
+            logFactorial(snp) -
+            log(Ne) -
+            (snp+1)*log(2*mu+1/Ne);
+            
         }
     }
     

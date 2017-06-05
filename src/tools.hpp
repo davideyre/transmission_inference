@@ -48,6 +48,7 @@ vector<vector<int>> getPtLocation(int nPatients, int maxTime, int nWards, vector
 
 // Incomplete gamma function, as defined in Maple - required in llGenetic
 double igamma (double a, double z);
+double logIgamma (double a, double z); //log version
 
 //factorial function
 double factorial (double x);

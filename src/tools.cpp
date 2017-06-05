@@ -229,6 +229,10 @@ double igamma (double a, double z) {
     return pgamma(z,a,1,0,0)*tgamma(a);
 }
 
+double logIgamma (double a, double z) {
+    return pgamma(z,a,1,0,1) + lgamma(a);
+}
+
 //factorial function
 double factorial (double x) {
     return tgamma(x+1);
