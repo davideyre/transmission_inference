@@ -29,9 +29,9 @@ void runTest(vector<int> &infectedPatients, vector<int> &uninfectedPatients, vec
     printf("TEST: GeneticLL = %0.4f (Expected value: -30344.3)\n\n", testGeneticLL);
     
     //test of single log genetic likelihood over all pairs
-    double testGeneticSingleLL = llGeneticAlt(infectedPatients, infTimes, sampleTimes, infSources, infSourceType,
-                                              geneticDist, geneticMap, nPatients, parm);
-    printf("TEST: GeneticSingleLL = %0.4f (Expected value: -30344.3)\n\n", testGeneticSingleLL);
+    //double testGeneticSingleLL = llGeneticAlt(infectedPatients, infTimes, sampleTimes, infSources, infSourceType,
+     //                                         geneticDist, geneticMap, nPatients, parm);
+    //printf("TEST: GeneticSingleLL = %0.4f (Expected value: -30344.3)\n\n", testGeneticSingleLL);
     
     //test of priors
     double testPrior = getPrior(parm);
