@@ -59,6 +59,24 @@ Install on linux:
 * make; make install
 
 
+Armadillo support
+-----------------
+
+On mac:
+brew tap homebrew/science
+brew install cmake pkg-config
+brew install armadillo
+
+then test:
+clang++ -I/usr/local/include -L/usr/local/lib test.cpp -o test -O2 -larmadillo -llapack -lblas
+
+for Xcode:
+add to Header Search Path: /usr/local/include
+add to Library Search Path: /usr/local/lib
+add to other linker flags: -larmadillo -llapack -lblas
+set optimisation flag: Other C++ flags -O2
+
+
 Compile - mac
 -------------
 cd /Users/davideyre/Dropbox/Epi_WGS_MCMC/cpp_inference_scratchpad/inference_test/inference_test
