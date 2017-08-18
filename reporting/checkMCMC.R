@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_39444134"
+path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_23574379"
 
 #parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
 option_list = list(
@@ -260,8 +260,6 @@ rowN = nrow(all.inf.infSources)
 inf.infSources = all.inf.infSources[burnIn:rowN,]
 
 inf.infSources.mode = apply(inf.infSources, 2, Mode)
-#correct back to numbering from 1
-inf.infSources.mode = ifelse(inf.infSources.mode==-1,-1, inf.infSources.mode+1)
 
 infSources.compare = cbind(true.infSources[,1], inf.infSources.mode, inf.infSources.mode==true.infSources[,1])
 
@@ -285,7 +283,7 @@ sourceHPD = function(x, rowCount) {
 
 infSources.hpd = rep(0, ncol(inf.infSources))
 for (i in 1:ncol(inf.infSources)) {
-  if( ifelse(true.infSources[i,1]==-1,-1,true.infSources[i,1]-1) %in% sourceHPD(inf.infSources[,i] ,rowCount) ) {
+  if( true.infSources[i,1] %in% sourceHPD(inf.infSources[,i] ,rowCount) ) {
     infSources.hpd[i] = 1
   }
 }
@@ -445,7 +443,7 @@ colors = brewer.pal(6,"Spectral")
 plot=list()
 i=1
 for (pt.R in infectedPatients) {
-  pt = paste("patient_", pt.R-1, sep="")
+  pt = paste("patient_", pt.R, sep="")
   pt.index = which(infectedPatients==pt.R)
   d = table(inf.infSources[,pt], inf.infSourceTypes[,pt])
   d = as.data.frame(cbind(as.numeric(rownames(d)), d))
@@ -461,8 +459,8 @@ for (pt.R in infectedPatients) {
     geom_bar(stat="identity") +
     scale_y_continuous(limits=c(0,1)) + 
     labs(y="Posterior probability", x="Source", 
-         title=paste("Infection sources for patient ", pt.R-1, 
-                     " (true source: ", ifelse(true.infSources[pt.index,1]==-1,-1,true.infSources[pt.index,1]-1), 
+         title=paste("Infection sources for patient ", pt.R, 
+                     " (true source: ", true.infSources[pt.index,1], 
                      " via route: ", getRoute(true.infSources[pt.index,2]), ")", sep="")) +
     scale_fill_manual(values=colors, drop=F, name="Source Type") +
     theme(legend.text=element_text(size=10), legend.title=element_text(size=10), 
@@ -487,7 +485,7 @@ for (pt.R in infectedPatients) {
     geom_bar(stat="identity") +
     scale_y_continuous(limits=c(0,1)) + 
     labs(y="Posterior probability", x="Estimated - true infection time", 
-         title=paste("Infection times for patient ", pt.R-1, sep="")) +
+         title=paste("Infection times for patient ", pt.R, sep="")) +
     scale_fill_manual(values=colors, drop=F, name="Source Type") +
     theme(legend.text=element_text(size=10), legend.title=element_text(size=10), 
           axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10)) +
@@ -499,7 +497,7 @@ for (pt.R in infectedPatients) {
   # colnames(d) = c("infTimes")
   # plot[[i]] = ggplot(d, aes(x=infTimes)) + 
   #   geom_histogram(binwidth = 1, col="orange", fill="orange", alpha=0.7) +
-  #   labs(x="Estimated - true infection time", y="Frequency", title=paste("Infection times for patient ", pt.R-1, sep="")) +
+  #   labs(x="Estimated - true infection time", y="Frequency", title=paste("Infection times for patient ", pt.R, sep="")) +
   #   theme_bw() +
   #   theme(axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10)) +
   #   scale_x_continuous(breaks=dMin:dMax)
