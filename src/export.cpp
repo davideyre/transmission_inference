@@ -9,7 +9,9 @@
 #include "export.hpp"
 
 void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
-                 vector<vector<int>> &chainRecTimes, int steps, string filePath) {
+                 vector<vector<int>> &chainRecTimes, int steps, string filePath,
+                 unordered_map<int,string> &ptLookupRev) {
+    
     FILE *fp;
     string fileName = filePath+"/chain_parameters.txt";
     fp = fopen(fileName.c_str(), "wb");
@@ -69,7 +71,11 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     fprintf(fp, headerText.c_str()); //header
     for(int i=0; i<steps; i++) {
         for (int j=0; j<nInf; j++){
-            if (chainInfTimes[1][j]!=-1) {fprintf(fp, "%d\t", chainInfSources[i][j]);}
+            if (chainInfTimes[1][j]!=-1) {
+                //convert infection source back to original label
+                string srcPtString = ptLookupRev.at(chainInfSources[i][j]);
+                fprintf(fp, "%s\t", srcPtString.c_str());
+            }
         }
         fprintf(fp, "\n");
     }

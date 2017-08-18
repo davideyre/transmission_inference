@@ -11,11 +11,13 @@
 
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 #include "struct.hpp"
 
 using namespace std;
 
 void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
-                 vector<vector<int>> &chainRecTimes, int steps, string filePath);
+                 vector<vector<int>> &chainRecTimes, int steps, string filePath,
+                 unordered_map<int,string> &ptLookupRev);
 
 #endif /* export_hpp */

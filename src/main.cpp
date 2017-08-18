@@ -1132,10 +1132,11 @@ int main(int argc, const char * argv[]) {
     int nNeverInfPatients; //number of patients never infected, but contributing to admission logs
     
     unordered_map<string,int> ptLookup; //lookup that converts patient identifers as strings into integers numbered from zero
+    unordered_map<int,string> ptLookupRev; //reverse for export
     
     //import details for infected patients
     string filePath = path + "/input/patientLog.csv";
-    importPatientLog(filePath, ptLookup, infTimes, infSources, infSourceTypes, sampleTimes, recoverTimes, nInfPatients, nNeverInfPatients);
+    importPatientLog(filePath, ptLookup, ptLookupRev, infTimes, infSources, infSourceTypes, sampleTimes, recoverTimes, nInfPatients, nNeverInfPatients);
     
     
     //set up ward logs
@@ -1235,7 +1236,7 @@ int main(int argc, const char * argv[]) {
     
     //export the chain to a file
     const string mcmcLog = path + "/inference"; //path for log files
-    exportChain(chain, chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes, steps, mcmcLog);
+    exportChain(chain, chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes, steps, mcmcLog, ptLookupRev);
     
     
     //report MCMC run time

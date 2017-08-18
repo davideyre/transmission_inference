@@ -19,7 +19,7 @@ using namespace std;
 
 
 //function to import patient infection log
-void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, vector<int> &infTimes, vector<int> &infSources,
+void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unordered_map<int,string> &ptLookupRev, vector<int> &infTimes, vector<int> &infSources,
                       vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nInfPatients, int &nNeverInfPatients);
 
 //function to import ward log

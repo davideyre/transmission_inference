@@ -12,7 +12,7 @@
 // *** functions to import epi data *** //
 
 //function to import details for infected patients (allows import of known infection and recovery times, source and source type for testing purposes)
-void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, vector<int> &infTimes, vector<int> &infSources,
+void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unordered_map<int,string> &ptLookupRev, vector<int> &infTimes, vector<int> &infSources,
                       vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nInfPatients, int &nNeverInfPatients) {
 
     //patient log has to contain all never infected patients
@@ -26,6 +26,7 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, vect
     while(in.read_row(tmp_ptId, tmp_sampleTimes)) {
         if(tmp_sampleTimes!="NA") {
             ptLookup.insert( { tmp_ptId, i });
+            ptLookupRev.insert( { i, tmp_ptId });            
             i++;
             sampleTimes.push_back(stoi(tmp_sampleTimes)-1);
         }
