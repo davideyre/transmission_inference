@@ -78,24 +78,39 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unor
 //    wardLogInf -  // wardLogInf[time][ward] = {patients...} for infected patients
 //    wardLogNeverInf - // wardLogNeverInf[time][ward] = int for count of never infected patients
 
-void importWardLog(string filePath, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup,
+void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup,
                    vector<vector<vector<int>>> &wardLogInf,
                    vector<vector<int>> &wardLogNeverInf,
-                   int &maxTime, int &nWards, vector<int> &sampleTimes) {
+                   int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards) {
     
     //temporary variables to hold text from CSV
     int tmp_admit, tmp_discharge;
-    string tmp_ward, tmp_pt;
+    string tmp_ward, tmp_pt, tmp_hospital;
+    
+    //create ward list for each hospital
+    vector<vector<int>> wardList;
     
     //create a lookup for all the wards, and obtain the last discharge date at the same time
-    io::CSVReader<2> in(filePath);
-    in.read_header(io::ignore_extra_column, "ward", "t_discharge");
+    io::CSVReader<3> in(filePath);
+    in.read_header(io::ignore_extra_column, "ward", "hospital", "t_discharge");
     int lastDischarge = 0;
     int i = 0;
-    while(in.read_row(tmp_ward, tmp_discharge)){
-        auto it = wardLookup.find(tmp_ward);
+    int h = 0;
+    while(in.read_row(tmp_ward, tmp_hospital, tmp_discharge)){
+        //check if have already saved hospital and if not save in lookup
+        auto itHosp = hospitalLookup.find(tmp_hospital);
+        if (itHosp==hospitalLookup.end()) {
+            hospitalLookup.insert( {tmp_hospital, h});
+            h++;
+            wardList.push_back({});
+        }
+        
+        string tmp_wardHosp = tmp_hospital+": "+tmp_ward;
+        auto it = wardLookup.find(tmp_wardHosp);
         if (it==wardLookup.end()) {
-            wardLookup.insert( { tmp_ward, i });
+            wardLookup.insert( { tmp_wardHosp, i }); //save name of ward
+            int hChk = hospitalLookup.at(tmp_hospital); //save which hospital ward is in
+            wardList[hChk].push_back(i);
             i++;
         }
         tmp_discharge -= 1; //convert tmp_discharge to number from zero
@@ -104,13 +119,28 @@ void importWardLog(string filePath, unordered_map<string,int> &wardLookup, unord
         }
     }
     
+    //get number of wards
+    nWards = i;
+    int nHospitals = h;
+    
+    //generate list of wards in the same hospital as each ward
+    hospitalWards.resize(nWards);
+    for (int hosp=0; hosp<nHospitals; hosp++) {
+        for (int ptWard : wardList[hosp]) {
+            for (int ward: wardList[hosp]) {
+                if (ward!=ptWard) {
+                    hospitalWards[ptWard].push_back(ward);
+                }
+            }
+        }
+    }
+    
     //get max time
     int maxTimeWard = lastDischarge;
     int maxTimeSample = *max_element(begin(sampleTimes), end(sampleTimes));
     maxTime = max({maxTimeWard, maxTimeSample});
     
-    //get number of wards
-    nWards = i;
+
     
     //set up sizes of wardLogs - wardLogInf,
     wardLogInf.resize(maxTime+1);
@@ -124,15 +154,16 @@ void importWardLog(string filePath, unordered_map<string,int> &wardLookup, unord
         }
     }
     
-    io::CSVReader<4> inMore(filePath);
-    inMore.read_header(io::ignore_extra_column, "patient_id", "ward", "t_admit", "t_discharge");
-    while(inMore.read_row(tmp_pt, tmp_ward, tmp_admit, tmp_discharge)){
+    io::CSVReader<5> inMore(filePath);
+    inMore.read_header(io::ignore_extra_column, "patient_id", "ward", "hospital", "t_admit", "t_discharge");
+    while(inMore.read_row(tmp_pt, tmp_ward, tmp_hospital, tmp_admit, tmp_discharge)){
         //convert admission and discharge dates
         int t_admit = tmp_admit - 1;
         int t_discharge = tmp_discharge -1;
         
         //convert ward to numeric form
-        int ward = wardLookup.at(tmp_ward);
+        string tmp_wardHosp = tmp_hospital+": "+tmp_ward;
+        int ward = wardLookup.at(tmp_wardHosp);
         
         //check if infected patient
         auto itPt = ptLookup.find(tmp_pt);

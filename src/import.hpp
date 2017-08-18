@@ -23,8 +23,8 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unor
                       vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nInfPatients, int &nNeverInfPatients);
 
 //function to import ward log
-void importWardLog(string filePath, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup, vector<vector<vector<int>>> &wardLogInf,
-                   vector<vector<int>> &wardLogNeverInf, int &maxTime, int &nWards, vector<int> &sampleTimes);
+void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup, vector<vector<vector<int>>> &wardLogInf,
+                   vector<vector<int>> &wardLogNeverInf, int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards);
 
 //function to import genetic data
 void importGeneticData(string filePathGenetic, vector<vector<double>> &geneticDist, unordered_map<string,int> &ptLookup, int nInfPatients);

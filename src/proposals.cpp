@@ -247,7 +247,7 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
                              vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist,
                              int nWards,
-                             int nInfPatients, Parm &parm) {
+                             int nInfPatients, vector<vector<int>> &hospitalWards, Parm &parm) {
     SrcList output; //struct of type SrcList to store output
     
     vector<int> sourceList; //vector of sources
@@ -288,14 +288,12 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
             }
             
             //potential hospital sources
-            for (int nonWard=0; nonWard<nWards; nonWard++) {
-                if (nonWard!=ward) {
-                    for (int srcPt : wardLogInf[proposedInfTime][nonWard]) {
-                        if (infTimes[srcPt]!=-1 & infTimes[srcPt]<proposedInfTime & recoveryTimes[srcPt]>proposedInfTime & srcPt!=proposedPatient) {
-                            sourceList.push_back(srcPt);
-                            sourceTypeList.push_back(SrcType::HOSP);
-                            
-                        }
+            for (int nonWard : hospitalWards[ward]) {
+                for (int srcPt : wardLogInf[proposedInfTime][nonWard]) {
+                    if (infTimes[srcPt]!=-1 & infTimes[srcPt]<proposedInfTime & recoveryTimes[srcPt]>proposedInfTime & srcPt!=proposedPatient) {
+                        sourceList.push_back(srcPt);
+                        sourceTypeList.push_back(SrcType::HOSP);
+                        
                     }
                 }
             }
@@ -373,7 +371,7 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
 Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
                              vector<vector<vector<int>>> &wardLog, vector<int> infSourceType, vector<vector<vector<int>>> &sporeI,
                              vector<vector<int>> &ptLocation,
-                             vector<vector<double>> &geneticDist, int nWards, int nInfPatients, Parm &parm) {
+                             vector<vector<double>> &geneticDist, int nWards, int nInfPatients, vector<vector<int>> &hospitalWards, Parm &parm) {
     Src output; //struct of type Src to store output
     
     if(proposedInfTime<0) {
@@ -383,7 +381,7 @@ Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<in
     else {
         
         SrcList sourceList = getSourceProb(proposedPatient, proposedInfTime, infTimes, sampleTimes, recoveryTimes,
-                              wardLog, infSourceType, sporeI, ptLocation, geneticDist, nWards, nInfPatients, parm);
+                              wardLog, infSourceType, sporeI, ptLocation, geneticDist, nWards, nInfPatients, hospitalWards, parm);
         
         if(sourceList.sourceList.size()==1) {
             if(sourceList.sourceTypeList[0] == SrcType::BGROUND_HOSP) {

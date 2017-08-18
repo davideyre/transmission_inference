@@ -10,12 +10,15 @@ Testing
 
 Code
 ----
-1. Convert handling of never infected cases to be ward totals by day
-2. Switch all vectors to be sized on infected cases
-3. Allow for handling of multiple hospitals
-4. Allow for import of data with unknown infection times, sources and source types
-5. For now all input times are assumed to be numbered from 1, allow for conversion from date format
-6. assume for now genetic distances provided for all samples - not explicitly checked - could add
+1. Allow for handling of multiple hospitals
+2. Allow for import of data with unknown infection times, sources and source types
+3. For now all input times are assumed to be numbered from 1, allow for conversion from date format
+4. assume for now genetic distances provided for all samples - not explicitly checked - could add
+
+
+Improvements
+------------
+1. Refine genetic likelihood
 
 
 Application

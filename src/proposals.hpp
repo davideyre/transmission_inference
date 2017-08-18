@@ -43,7 +43,7 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
                       vector<vector<int>> &ptLocation,
                       vector<vector<double>> &geneticDist,
                       int nWards,
-                      int nInfPatients, Parm &parm);
+                      int nInfPatients, vector<vector<int>> &hospitalWards,  Parm &parm);
 
 
 
@@ -52,6 +52,6 @@ Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<in
                              vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
                              vector<vector<vector<int>>> &sporeI, vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist,
-                             int nWards, int nInfPatients, Parm &parm);
+                             int nWards, int nInfPatients, vector<vector<int>> &hospitalWards, Parm &parm);
 
 #endif /* proposals_hpp */
