@@ -65,7 +65,7 @@ if(!dir.exists(outDirBase)) {
 #transmission parameters
 bgroundBeta = 0.002
 wardBeta = 0.005
-hospBeta = 0.000
+hospBeta = 0.002
 commBeta = 0.000
 
 pStartPos= 0.0
@@ -87,7 +87,19 @@ introNe = 10000
 bottleneck = 1000 #set to 1000 for high bottleneck
 
 #ward set up
-nWards = 4
+nWardsPerHospital = 4
+nHospitals = 2
+nWards = nWardsPerHospital * nHospitals
+
+hospitalWards = matrix(NA, nrow=nHospitals, ncol=nWardsPerHospital)
+for (h in 1:nHospitals) {
+  for (w in 1:nWardsPerHospital) {
+    wardIndex = (h-1)*nWardsPerHospital + w
+    hospitalWards[h,w] = wardIndex
+  }
+}
+
+
 nPopulation = 2000
 pAdmit = 0.005 #chance of being admitted at any time-step
 losMean = 5 #length of stay - poisson distributed, assuming that diseases doesn't impact length of stay
@@ -215,7 +227,10 @@ for(t in 2:maxTime) {
          nIWard = length(vectorIWard)
          
          #get vector of infectious patients on other wards
-         vectorIHosp = which(ptLocation[t,]!=ptWard & ptLocation[t,]!=0 & infections[,1]<t & infections[,5]>t) 
+         #get vector of other wards in same hospital
+         hosp = which(hospitalWards==ptWard, arr.ind=T)[1]
+         hospWardsPt = hospitalWards[hosp,]
+         vectorIHosp = which(ptLocation[t,] %in% hospWardsPt & ptLocation[t,]!=ptWard & ptLocation[t,]!=0 & infections[,1]<t & infections[,5]>t) 
          #patients on a different ward infected before current time step
          nIHosp = length(vectorIHosp)
          
@@ -438,7 +453,7 @@ colnames(patientLog) = c("patient_id", "t_inf", "source", "source_type", "t_samp
 write.csv(patientLog, file=paste(outDir, "/patientLog.csv", sep=""), row.names=FALSE, quote=FALSE)
 
 #admission log - convert back into patient, location, admit_date, discharge_date
-wardLog = c(NA, NA, NA, NA)
+wardLog = c(NA, NA, NA, NA, NA)
 for(pt in 1:nPopulation) {
    prevLocation = 0
    location = NA
@@ -450,25 +465,26 @@ for(pt in 1:nPopulation) {
             #an admission
             t_admit = t
             location = ptLocation[t,pt]
+            hosp = which(hospitalWards==location, arr.ind=T)[1]
             prevLocation = location
          } 
          if(ptLocation[t,pt]==0) {
             #a discharge
             t_discharge = t-1
-            wardLog = rbind(wardLog, c(pt, location, t_admit, t_discharge))
+            wardLog = rbind(wardLog, c(pt, location, hosp, t_admit, t_discharge))
             prevLocation = 0
          }
       }
       if(t==maxTime & ptLocation[t,pt]!=0) {
          #record as discharge
          t_discharge = t
-         wardLog = rbind(wardLog, c(pt, location, t_admit, t_discharge))
+         wardLog = rbind(wardLog, c(pt, location, hosp, t_admit, t_discharge))
       }
    }
 }
 #remove top line
 wardLog = wardLog[2:nrow(wardLog),]
-colnames(wardLog) = c("patient_id", "ward", "t_admit", "t_discharge")
+colnames(wardLog) = c("patient_id", "ward", "hospital", "t_admit", "t_discharge")
 write.csv(wardLog, file=paste(outDir, "/wardLog.csv", sep=""), row.names=FALSE, quote=FALSE)
 
 
