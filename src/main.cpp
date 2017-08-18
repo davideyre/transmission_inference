@@ -1150,28 +1150,50 @@ int main(int argc, const char * argv[]) {
     
     // **** IMPORT DATA **** //
     //read in epi data CSV files
-    vector <int> infTimes; //if no infection then set to -1
-    vector <int> infSources; //if no infection or background/starts infected set to -1
-    vector <int> infSourceTypes; //hospital background = 0, ward =1, hospital = 2, comm background = 3, started infection = 4, no infection = -1
-    vector <int> sampleTimes; // if not infection set to -1
-    vector <int> recoverTimes; // if not infection set to -1
     
-    int nPatients;
+    //vectors for sample times for infected cases
+    vector <int> sampleTimes;
+    
+    //vectors for infection times and recovery times, infection sources, and source types for infected cases
+    vector <int> infTimes, recoverTimes;
+    vector <int> infSources; //recorded using number source indentifiers
+    vector <int> infSourceTypes; //hospital background = 0, ward =1, hospital = 2, comm background = 3, started infection = 4
+    
+    
+    int nInfPatients; //number of infected patients
+    unordered_map<string,int> ptLookup; //lookup that converts patient identifers as strings into integers numbered from zero
+    
+    //import details for infected patients
     string filePath = path + "/input/patientLog.csv";
-    importPatientLog(filePath, infTimes, infSources, infSourceTypes, sampleTimes, recoverTimes, nPatients);
+    importPatientLog(filePath, ptLookup, infTimes, infSources, infSourceTypes, sampleTimes, recoverTimes, nInfPatients);
     
+    
+    //set up ward logs
+    vector<vector<vector<int>>> wardLogInf;
+    vector<vector<int>> wardLogNeverInf;
+    //    wardLogInf -  // wardLogInf[time][ward] = {patients...} for infected patients
+    //    wardLogNeverInf - // wardLogNeverInf[time][ward] = int for count of never infected patients
+    
+    //ward lookup that converts text ward names into integers starting at zero
+    unordered_map<string,int> wardLookup;
+    
+    //last time to track
+    int maxTime;
+    
+    //number of wards
+    int nWards;
+    
+    //import ward admission details
     filePath = path + "/input/wardLog.csv";
-    vector<vector<vector<int>>> wardLog;
-    int nWards, maxTime;
-    importWardLog(filePath, wardLog, maxTime, nWards, nPatients, sampleTimes);  // wardLog[time][ward] = {patients...}
-    vector<int> infectedPatients = getInfectedPatients(sampleTimes, nPatients);
+    importWardLog(filePath, wardLookup, ptLookup, wardLogInf, wardLogNeverInf, maxTime, nWards, sampleTimes);
     
     //read in genetic data
     string filePathGenetic = path + "/input/simDistances_snps.txt";
-    vector<vector<double>> geneticDist; //pairwise genetic distances
-    unordered_map<int,int> geneticMap; //maps the row and column of the 2d vector back to the patient ids
-    importGeneticData(filePathGenetic, geneticDist, geneticMap);
+    vector<vector<double>> geneticDist; //pairwise genetic distances, indexed using integers from ptLookup
+    importGeneticData(filePathGenetic, geneticDist, ptLookup, nInfPatients);
 
+ 
+    /*
     // **** RUN MCMC **** //
     // MCMC setup
     //clock_t startMCMC,finishMCMC;
@@ -1255,7 +1277,7 @@ int main(int argc, const char * argv[]) {
     deltaMCMC = ((endMCMC.tv_sec  - startMCMC.tv_sec) * 1000000u +
              endMCMC.tv_usec - startMCMC.tv_usec) / 1.e6;
     printf("MCMC Processing time: %0.4f seconds\n",deltaMCMC);
-    
+    */
     
     return 0;
 }

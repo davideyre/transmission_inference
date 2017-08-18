@@ -17,15 +17,16 @@
 
 using namespace std;
 
-//function to import ward log
-void importWardLog(string filePath, vector<vector<vector<int>>> &wardLog, int &maxTime, int &nWards, int nPatients,
-                   vector<int> &sampleTimes);
 
 //function to import patient infection log
-void importPatientLog(string filePath, vector<int> &infTimes, vector<int> &infSources, 
-                      vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nPatients);
+void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, vector<int> &infTimes, vector<int> &infSources,
+                      vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nInfPatients);
+
+//function to import ward log
+void importWardLog(string filePath, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup, vector<vector<vector<int>>> &wardLogInf,
+                   vector<vector<int>> &wardLogNeverInf, int &maxTime, int &nWards, vector<int> &sampleTimes);
 
 //function to import genetic data
-void importGeneticData(string filePathGenetic, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap);
+void importGeneticData(string filePathGenetic, vector<vector<double>> &geneticDist, unordered_map<string,int> &ptLookup, int nInfPatients);
 
 #endif
