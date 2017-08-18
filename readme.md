@@ -1,5 +1,4 @@
-Transmission Inference
-======================
+# Transmission Inference
 
 This repository contains a series of healthcare-associated tranmission tools currently under development.
 
@@ -9,3 +8,30 @@ This repository contains a series of healthcare-associated tranmission tools cur
 
 For further details please contact david.eyre@ndm.ox.ac.uk
 
+---
+
+## Running the code
+ 
+### Input files
+All times are numbered for input files starting from 1. Assumes only single infection per patient. Assumes only single sample per patient.
+
+1. input/patientLog.csv : file with headers -   
+    patient\_id [string] any patient identfier  
+    t\_inf [int] infection time if know (only used for testing)  
+    source [string] infection source patient identifier (only used for testing)  
+    source_type [int] infection source type (only used for testing: BGROUND\_HOSP = 0, WARD = 1, HOSP = 2, BGROUND\_COMM = 3, START\_POS = 4, SPORE = 5)  
+    t\_sample [int] sample time
+    t\_recover [int] recovery time if known (only used for testing)
+
+    where testing values are not known enter "NA" in the cell
+
+2. input/wardLog.csv : file with headers - 
+    patient\_id [string] any patient identfier  
+    ward [string] any ward identfier  
+    hospital [string] any hospital identfier  
+    t\_admit [int] ward admission time  
+    t\_discharge [int] ward discharge time  
+
+3. input/simDistancesSNPs.txt - matrix of SNP distances, seperated by spaces, with patient ids prefixed with patient_
+
+Example input files are provided in the example_input folder

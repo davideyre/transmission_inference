@@ -55,16 +55,19 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unor
             //retrieve numeric patient id
             ptId = ptLookup.at(tmp_ptId);
             //populate vectors
-            infTimes[ptId] = stoi(tmp_infTimes)-1;
-            recoverTimes[ptId] = stoi(tmp_recoverTimes)-1;
-            infSourceType[ptId] = stoi(tmp_infSourceType);
+            if(isPosInt(tmp_infTimes)) infTimes[ptId] = stoi(tmp_infTimes)-1;
+            if(isPosInt(tmp_recoverTimes)) recoverTimes[ptId] = stoi(tmp_recoverTimes)-1;
+            if(isPosInt(tmp_infSourceType)) infSourceType[ptId] = stoi(tmp_infSourceType);
             //check if background source, i.e. -1
             if(tmp_infSources=="-1") {
                 infSources[ptId] = -1;
             }
             else {
-                int srcPtId = ptLookup.at(tmp_infSources);
-                infSources[ptId] = srcPtId;
+                if(!tmp_infSources.empty() & tmp_infSources!="NA") {
+                    int srcPtId = ptLookup.at(tmp_infSources);
+                    infSources[ptId] = srcPtId;
+                }
+
             }
         }
     }

@@ -13,6 +13,7 @@
 #include <Rmath.h>
 #include <algorithm> //for removing first element from a vector
 #include <unordered_map>
+#include <string>
 #include "likelihood.hpp"
 #include "proposals.hpp"
 #include "struct.hpp"
@@ -66,6 +67,8 @@ vector<double> normaliseLL(vector<double> sourceLikelihood);
 //choose item based on vector of probabilities, return the index of the chosen item
 int sampleProbVector(vector<double> sourceProbability);
 
+//check if a string is a postive integer
+bool isPosInt(string& s);
 
 
 #endif /* tools_hpp */

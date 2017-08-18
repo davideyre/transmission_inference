@@ -14,6 +14,7 @@
 #include <sstream>
 #include "csv.hpp"
 #include "proposals.hpp"
+#include "tools.hpp"
 
 using namespace std;
 

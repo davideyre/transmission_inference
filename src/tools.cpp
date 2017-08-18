@@ -316,7 +316,11 @@ int sampleProbVector(vector<double> sourceProbability) {
 }
 
 
-
+//check if a string is a postive integer
+bool isPosInt(string& s)
+{
+    return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
 
 
 
