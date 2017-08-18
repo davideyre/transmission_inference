@@ -16,12 +16,12 @@
 
 using namespace std;
 
-void runTest(vector<int> &infectedPatients, vector<int> &uninfectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes, Parm &parm,
+void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes, Parm &parm,
              vector<int> &infSources, vector<int> &infSourceType,
              vector<vector<vector<int>>> &sporeI, vector<vector<vector<double>>> &sporeForce, vector<vector<double>> &sporeForceSummary,
-             vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap, vector<vector<vector<int>>> &wardLog,
+             vector<vector<double>> &geneticDist, vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
              vector<vector<vector<int>>> &inPtDays,
              vector<vector<int>> &ptLocation,
-             vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime);
+             vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime);
 
 #endif /* testing_hpp */

@@ -16,10 +16,10 @@
 
 
 //function to obtain the number of infectious individuals on a given ward at a specific timepoint
-int getI(int t, int ward, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLog) {
+int getI(int t, int ward, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf) {
     int nInf = 0;
-    for (int pt : wardLog[t][ward]) {
-        if (infTimes[pt] > -1 & infTimes[pt] < t & recTimes[pt] > t) {
+    for (int pt : wardLogInf[t][ward]) {
+        if (infTimes[pt] < t & recTimes[pt] > t) {
             nInf ++;
         }
     }
@@ -27,7 +27,8 @@ int getI(int t, int ward, vector<int> &infTimes, vector<int> &recTimes, vector<v
 }
 
 //function to return a 2d vector of the number of infectious individuals on each ward at all time points
-vector<vector<int>> getWardI(int nPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLog) {
+vector<vector<int>> getWardI(int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf) {
+    
     vector<vector<int>> wardI;
     
     //set up sizes of 2d vector
@@ -39,7 +40,7 @@ vector<vector<int>> getWardI(int nPatients, int maxTime, int nWards, vector<int>
     //populate
     for (int t=0; t<maxTime; t++) {
         for (int ward=0; ward< nWards; ward++) {
-            wardI[t][ward] = getI(t, ward, infTimes, recTimes, wardLog);
+            wardI[t][ward] = getI(t, ward, infTimes, recTimes, wardLogInf);
         }
     }
     return wardI;
@@ -47,11 +48,11 @@ vector<vector<int>> getWardI(int nPatients, int maxTime, int nWards, vector<int>
 
 
 //function to get sporeI - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-void getSporeI(vector<vector<vector<int>>> &sporeI, vector<int> &infectedPatients, int nPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes,
+void getSporeI(vector<vector<vector<int>>> &sporeI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes,
                                       vector<vector<int>> &ptLocation) {
     
     //reset sporeI for all infected patients
-    for(int pt : infectedPatients) {
+    for(int pt=0; pt<nInfPatients; pt++) {
         for(int t=0; t<=maxTime; t++) {
             for(int ward=0; ward<nWards; ward++) {
                 sporeI[t][ward][pt] = 0;
@@ -61,7 +62,7 @@ void getSporeI(vector<vector<vector<int>>> &sporeI, vector<int> &infectedPatient
 
 
     //iterate through infected patients
-    for(int pt : infectedPatients) {
+    for(int pt=0; pt<nInfPatients; pt++) {
         //set spores at recovery if inpatient - ptLocation[patient][time] = wardId
         if(recTimes[pt]<=maxTime) {
             int recoveryWard = ptLocation[pt][recTimes[pt]];
@@ -97,7 +98,7 @@ void getSporeI(vector<vector<vector<int>>> &sporeI, vector<int> &infectedPatient
 }
 
 //udpate sporeI for a single patient, updating proposed copy passed as sporeI
-void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime, int nPatients, int nWards, vector<int> &infTimes, vector<int> &recTimes,
+void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes,
           vector<vector<int>> &ptLocation) {
 
     //change sporeI sporeI[t][ward][pt] = spore_duration (numbering from 1...) for patient being updated
@@ -144,7 +145,7 @@ void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime
 
 
 
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int> &infectedPatients, vector<vector<vector<int>>> &sporeI, int maxTime, int nWards, int nPatients, vector<int> &infTimes, Parm parm) {
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporeI, int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, Parm parm) {
     //pre-calculate the sum of spore force of infection - [t][ward]
 
     //reset current values of spore force summary to be zero
@@ -154,7 +155,7 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int>
         }
     }
     
-    for (int sporePt: infectedPatients) {
+    for (int sporePt=0; sporePt< nInfPatients; sporePt++) {
         for (int t = max({0, infTimes[sporePt]}); t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
             for (int ward = 0; ward<nWards; ward++) {
                 int sporeDuration = sporeI[t][ward][sporePt];
@@ -172,20 +173,20 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<int>
 
 
 
-//function to get vector of days an intpatient - inPtDays[patient][ward] = {times...} (whereas wardLog[time][ward] = {patients...})
-vector<vector<vector<int>>> getInPtDays(int nPatients, int maxTime, int nWards, vector<vector<vector<int>>> &wardLog) {
+//function to get vector of days an intpatient - inPtDays[patient][ward] = {times...} (whereas wardLogInf[time][ward] = {patients...})
+vector<vector<vector<int>>> getInPtDays(int nInfPatients, int maxTime, int nWards, vector<vector<vector<int>>> &wardLogInf) {
     vector<vector<vector<int>>> inPtDays;
     
     //set up 3d vector
-    inPtDays.resize(nPatients);
-    for (int i=0; i<nPatients; i++) {
+    inPtDays.resize(nInfPatients);
+    for (int i=0; i<nInfPatients; i++) {
         inPtDays[i].resize(nWards);
     }
     
     //loop through wardLog
     for (int t=0; t<=maxTime; t++) {
         for (int ward=0; ward< nWards; ward++) {
-            for(int pt : wardLog[t][ward]) {
+            for(int pt : wardLogInf[t][ward]) {
                 inPtDays[pt][ward].push_back(t);
             }
         }
@@ -194,13 +195,13 @@ vector<vector<vector<int>>> getInPtDays(int nPatients, int maxTime, int nWards, 
     
 }
 
-//function to store the location of patients - ptLocation[patient][time] = wardId
-vector<vector<int>> getPtLocation(int nPatients, int maxTime, int nWards, vector<vector<vector<int>>> &inPtDays) {
+//function to store the location of patients for infected patients - ptLocation[patient][time] = wardId
+vector<vector<int>> getPtLocation(int nInfPatients, int maxTime, int nWards, vector<vector<vector<int>>> &inPtDays) {
     vector<vector<int>> ptLocation;
     
     //set up 3d vector
-    ptLocation.resize(nPatients);
-    for (int pt=0; pt<nPatients; pt++) {
+    ptLocation.resize(nInfPatients);
+    for (int pt=0; pt<nInfPatients; pt++) {
         ptLocation[pt].resize(maxTime+1);
         for (int t=0; t<=maxTime; t++) {
             ptLocation[pt][t] = -1; //set default location as in community
@@ -208,7 +209,7 @@ vector<vector<int>> getPtLocation(int nPatients, int maxTime, int nWards, vector
     }
     
     //loop through inPtDays[patient][ward] = {times}
-    for (int pt=0; pt<nPatients; pt++) {
+    for (int pt=0; pt<nInfPatients; pt++) {
         for (int ward=0; ward< nWards; ward++) {
             for (int t: inPtDays[pt][ward]) {
                 ptLocation[pt][t] = ward;
@@ -244,17 +245,6 @@ double logFactorial(double x) {
     return lgamma(x+1);
 }
 
-
-//function to get vector of infected patients
-vector<int> getInfectedPatients(vector<int> &sampleTimes, int nPatients) {
-    vector<int> infectedPatients;
-    for(int patient=0; patient<nPatients; patient++) {
-        if(sampleTimes[patient]>=0) {
-            infectedPatients.push_back(patient);
-        }
-    }
-    return infectedPatients;
-}
 
 //remove the first element from a vector that matches
 void removeFirst(int n, vector<int> &vect){

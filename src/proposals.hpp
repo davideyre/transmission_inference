@@ -37,21 +37,21 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
 
 
 //get list of sources and their probabilities for a given patient and infection time, and parameter set
-SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
-                      vector<vector<vector<int>>> &wardLog, vector<int> infSourceType,
+SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
+                      vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
                       vector<vector<vector<int>>> &sporeI,
                       vector<vector<int>> &ptLocation,
-                      vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap,
+                      vector<vector<double>> &geneticDist,
                       int nWards,
-                      int nPatients, Parm &parm);
+                      int nInfPatients, Parm &parm);
 
 
 
 //function to determine proposed source of infection conditionally
-Src proposeConditionalSource(vector<int> &infectedPatients, int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
-                             vector<vector<vector<int>>> &wardLog, vector<int> infSourceType, 
+Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
+                             vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
                              vector<vector<vector<int>>> &sporeI, vector<vector<int>> &ptLocation,
-                             vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap,
-                             int nWards, int nPatients, Parm &parm);
+                             vector<vector<double>> &geneticDist,
+                             int nWards, int nInfPatients, Parm &parm);
 
 #endif /* proposals_hpp */

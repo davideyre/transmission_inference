@@ -13,20 +13,24 @@
 
 //function to import details for infected patients (allows import of known infection and recovery times, source and source type for testing purposes)
 void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, vector<int> &infTimes, vector<int> &infSources,
-                      vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nInfPatients) {
+                      vector<int> &infSourceType, vector<int> &sampleTimes, vector<int> &recoverTimes, int &nInfPatients, int &nNeverInfPatients) {
 
-    
+    //patient log has to contain all never infected patients
     //first set up ptLookup, save original patient ids and then re-number infected cases consecutively from zero
     //also save sampleTimes
     io::CSVReader<2> in(filePath);
     in.read_header(io::ignore_extra_column, "patient_id", "t_sample");
     string tmp_ptId, tmp_sampleTimes;
     int i = 0;
+    nNeverInfPatients = 0;
     while(in.read_row(tmp_ptId, tmp_sampleTimes)) {
         if(tmp_sampleTimes!="NA") {
             ptLookup.insert( { tmp_ptId, i });
             i++;
             sampleTimes.push_back(stoi(tmp_sampleTimes)-1);
+        }
+        else {
+            nNeverInfPatients ++;
         }
     }
     nInfPatients = i;

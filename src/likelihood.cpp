@@ -8,121 +8,54 @@
 
 #include "likelihood.hpp"
 
-
-double llTransAvoid(vector<int> &infectedPatients, vector<int> &uninfectedPatients, vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
-               vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
-               vector<vector<vector<int>>> &wardLog,
-               vector<vector<vector<int>>> &inPtDays,
-               vector<vector<int>> &ptLocation,
-               vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, Parm &parm) {
-    
-    double ll = 0.00;
-    
-    //ll for uninfectedPatients
-    int nUninfected = (int)uninfectedPatients.size();
-    int wardInfDays = 0;
-    int hospInfDays = 0;
-    double sporeInfDays = 0.00;
-    int admissionDuration = 0;
-    
-    // Pr(not infected at start) //
-    double probNotStartInf = 1 - getStartInfP(parm);
-    ll += nUninfected*log(probNotStartInf);
-    
-    //get counts of number of each type of day uninfected patients exposed to
-    
-    for(int patient : uninfectedPatients) {
-        //loop through all days an inpatient - inPtDays[patient][ward] = {times...}
-        for(int ward=0; ward < nWards; ward++) {
-            if (inPtDays[patient][ward].size()>0) { // if inpatient on that ward
-                for (int t: inPtDays[patient][ward]) {
-                    //log of admission duration for background exposure
-                    admissionDuration ++;
-                    
-                    //ward infected person-days exposed to - wardI[t][ward] = nInf
-                    wardInfDays += wardI[t][ward];
-                    
-                    //get infectious numbers from other wards
-                    for(int nonWard=0; nonWard < nWards; nonWard++) {
-                        if(nonWard!=ward) {
-                            hospInfDays += wardI[t][nonWard];
-                        }
-                    }
-                    
-                    //get number of spore day equivalents - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-                    //spores decay according to geometric distribution
-                    sporeInfDays += sporeForceSummary[t][ward];
-                }
-            }
-        }
-    }
-    
-    int nonAdmissionDuration = (nUninfected*maxTime) - admissionDuration;
-    
-    double logProbAvoidInf = -((parm.betaBgroundHosp * admissionDuration) //hospital background
-                               + (parm.betaWard * wardInfDays) //ward infection force
-                               + (parm.betaHosp * hospInfDays) //across hospital infection force
-                               + (parm.betaComm * nonAdmissionDuration) //community background
-                               + (parm.betaWard * sporeInfDays ) //ward-based spore force
-                               );
-    ll += logProbAvoidInf;
-    return (ll);
-}
-
-
-
 //log likelihood contribution from transmission model - p(I | parm)
 
-double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
+double llTrans(vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
                vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
-               vector<vector<vector<int>>> &wardLog,
+               vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
-               vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, Parm &parm) {
+               vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, Parm &parm) {
      
     
     double ll = 0.00;
-    
-    //ll for uninfectedPatients
-    int nUninfected = (int)uninfectedPatients.size();
-    int wardInfDays = 0;
-    int hospInfDays = 0;
-    double sporeInfDays = 0.00;
-    int admissionDuration = 0;
+
+    int wardInfDays = 0; // patient - days of ward pressure exposed to
+    int hospInfDays = 0; // hospital pressure
+    double sporeInfDays = 0.00; // spore pressure
+    int admissionDuration = 0; // total days of inpatient stay
     
     // Pr(not infected at start) //
     double probNotStartInf = 1 - getStartInfP(parm);
-    ll += nUninfected*log(probNotStartInf);
+    ll += nNeverInfPatients*log(probNotStartInf);
     
-    //get counts of number of each type of day uninfected patients exposed to
-    
-    for(int patient : uninfectedPatients) {
-        //loop through all days an inpatient - inPtDays[patient][ward] = {times...}
-        for(int ward=0; ward < nWards; ward++) {
-            if (inPtDays[patient][ward].size()>0) { // if inpatient on that ward
-                for (int t: inPtDays[patient][ward]) {
-                    //log of admission duration for background exposure
-                    admissionDuration ++;
-                    
-                    //ward infected person-days exposed to - wardI[t][ward] = nInf
-                    wardInfDays += wardI[t][ward];
-                    
-                    //get infectious numbers from other wards
-                    for(int nonWard=0; nonWard < nWards; nonWard++) {
-                        if(nonWard!=ward) {
-                            hospInfDays += wardI[t][nonWard];
-                        }
-                    }
-                    
-                    //get number of spore day equivalents - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-                    //spores decay according to geometric distribution
-                    sporeInfDays += sporeForceSummary[t][ward];
-                }
-            }
-        }
+    // wardLogNeverInf[time][ward] = int for count of never infected patients
+    //loop over wardLogNeverInf
+    for(int t=0; t<=maxTime; t++) {
+         for(int ward=0; ward < nWards; ward++) {
+             
+             //log patients admitted that day admission duration for background exposure
+             admissionDuration += wardLogNeverInf[t][ward];
+             
+             //ward infected person-days exposed to - wardI[t][ward] = nInf
+             wardInfDays += wardI[t][ward] * wardLogNeverInf[t][ward];
+             
+             //get infectious numbers from other wards
+             int nonWardInfs = 0;
+             for(int nonWard=0; nonWard < nWards; nonWard++) {
+                 if(nonWard!=ward) {
+                     nonWardInfs += wardI[t][nonWard];
+                 }
+             }
+             hospInfDays += nonWardInfs * wardLogNeverInf[t][ward];
+             
+             //get number of spore day equivalents - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
+             //spores decay according to geometric distribution
+             sporeInfDays += sporeForceSummary[t][ward] * wardLogNeverInf[t][ward];
+         }
     }
 
-    int nonAdmissionDuration = (nUninfected*maxTime) - admissionDuration;
+    int nonAdmissionDuration = (nNeverInfPatients*maxTime) - admissionDuration;
 
     double logProbAvoidInf = -((parm.betaBgroundHosp * admissionDuration) //hospital background
                                          + (parm.betaWard * wardInfDays) //ward infection force
@@ -133,11 +66,9 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
     ll += logProbAvoidInf;
 
     
-    
-    
     //loop over infected patients
     
-    for(int patient : infectedPatients) {
+    for(int patient=0; patient<nInfPatients; patient++) {
         //infected pateints
         if (infTimes[patient] < 0) {
             //patients infected before start
@@ -272,7 +203,7 @@ double llTrans(vector<int> &infectedPatients, vector<int> &uninfectedPatients, v
 
 
 //log likelihood contribution from sampling times - p(S | I, parm)
-double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
+double llSample(int nInfPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
    
     // neg. binomial distributed time between infection and sampling
     double sampleSize = parm.sampleSize;
@@ -281,7 +212,7 @@ double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int
     
     double ll = 0;
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
-    for(int pt : infectedPatients) {
+    for(int pt=0; pt<nInfPatients; pt++) {
         //for all infected patients
         int dd = sampleTimes[pt] - infTimes[pt];
         ll += dnbinom(dd, sampleSize, sampleProb, 1);
@@ -293,7 +224,7 @@ double llSample(vector<int> &infectedPatients, vector<int> &infTimes, vector<int
 
 
 //log likelihood contribution for recovery, p(R | I, parm)
-double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector<int> &recTimes, Parm &parm) {
+double llRecover(int nInfPatients, vector<int> &sampleTimes, vector<int> &recTimes, Parm &parm) {
     //neg binomial distributed time between sampling and recovery
     //"recSize", "recMu" = parm.recSize and parm.recMu
     double recSize = parm.recSize;
@@ -302,7 +233,7 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 
     double ll = 0;
     //#pragma omp parallel for reduction(+:ll) num_threads(4)
-    for(int pt : infectedPatients) {
+    for(int pt=0; pt<nInfPatients; pt++) {
         //for those patients with infections
         int dd = recTimes[pt] - sampleTimes[pt];
         ll += dnbinom(dd, recSize, recProb, 1);
@@ -314,8 +245,8 @@ double llRecover(vector<int> &infectedPatients, vector<int> &sampleTimes, vector
 
 
 //genetic log likelihood for single patient pair
-double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
-                       vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
+double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
+                       vector<vector<double>> &geneticDist, int nInfPatients, Parm &parm) {
     double ll;
     
     if (transmissionSource==-1) {
@@ -337,7 +268,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
         //find all possible comparison samples, the 'nearest neighbours'
             //nearest neighbours defined for now as the first case of every cluster
         vector<int> potentialNN;
-        for (int nn : infectedPatients) {
+        for (int nn=0; nn<nInfPatients; nn++) {
             if (nn!=patient & (infSourceType[nn]== SrcType::BGROUND_HOSP
                                | infSourceType[nn] == SrcType::BGROUND_COMM
                                | infSourceType[nn] == SrcType::START_POS)) {
@@ -345,13 +276,11 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
             }
         }
         int nPotentialNN = (int)potentialNN.size();
-        int ptIndex = geneticMap.at(patient);
         
         //get average SNP difference to all potential NN
         double snpSum = 0;
-        for(int nn: potentialNN) {
-            int srcIndex = geneticMap.at(nn);
-            double snp = geneticDist[ptIndex][srcIndex];
+        for(int nn : potentialNN) {
+            double snp = geneticDist[patient][nn];
             snpSum += snp;
         }
         //use mean SNPs to calculate prob of NN
@@ -361,9 +290,7 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
     }
     else {
         //likelihood for direct transmission
-        int ptIndex = geneticMap.at(patient);
-        int srcIndex = geneticMap.at(transmissionSource);
-        double snp = geneticDist[ptIndex][srcIndex];
+        double snp = geneticDist[patient][transmissionSource];
         double time = fabs(sampleTimes[patient] - sampleTimes[transmissionSource]);
         double Ne = parm.directNe;
         double mu = parm.mu;
@@ -378,10 +305,11 @@ double llGeneticSingle(vector<int> &infectedPatients, vector<int> &sampleTimes, 
 
 
 //log likelihood contribution from the genetic distance matrix - p(G | I, S, parm)
-double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType, vector<vector<double>> &geneticDist, unordered_map<int,int> &geneticMap, int nPatients, Parm &parm) {
+double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType,
+                 vector<vector<double>> &geneticDist, int nInfPatients, Parm &parm) {
     double ll = 0.00;
     //#pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
-    for (int patient : infectedPatients) {
+    for (int patient =0; patient<nInfPatients; patient++) {
         //log likelihood for patient not infected = 0
         //therefore, determine log likelihood for infected patients only
         
@@ -394,7 +322,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             double p = 1/(1+(1/(2*mu*Ne)));
             //double llNN = 0;
             vector<int> potentialNN;
-            for (int nn : infectedPatients) {
+            for (int nn =0; nn<nInfPatients; nn++) {
                 if (infSources[nn]==-1 & nn!=patient) {
                     //nearest neighbours could be defined as the first case of every cluster - problem is this changes numbers
                     // as move source, therefore link to all except self
@@ -402,13 +330,11 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
                 }
             }
             int nPotentialNN = (int)potentialNN.size();
-            int ptIndex = geneticMap.at(patient);
 
             //get average SNP difference to all potential NN
             double snpSum = 0.0;
             for(int nn: potentialNN) {
-                int srcIndex = geneticMap.at(nn);
-                double snp = geneticDist[ptIndex][srcIndex];
+                double snp = geneticDist[patient][nn];
                 snpSum += snp;
             }
             
@@ -427,9 +353,7 @@ double llGenetic(vector<int> &infectedPatients, vector<int> &infTimes, vector<in
             //sampling of source long after transmission, provides diversity within 2 hosts and tends to inflate Ne
             
             int sourcePatient = infSources[patient];
-            int ptIndex = geneticMap.at(patient);
-            int srcIndex = geneticMap.at(sourcePatient);
-            double snp = geneticDist[ptIndex][srcIndex];
+            double snp = geneticDist[patient][sourcePatient];
             double time = fabs(sampleTimes[patient] - sampleTimes[sourcePatient]);
             double Ne = parm.directNe;
             double mu = parm.mu;
@@ -466,19 +390,19 @@ double getPrior(Parm &parm) {
 }
 
 //target distribution, i.e. non-normalised posterior
-double targetDist (vector<int> &infectedPatients, vector<int> &uninfectedPatients, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
+double targetDist (vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
                    vector<int> &infSources, vector<int> &infSourceType,
                    vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
-                   vector<vector<vector<int>>> &wardLog,
+                   vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                    vector<vector<vector<int>>> &inPtDays,
                    vector<vector<int>> &ptLocation,
-                   vector<vector<int>> &wardI, int nPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap, Parm &parm) {
+                   vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, Parm &parm) {
 
     
-    double td = llTrans(infectedPatients, uninfectedPatients, infTimes, infSourceType, infSources, sporeI, sporeForceSummary, wardLog, inPtDays, ptLocation, wardI, nPatients, nWards, maxTime, parm) +
-                    llSample(infectedPatients, infTimes, sampleTimes, parm) +
-                    llRecover(infectedPatients, sampleTimes, recoverTimes, parm) +
-                    llGenetic(infectedPatients, infTimes, sampleTimes, infSources, infSourceType, geneticDist, geneticMap, nPatients, parm) +
+    double td = llTrans(infTimes, infSourceType, infSources, sporeI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
+                    llSample(nInfPatients, infTimes, sampleTimes, parm) +
+                    llRecover(nInfPatients, sampleTimes, recoverTimes, parm) +
+                    llGenetic(infTimes, sampleTimes, infSources, infSourceType, geneticDist, nInfPatients, parm) +
                     getPrior(parm);
     
     return td;

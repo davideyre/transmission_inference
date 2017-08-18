@@ -241,13 +241,13 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
 
 
 //get list of sources and their probabilities for a given patient and infection time, and parameter set
-SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
-                             vector<vector<vector<int>>> &wardLog, vector<int> infSourceType,
+SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
+                             vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
                              vector<vector<vector<int>>> &sporeI,
                              vector<vector<int>> &ptLocation,
-                             vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap,
+                             vector<vector<double>> &geneticDist,
                              int nWards,
-                             int nPatients, Parm &parm) {
+                             int nInfPatients, Parm &parm) {
     SrcList output; //struct of type SrcList to store output
     
     vector<int> sourceList; //vector of sources
@@ -279,7 +279,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
             sourceTypeList.push_back(SrcType::BGROUND_HOSP);
             
             //potential ward sources
-            for (int srcPt : wardLog[proposedInfTime][ward]) {
+            for (int srcPt : wardLogInf[proposedInfTime][ward]) {
                 if (infTimes[srcPt]!=-1 & infTimes[srcPt]<proposedInfTime & recoveryTimes[srcPt]>proposedInfTime & srcPt!=proposedPatient) {
                     sourceList.push_back(srcPt);
                     sourceTypeList.push_back(SrcType::WARD);
@@ -290,7 +290,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
             //potential hospital sources
             for (int nonWard=0; nonWard<nWards; nonWard++) {
                 if (nonWard!=ward) {
-                    for (int srcPt : wardLog[proposedInfTime][nonWard]) {
+                    for (int srcPt : wardLogInf[proposedInfTime][nonWard]) {
                         if (infTimes[srcPt]!=-1 & infTimes[srcPt]<proposedInfTime & recoveryTimes[srcPt]>proposedInfTime & srcPt!=proposedPatient) {
                             sourceList.push_back(srcPt);
                             sourceTypeList.push_back(SrcType::HOSP);
@@ -301,7 +301,7 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
             }
             
             //potential spore sources
-            for (int srcPt = 0; srcPt<nPatients; srcPt ++) {
+            for (int srcPt = 0; srcPt<nInfPatients; srcPt ++) {
                 if(sporeI[proposedInfTime][ward][srcPt]>0 & srcPt!=proposedPatient) {
                     sourceList.push_back(srcPt);
                     sourceTypeList.push_back(SrcType::SPORE);
@@ -322,8 +322,8 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                 vector<double> sourceLogLikelihood; //vector of log likelihood values for each source
                 
                 //calculate the background likelihood
-                double backgroundLogLikelihood = log(parm.betaBgroundHosp) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, -1,
-                                                                                             infSourceType, geneticDist, geneticMap, nPatients, parm);
+                double backgroundLogLikelihood = log(parm.betaBgroundHosp) + llGeneticSingle(sampleTimes, proposedPatient, -1,
+                                                                                             infSourceType, geneticDist, nInfPatients, parm);
                 
                 sourceLogLikelihood.resize(sourceList.size());
                 sourceLogLikelihood[0] = backgroundLogLikelihood;
@@ -332,14 +332,14 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                 for (int srcIndex = 1; srcIndex<sourceList.size(); srcIndex++) {
                     if( sourceTypeList[srcIndex] == SrcType::WARD) {
                         //infection from same ward
-                        sourceLogLikelihood[srcIndex] = log(parm.betaWard) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex],
-                                                                                             infSourceType, geneticDist, geneticMap, nPatients, parm);
+                        sourceLogLikelihood[srcIndex] = log(parm.betaWard) + llGeneticSingle(sampleTimes, proposedPatient, sourceList[srcIndex],
+                                                                                             infSourceType, geneticDist, nInfPatients, parm);
                         
                     }
                     if( sourceTypeList[srcIndex] == SrcType::HOSP) {
                         //infection from hospital
-                        sourceLogLikelihood[srcIndex] = log(parm.betaHosp) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex],
-                                                                                             infSourceType, geneticDist, geneticMap, nPatients, parm);
+                        sourceLogLikelihood[srcIndex] = log(parm.betaHosp) + llGeneticSingle(sampleTimes, proposedPatient, sourceList[srcIndex],
+                                                                                             infSourceType, geneticDist, nInfPatients, parm);
                     }
                     if( sourceTypeList[srcIndex] == SrcType::SPORE) {
                         //infection from spore
@@ -348,8 +348,8 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
                         int specificSporeDuration = sporeI[proposedInfTime][ward][sourceList[srcIndex]];
                         double specificSporeLevel = pow((1-getSporeP(parm)), specificSporeDuration);
                         
-                        sourceLogLikelihood[srcIndex] = log(parm.betaWard * specificSporeLevel) + llGeneticSingle(infectedPatients, sampleTimes, proposedPatient, sourceList[srcIndex],
-                                                                                                                  infSourceType, geneticDist, geneticMap, nPatients, parm);
+                        sourceLogLikelihood[srcIndex] = log(parm.betaWard * specificSporeLevel) + llGeneticSingle(sampleTimes, proposedPatient, sourceList[srcIndex],
+                                                                                                                  infSourceType, geneticDist, nInfPatients, parm);
                     }
                     
                 }
@@ -370,11 +370,10 @@ SrcList getSourceProb(vector<int> &infectedPatients, int proposedPatient, int pr
 
 
 //function to determine proposed source of infection conditionally
-Src proposeConditionalSource(vector<int> &infectedPatients, int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
+Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
                              vector<vector<vector<int>>> &wardLog, vector<int> infSourceType, vector<vector<vector<int>>> &sporeI,
                              vector<vector<int>> &ptLocation,
-                             vector<vector<double>> &geneticDist, unordered_map<int,int> geneticMap,
-                             int nWards, int nPatients, Parm &parm) {
+                             vector<vector<double>> &geneticDist, int nWards, int nInfPatients, Parm &parm) {
     Src output; //struct of type Src to store output
     
     if(proposedInfTime<0) {
@@ -383,8 +382,8 @@ Src proposeConditionalSource(vector<int> &infectedPatients, int proposedPatient,
     
     else {
         
-        SrcList sourceList = getSourceProb(infectedPatients, proposedPatient, proposedInfTime, infTimes, sampleTimes, recoveryTimes,
-                              wardLog, infSourceType, sporeI, ptLocation, geneticDist, geneticMap, nWards, nPatients, parm);
+        SrcList sourceList = getSourceProb(proposedPatient, proposedInfTime, infTimes, sampleTimes, recoveryTimes,
+                              wardLog, infSourceType, sporeI, ptLocation, geneticDist, nWards, nInfPatients, parm);
         
         if(sourceList.sourceList.size()==1) {
             if(sourceList.sourceTypeList[0] == SrcType::BGROUND_HOSP) {
