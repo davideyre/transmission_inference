@@ -448,7 +448,9 @@ write.table(geneticDist, file=paste(outDir, "/simDistances.txt", sep=""),
 print("genetic distances written")
 
 #write log of all patients, infected and non-infected
-patientLog = cbind(paste("patient_", 1:nPopulation, sep=""), infections)
+infectionsStr = infections
+infectionsStr[,2] = ifelse(infections[,2]==-1, -1, paste("patient_", infections[,2], sep=""))
+patientLog = cbind(paste("patient_", 1:nPopulation, sep=""), infectionsStr)
 colnames(patientLog) = c("patient_id", "t_inf", "source", "source_type", "t_sample", "t_recover")
 write.csv(patientLog, file=paste(outDir, "/patientLog.csv", sep=""), row.names=FALSE, quote=FALSE)
 
