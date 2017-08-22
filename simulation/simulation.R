@@ -415,7 +415,7 @@ write.table(siLog, file = paste(outDir, "/siLog.txt", sep=""),
             row.names = F, sep="\t", quote=F)
 print("siLog file written")
 
-#run coalescent simulation
+#run coalescent simulationinfectedPatients
 cmd = paste("/usr/local/bin/python /Users/davideyre/Dropbox/Transmission_Inference/xcode_project/simulation/simCoalescent.py", 
             " -p ", directNe,
             " -c ", introNe,
@@ -448,7 +448,7 @@ write.table(geneticDist, file=paste(outDir, "/simDistances.txt", sep=""),
 print("genetic distances written")
 
 #write log of all patients, infected and non-infected
-patientLog = cbind(1:nPopulation, infections)
+patientLog = cbind(paste("patient_", 1:nPopulation, sep=""), infections)
 colnames(patientLog) = c("patient_id", "t_inf", "source", "source_type", "t_sample", "t_recover")
 write.csv(patientLog, file=paste(outDir, "/patientLog.csv", sep=""), row.names=FALSE, quote=FALSE)
 
@@ -471,14 +471,14 @@ for(pt in 1:nPopulation) {
          if(ptLocation[t,pt]==0) {
             #a discharge
             t_discharge = t-1
-            wardLog = rbind(wardLog, c(pt, location, hosp, t_admit, t_discharge))
+            wardLog = rbind(wardLog, c(paste("patient_", pt, sep=""), location, hosp, t_admit, t_discharge))
             prevLocation = 0
          }
       }
       if(t==maxTime & ptLocation[t,pt]!=0) {
          #record as discharge
          t_discharge = t
-         wardLog = rbind(wardLog, c(pt, location, hosp, t_admit, t_discharge))
+         wardLog = rbind(wardLog, c(paste("patient_", pt, sep=""), location, hosp, t_admit, t_discharge))
       }
    }
 }

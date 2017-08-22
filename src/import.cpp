@@ -206,41 +206,34 @@ void importGeneticData(string filePathGenetic, vector<vector<double>> &geneticDi
     //populate genetic distance
     if (file.is_open()) {
         while (getline(file, line)) {
-            lineNumber ++;
             istringstream iss(line);
-            if (lineNumber==1) {
+            if (lineNumber==0) {
                 //read in header - which contains patient identifiers
                 while(std::getline(iss, field, ' ')) {
-                    string strRemove = "patient_";
-                    string::size_type i = field.find(strRemove);
-                    if (i != std::string::npos) {
-                        field.erase(i, strRemove.length());
-                    }
                     int pt = ptLookup.at(field);
                     ptIdHeader.push_back(pt);
                 }
             }
             else {
+                //read in non-header rows
                 fieldNumber = 0;
                 int pt1, pt2;
+                //for each field in row
                 while(std::getline(iss, field, ' ')) {
-                    string startsWith = "patient_";
-                    if(field.find(startsWith)==0) {
-                        string::size_type i = field.find(startsWith);
-                        if (i != std::string::npos) {
-                            field.erase(i, startsWith.length());
-                        }
+                    if(fieldNumber==0) {
+                        //for first field, get patient id from row label
                         pt1 = ptLookup.at(field);
                     }
                     else {
-                        pt2 = ptIdHeader[fieldNumber];
+                        //for subsequent fields save SNPs
+                        pt2 = ptIdHeader[fieldNumber-1];
                         geneticDist[pt1][pt2] = stod(field);
                         
-                        fieldNumber ++;
-                        
                     }
-                }
-            }
+                    fieldNumber ++;
+                } //end fields in row loop
+            } //end non-header row if...
+            lineNumber ++;
         }
         file.close();
     }
