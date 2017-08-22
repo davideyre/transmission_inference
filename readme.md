@@ -18,7 +18,7 @@ All times are numbered for input files starting from 1. Assumes only single infe
 1. input/patientLog.csv : file with headers -   
     patient\_id [string] any patient identfier  
     t\_inf [int] infection time if know (only used for testing)  
-    source [string] infection source patient identifier (only used for testing)  
+    source [string] infection source patient identifier (only used for testing), must be "-1" for backrgound source types and starting the simulation infected  
     source_type [int] infection source type (only used for testing: BGROUND\_HOSP = 0, WARD = 1, HOSP = 2, BGROUND\_COMM = 3, START\_POS = 4, SPORE = 5)  
     t\_sample [int] sample time
     t\_recover [int] recovery time if known (only used for testing)
@@ -32,6 +32,6 @@ All times are numbered for input files starting from 1. Assumes only single infe
     t\_admit [int] ward admission time  
     t\_discharge [int] ward discharge time  
 
-3. input/simDistancesSNPs.txt - matrix of SNP distances, seperated by spaces, with patient ids prefixed with patient_
+3. input/simDistancesSNPs.txt - matrix of SNP distances, seperated by spaces, with column and row labels using patient ids, column header has no leading space
 
 Example input files are provided in the example_input folder
