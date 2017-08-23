@@ -1163,7 +1163,7 @@ int main(int argc, const char * argv[]) {
     importWardLog(filePath, hospitalLookup, wardLookup, ptLookup, wardLogInf, wardLogNeverInf, maxTime, nWards, sampleTimes, hospitalWards);
     
     //read in genetic data
-    string filePathGenetic = path + "/input/simDistances_snps.txt";
+    string filePathGenetic = path + "/input/geneticDistances_snps.txt";
     vector<vector<double>> geneticDist; //pairwise genetic distances, indexed using integers from ptLookup
     importGeneticData(filePathGenetic, geneticDist, ptLookup, nInfPatients);
 

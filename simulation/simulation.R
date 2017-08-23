@@ -508,9 +508,9 @@ tree.nj = NJ(dist.aln)
 tree.nj$tip.label = paste("patient_", gsub("_1", "", gsub("Samp_", "", tree.nj$tip.label)), sep="")
 geneticDist = round(cophenetic(tree.nj)*alnLength,0) #option integer distances based on alignment length of 10000
 
-write.csv(geneticDist, file=paste(outDir, "/simDistances_snps.csv", sep=""), 
+write.csv(geneticDist, file=paste(outDir, "/geneticDistances_snps.csv", sep=""), 
           quote=F)
-write.table(geneticDist, file=paste(outDir, "/simDistances_snps.txt", sep=""),
+write.table(geneticDist, file=paste(outDir, "/geneticDistances_snps.txt", sep=""),
             quote=F)
 tree.nj$edge.length = abs(round(tree.nj$edge.length*1000,1))
 write.tree(tree.nj, file=paste(outDir, "/sim_newick_snps.tree", sep=""))
