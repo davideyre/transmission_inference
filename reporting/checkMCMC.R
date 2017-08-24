@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_23574379"
+path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_44511/"
 
 #parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
 option_list = list(
@@ -33,6 +33,9 @@ simId = simId[length(simId)]
 patientLog = read.csv(file = paste(path, "input/patientLog.csv", sep=""))
 wardLog = read.csv(file = paste(path, "input/wardLog.csv", sep=""))
 geneticDist = read.table(file=paste(path, "input/simDistances.txt", sep=""))
+
+patientLog[,1] = gsub("patient_", "", patientLog[,1])
+wardLog[,1] = gsub("patient_", "", wardLog[,1])
 
 #reformat simulation log for ease of reading code
 true.infTimes = patientLog$t_inf
@@ -257,9 +260,11 @@ transSummary = rbind(transSummary, c("Source Types", n, n.srcType.exact, n.srcTy
 infSourceLog = paste(path, "inference/chain_inf_sources.txt", sep="")
 all.inf.infSources = read.table(infSourceLog, header=T)
 rowN = nrow(all.inf.infSources)
+all.inf.infSources = as.data.frame(lapply(all.inf.infSources, function(y) gsub("patient_", "", y)))
+
 inf.infSources = all.inf.infSources[burnIn:rowN,]
 
-inf.infSources.mode = apply(inf.infSources, 2, Mode)
+inf.infSources.mode = as.numeric(apply(inf.infSources, 2, Mode))
 
 infSources.compare = cbind(true.infSources[,1], inf.infSources.mode, inf.infSources.mode==true.infSources[,1])
 

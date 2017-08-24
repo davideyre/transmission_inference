@@ -29,17 +29,16 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     int nInf = (int)chainInfTimes[1].size();
     string headerText;
     for (int j=0; j<nInf; j++){
-        if (chainInfTimes[1][j]!=-1) {
-            string ptStr = ptLookupRev.at(j);
-            headerText += "patient_"+ptStr+"\t";
-        }
+        string ptStr = ptLookupRev.at(j);
+        headerText += ptStr+"\t";
     }
+    
     headerText += "\n";
     fp = fopen(fileName.c_str(), "wb");
     fprintf(fp, headerText.c_str()); //header
     for(int i=0; i<steps; i++) {
         for (int j=0; j<nInf; j++){
-            if (chainInfTimes[1][j]!=-1) {fprintf(fp, "%d\t", chainInfTimes[i][j]);}
+            fprintf(fp, "%d\t", chainInfTimes[i][j]);
         }
         fprintf(fp, "\n");
     }
@@ -49,17 +48,15 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     fileName = filePath+"/chain_rec_times.txt";
     headerText = "";
     for (int j=0; j<nInf; j++){
-        if (chainRecTimes[1][j]!=-1) {
-            string ptStr = ptLookupRev.at(j);
-            headerText += "patient_"+ptStr+"\t";
-        }
+        string ptStr = ptLookupRev.at(j);
+        headerText += ptStr+"\t";
     }
     headerText += "\n";
     fp = fopen(fileName.c_str(), "wb");
     fprintf(fp, headerText.c_str()); //header
     for(int i=0; i<steps; i++) {
         for (int j=0; j<nInf; j++){
-            if (chainRecTimes[1][j]!=-1) {fprintf(fp, "%d\t", chainRecTimes[i][j]);}
+            fprintf(fp, "%d\t", chainRecTimes[i][j]);
         }
         fprintf(fp, "\n");
     }
@@ -70,25 +67,21 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     fileName = filePath+"/chain_inf_sources.txt";
     headerText = "";
     for (int j=0; j<nInf; j++){
-        if (chainInfTimes[1][j]!=-1) {
-            string ptStr = ptLookupRev.at(j);
-            headerText += "patient_"+ptStr+"\t";
-        }
+        string ptStr = ptLookupRev.at(j);
+        headerText += ptStr+"\t";
     }
     headerText += "\n";
     fp = fopen(fileName.c_str(), "wb");
     fprintf(fp, headerText.c_str()); //header
     for(int i=0; i<steps; i++) {
         for (int j=0; j<nInf; j++){
-            if (chainInfTimes[1][j]!=-1) {
-                //convert infection source back to original label provided not from background, i.e. -1
-                if(chainInfSources[i][j]==-1) {
-                    fprintf(fp, "%d\t", -1);
-                }
-                else {
-                    string srcPtString = ptLookupRev.at(chainInfSources[i][j]);
-                    fprintf(fp, "%s\t", srcPtString.c_str());
-                }
+            //convert infection source back to original label provided not from background, i.e. -1
+            if(chainInfSources[i][j]==-1) {
+                fprintf(fp, "%d\t", -1);
+            }
+            else {
+                string srcPtString = ptLookupRev.at(chainInfSources[i][j]);
+                fprintf(fp, "%s\t", srcPtString.c_str());
             }
         }
         fprintf(fp, "\n");
@@ -99,17 +92,15 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
     fileName = filePath+"/chain_inf_source_types.txt";
     headerText = "";
     for (int j=0; j<nInf; j++){
-        if (chainInfTimes[1][j]!=-1) {
-            string ptStr = ptLookupRev.at(j);
-            headerText += "patient_"+ptStr+"\t";
-        }
+        string ptStr = ptLookupRev.at(j);
+        headerText += ptStr+"\t";
     }
     headerText += "\n";
     fp = fopen(fileName.c_str(), "wb");
     fprintf(fp, headerText.c_str()); //header
     for(int i=0; i<steps; i++) {
         for (int j=0; j<nInf; j++){
-            if (chainInfTimes[1][j]!=-1) {fprintf(fp, "%d\t", chainInfSourceTypes[i][j]);}
+            fprintf(fp, "%d\t", chainInfSourceTypes[i][j]);
         }
         fprintf(fp, "\n");
     }
