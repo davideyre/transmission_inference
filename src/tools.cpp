@@ -154,7 +154,7 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vect
             sporeForceSummary[t][ward] = 0;
         }
     }
-    
+    //#pragma omp parallel num_threads(4) //this is not providing any advantage at present - ignore for now
     for (int sporePt=0; sporePt< nInfPatients; sporePt++) {
         for (int t = max({0, infTimes[sporePt]}); t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
             for (int ward = 0; ward<nWards; ward++) {

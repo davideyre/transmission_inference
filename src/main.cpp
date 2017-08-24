@@ -201,9 +201,25 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     struct timeval previousSystemTime;
     gettimeofday(&previousSystemTime, NULL);
 
+    struct timeval previousSystemTimeIter;
+    gettimeofday(&previousSystemTimeIter, NULL);
     
     //generate random walk
     for(int i=1; i<steps; i++) {
+        
+        /*
+        //timer for every iteration for testing
+        printf("Starting iteration %d\n", i);
+        struct timeval currentSystemTimeIter;
+        gettimeofday(&currentSystemTimeIter, NULL);
+        if(i>1) {            
+            double deltaIter = ((currentSystemTimeIter.tv_sec  - previousSystemTimeIter.tv_sec) * 1000000u +
+                            currentSystemTimeIter.tv_usec - previousSystemTimeIter.tv_usec) / 1.e6;
+            printf("iteration processing time: %0.1f seconds\n\n",deltaIter);
+            
+        }
+        previousSystemTimeIter = currentSystemTimeIter;
+        */
         
         //PARAMETER AND TUNING REPORTING
         //every 100 steps

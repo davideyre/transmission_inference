@@ -17,6 +17,7 @@
 #include "likelihood.hpp"
 #include "proposals.hpp"
 #include "struct.hpp"
+#include <omp.h>
 
 using namespace std;
 
