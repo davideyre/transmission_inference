@@ -184,7 +184,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     
     currentWardI = getWardI(maxTime, nWards, currentInfTimes, currentRecTimes, wardLogInf); //get initial values
     getSporeI(currentSporeI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
-    getSporeForceSummary(currentSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, currentParm);
+    getSporeForceSummary(currentSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
     
     
    
@@ -293,7 +293,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             else {
                 
                 if(parmIndex==9) {
-                    getSporeForceSummary(proposedSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, proposedParm);
+                    getSporeForceSummary(proposedSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, proposedParm);
                     proposedLL = targetDist(hospitalWards, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
                                             currentSporeI, proposedSporeForceSummary,
                                             wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, proposedParm);
@@ -362,7 +362,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 //        currentInfSourceTypes = infSourceTypes;
 //        currentWardI = getWardI(nPatients, maxTime, nWards, currentInfTimes, currentRecTimes, wardLog);
 //        getSporeI(currentSporeI, infectedPatients, nPatients, maxTime, nWards, infTimes, currentRecTimes, ptLocation);
-//        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
+//        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, ptLocation, currentParm);
        
         //generic over-ride
     
@@ -370,7 +370,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 //        currentLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
 //                               currentSporeI, currentSporeForceSummary,
 //                             wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap,currentParm);
-//         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, currentParm);
+//         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, ptLocation, currentParm);
         
         // end over-ride
 
@@ -513,7 +513,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //update sporeI to reflect new infection times (as ward discharges while infectious may have changed)
             updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, proposedInfTimes, currentParm);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
             
             //debugging code
             if(debugPt) {
@@ -636,7 +636,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             proposedWardI = getWardI(maxTime, nWards, currentInfTimes, proposedRecTimes, wardLogInf);
             //update sporeI to reflect new recovery time
             updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, currentInfTimes, currentParm);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
             
             
             if(debugPt) {
@@ -860,7 +860,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 // for proposedInfTimes, also need to update sporeI based on these - unlike above where only updating one case
                 proposedWardI = getWardI(maxTime, nWards, proposedInfTimes, proposedRecTimes, wardLogInf);
                 getSporeI(proposedSporeI, nInfPatients, maxTime, nWards, proposedInfTimes, proposedRecTimes, ptLocation);
-                getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, proposedInfTimes, currentParm);
+                getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
                 
                 //currentInfSourceTypes - is used to determine genetic likelihood - use this for all updates current --> proposed updates
                 // and converse (proposedInfSourceTypes) for proposed --> current updates
@@ -1237,10 +1237,6 @@ int main(int argc, const char * argv[]) {
     vector<vector<int>> ptLocation = getPtLocation(nInfPatients, maxTime, nWards, inPtDays);
     vector<vector<int>> wardI = getWardI(maxTime, nWards, infTimes, recoverTimes, wardLogInf);
     
-    
-    //vector<vector<vector<int>>> sporeI = getSporeI(nPatients, maxTime, nWards, infTimes, recoverTimes, ptLocation);
-    //vector<vector<vector<double>>> sporeForce = getSporeForce(sporeI, maxTime, nWards, nPatients, startParm);
-    //vector<vector<double>> sporeForceSummary = getSporeForceSummary(sporeForce, maxTime, nWards, nPatients);
     
     
     //runTest(infTimes, sampleTimes, recoverTimes, startParm,

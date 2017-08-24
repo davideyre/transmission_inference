@@ -145,7 +145,7 @@ void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime
 
 
 
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporeI, int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, Parm parm) {
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporeI, int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
     //pre-calculate the sum of spore force of infection - [t][ward]
 
     //reset current values of spore force summary to be zero
@@ -154,18 +154,40 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vect
             sporeForceSummary[t][ward] = 0;
         }
     }
+    
+    //pre-calculate all spore probabilities
+    double probSpore = 1-getSporeP(parm);
+    vector<double> probSporeDay;
+    probSporeDay.resize(maxTime+1);
+    for (int t=0; t<=maxTime; t++) {
+        probSporeDay[t] = pow(probSpore, t);
+    }
+    
+    
     //#pragma omp parallel num_threads(4) //this is not providing any advantage at present - ignore for now
     for (int sporePt=0; sporePt< nInfPatients; sporePt++) {
-        for (int t = max({0, infTimes[sporePt]}); t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
-            for (int ward = 0; ward<nWards; ward++) {
+        
+        //check which wards this patient has been on since start time
+        int startTime = max({0, infTimes[sporePt]});
+        
+        set<int> wardList;
+        for (int t = startTime; t<=maxTime; t++) {
+        wardList.insert(ptLocation[sporePt][t]);
+        }
+        wardList.erase(-1); //remove community from wardList
+
+        for (int t = startTime; t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
+            for (int ward : wardList) { //iterate through list of wards has visited
                 int sporeDuration = sporeI[t][ward][sporePt];
                 if(sporeDuration>0) {
-                    sporeForceSummary[t][ward] += pow((1-getSporeP(parm)), sporeDuration);
+                    sporeForceSummary[t][ward] += probSporeDay[sporeDuration];
                 }
             }
         }
     }
 }
+
+
 
 
 

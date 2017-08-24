@@ -8,16 +8,22 @@
 
 #ifndef tools_hpp
 #define tools_hpp
-#include <vector>
+
 #define MATHLIB_STANDALONE
 #include <Rmath.h>
+
+#include <omp.h>
+
+#include <vector>
+#include<set>
 #include <algorithm> //for removing first element from a vector
 #include <unordered_map>
 #include <string>
+
 #include "likelihood.hpp"
 #include "proposals.hpp"
 #include "struct.hpp"
-#include <omp.h>
+
 
 using namespace std;
 
@@ -39,7 +45,7 @@ void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime
                   vector<vector<int>> &ptLocation);
 
 void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporeI,
-                          int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, Parm parm);
+                          int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm);
 
 
 //function to get vector of days an intpatient - inPtDays[patient][ward] = {times...} (whereas wardLog[time][ward] = {patients...})
