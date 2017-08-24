@@ -185,7 +185,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     currentWardI = getWardI(maxTime, nWards, currentInfTimes, currentRecTimes, wardLogInf); //get initial values
     getSporeI(currentSporeI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
     getSporeForceSummary(currentSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
-    
+    //also set proposedSporeI to start as current SporeI as only update this at the accept / reject step
+    proposedSporeI = currentSporeI;
     
    
     //calculate initial targetDist value
@@ -401,7 +402,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             proposedInfTimes = currentInfTimes;
             proposedInfSources = currentInfSources;
             proposedInfSourceTypes = currentInfSourceTypes;
-            proposedSporeI = currentSporeI;
+            
+            //proposedSporeI = currentSporeI; //costly to repeat here - handle this at each accept / reject step
+            
             vector<vector<trans>> proposedOnwardTransmission = onwardTransmission;
             
             double hastingsRatio = 0; //store log hastings ratio
@@ -573,7 +576,12 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 currentInfSourceTypes = proposedInfSourceTypes;;
                 currentWardI = proposedWardI;
                 currentLL = proposedLL;
-                currentSporeI = proposedSporeI;
+                
+                //currentSporeI = proposedSporeI; //this is costly - just update the bit we need to
+                updateSporeI(currentSporeI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
+                
+                
+                
                 currentSporeForceSummary = proposedSporeForceSummary;
                 
                 //printf("Current LL check %f\n", currentLLCheck);
@@ -586,6 +594,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 chainInfTimes[i] = currentInfTimes;
                 chainInfSources[i] = currentInfSources;
                 chainInfSourceTypes[i] = currentInfSourceTypes;
+                
+                //reset proposedSporeI back to currentSporeI
+                updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+                
             }
             
             
@@ -667,7 +679,11 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 currentRecTimes = proposedRecTimes;
                 currentWardI = proposedWardI;
                 currentLL = proposedLL;
-                currentSporeI = proposedSporeI;
+                
+                //currentSporeI = proposedSporeI; //again this is costly - just update the bit we need to
+                updateSporeI(currentSporeI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
+                
+                
                 currentSporeForceSummary = proposedSporeForceSummary;
                 
                 //printf("Current LL check %f\n", currentLLCheck);
@@ -678,6 +694,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 if (debugPt) printf("Move rejected (acceptance prob: %f, currentLL: %f, proposedLL: %f)\n\n", probAccept, currentLL, proposedLL);
                 // reject the proposed jump, stay at current position
                 chainRecTimes[i] = currentRecTimes;;
+                
+                //reset proposedSporeI back to currentSporeI
+                updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
             }
             
             
@@ -987,6 +1006,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 else {
                     if (debugDisrupt) printf("Move rejected (acceptance prob: %f, currentLL: %f, proposedLL: %f)\n\n", probAccept, currentLL, proposedLL);
                     // reject the proposed jump, stay at current position, already saved in main data augmentation step
+                    
+                    //reset proposed sporeI back to currentSporeI, this is done for other variables at the start of the data augmentation step
+                    proposedSporeI = currentSporeI;
                 }
                 
                 if (debugDisrupt) {
