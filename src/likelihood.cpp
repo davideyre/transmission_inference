@@ -64,7 +64,9 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
 
     
     //loop over infected patients
-    
+//#pragma omp parallel num_threads(4)
+ //   {
+   // #pragma omp for reduction(+:ll)
     for(int patient=0; patient<nInfPatients; patient++) {
         //infected pateints
         if (infTimes[patient] < 0) {
@@ -193,6 +195,7 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
 
         }
     }
+   // }
     
     return ll;
 }

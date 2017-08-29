@@ -198,7 +198,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     //generate random walk
     for(int i=1; i<steps; i++) {
         
-        /*
+        
         //timer for every iteration for testing
         printf("Starting iteration %d\n", i);
         struct timeval currentSystemTimeIter;
@@ -210,7 +210,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
         }
         previousSystemTimeIter = currentSystemTimeIter;
-        */
+        
         
         //PARAMETER AND TUNING REPORTING
         //every 100 steps
