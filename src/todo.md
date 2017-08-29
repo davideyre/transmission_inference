@@ -12,7 +12,6 @@ Code
 ----
 1. For now all input times are assumed to be numbered from 1, allow for conversion from date format
 2. assume for now genetic distances provided for all samples - not explicitly checked - could add this check
-3. Remove hard coding of patient_ from genetic distances file
 
 
 Improvements
