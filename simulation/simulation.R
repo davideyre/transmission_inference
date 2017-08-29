@@ -64,7 +64,7 @@ if(!dir.exists(outDirBase)) {
 ### PARAMETERS ###
 #transmission parameters
 bgroundBeta = 0.002
-wardBeta = 0.005
+wardBeta = 0.007
 hospBeta = 0.002
 commBeta = 0.000
 
@@ -79,7 +79,7 @@ rec.mu = 30
 
 #spore decay - geometric distn
 #hist(rgeom(1000,0.7))
-spore.p = 0.6
+spore.p = 0.2
 
 #genetic parameters
 directNe = 1 #within host population size
@@ -135,8 +135,8 @@ capture.output(settings, file = paste(outDir, "/initial_settings.txt", sep=""))
 #start with population all in community, rows=time, columns=patients (values = 0 for community, and then 1..nWards for wards)
 ptLocation = matrix(data=0, nrow=maxTime, ncol=nPopulation)
 
-#create location of spore, value is the age of the spore that is present
-sporeLocation = array(0, c(maxTime, nPopulation, nWards))
+#create level of spore sporeLevel[t][pt][ward]
+sporeLevel = array(0, c(maxTime, nPopulation, nWards))
 
 #at each time step iterate over all patients in community and choose who to admit
 for (t in 2:maxTime) { 
@@ -175,7 +175,7 @@ for(pt in 1:nPopulation) {
              spore.start = tt
              spore.end = maxTime 
              spore.ages = 1:(maxTime-tt+1)
-             sporeLocation[spore.start:spore.end, pt, currentLocation] = spore.ages
+             sporeLevel[spore.start:spore.end, pt, currentLocation] = sporeLevel[spore.start:spore.end, pt, currentLocation] + (1-spore.p)^spore.ages
              print(paste("Patient", pt, "has contaminated ward", currentLocation, 
                          "after discharge with spores from", spore.start, "until", spore.end))
             }
@@ -188,7 +188,7 @@ for(pt in 1:nPopulation) {
              spore.start = t.rec
              spore.end = maxTime 
              spore.ages = 1:(maxTime-t.rec+1)
-             sporeLocation[spore.start:spore.end, pt, recoveryLocation] = spore.ages
+             sporeLevel[spore.start:spore.end, pt, recoveryLocation] = sporeLevel[spore.start:spore.end, pt, recoveryLocation] + (1-spore.p)^spore.ages
              print(paste("Patient", pt, "has contaminated ward", recoveryLocation, 
                          "after recovery with spores from", spore.start, "until", spore.end))
           } 
@@ -235,9 +235,8 @@ for(t in 2:maxTime) {
          nIHosp = length(vectorIHosp)
          
          #get vector of spores that are infectious on the same ward
-         vectorISpore = which(sporeLocation[t,,ptWard]>0)
-         vectorSporeDuration = sporeLocation[t,vectorISpore,ptWard]
-         vectorSporeLevel  = (1-spore.p)^vectorSporeDuration
+         vectorISpore = which(sporeLevel[t,,ptWard]>0)
+         vectorSporeLevel = sporeLevel[t,vectorISpore,ptWard]
          sumSporeLevel = sum(vectorSporeLevel)
          
          betaI = c(bgroundBeta, (wardBeta*nIWard), (hospBeta*nIHosp), (wardBeta*sumSporeLevel)) #overall rate of infection
@@ -298,7 +297,7 @@ for(t in 2:maxTime) {
                     spore.start = tt
                     spore.end = maxTime 
                     spore.ages = 1:(maxTime-tt+1)
-                    sporeLocation[spore.start:spore.end, pt, currentLocation] = spore.ages
+                    sporeLevel[spore.start:spore.end, pt, currentLocation] = sporeLevel[spore.start:spore.end, pt, currentLocation] + (1-spore.p)^spore.ages
                     print(paste("Patient", pt, "has contaminated ward", currentLocation, 
                                 "after discharge with spores from", spore.start, "until", spore.end))
                      }
@@ -311,7 +310,7 @@ for(t in 2:maxTime) {
                     spore.start = t.rec
                     spore.end = maxTime 
                     spore.ages = 1:(maxTime-t.rec+1)
-                    sporeLocation[spore.start:spore.end, pt, recoveryLocation] = spore.ages
+                    sporeLevel[spore.start:spore.end, pt, recoveryLocation] = sporeLevel[spore.start:spore.end, pt, recoveryLocation] + (1-spore.p)^spore.ages
                     print(paste("Patient", pt, "has contaminated ward", recoveryLocation, 
                                 "after recovery with spores from", spore.start, "until", spore.end))
                     }
