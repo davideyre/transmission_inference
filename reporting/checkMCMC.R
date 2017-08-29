@@ -30,7 +30,7 @@ simId = simId[length(simId)]
 
 
 ## read in true values
-patientLog = read.csv(file = paste(path, "input/patientLog.csv", sep=""))
+patientLog = read.csv(file = paste(path, "input/patientLog.csv", sep=""), stringsAsFactors=F)
 wardLog = read.csv(file = paste(path, "input/wardLog.csv", sep=""))
 geneticDist = read.table(file=paste(path, "input/simDistances.txt", sep=""))
 
@@ -39,11 +39,14 @@ wardLog[,1] = gsub("patient_", "", wardLog[,1])
 
 #reformat simulation log for ease of reading code
 true.infTimes = patientLog$t_inf
-true.infSources = cbind(patientLog$source, patientLog$source_type)
-sampleTimes = patientLog$t_sample
-true.recTimes = patientLog$t_recover
-true.sporeDurations = patientLog$spore_duration
 infectedPatients = which(!is.na(true.infTimes))
+true.infTimes = true.infTimes[infectedPatients]
+true.infSources = cbind(as.numeric(gsub("patient_", "", patientLog$source)), as.numeric(patientLog$source_type))[infectedPatients,]
+
+sampleTimes = patientLog$t_sample[infectedPatients]
+true.recTimes = patientLog$t_recover[infectedPatients]
+true.sporeDurations = patientLog$spore_duration[infectedPatients]
+
 n = length(infectedPatients)
 maxTime = max(wardLog$t_discharge)
 nWards = max(wardLog$ward)
@@ -124,10 +127,10 @@ ess.infTimes = effectiveSize(as.mcmc(inf.infTimes))
 
 
 inf.infTimes.hpd = HPDinterval(as.mcmc(inf.infTimes))  +1 #convert back to numbering from 1 rather than zero
-inf.infTimes.hpd.match = true.infTimes[infectedPatients] >= inf.infTimes.hpd[,1] & true.infTimes[infectedPatients] <= inf.infTimes.hpd[,2]
+inf.infTimes.hpd.match = true.infTimes >= inf.infTimes.hpd[,1] & true.infTimes <= inf.infTimes.hpd[,2]
 
-inf.diffInfTimes = inf.meanInfTimes - true.infTimes[infectedPatients]
-infTimes.compare = cbind(inf.meanInfTimes, true.infTimes[infectedPatients], inf.diffInfTimes, inf.infTimes.hpd, inf.infTimes.hpd.match)
+inf.diffInfTimes = inf.meanInfTimes - true.infTimes
+infTimes.compare = cbind(inf.meanInfTimes, true.infTimes, inf.diffInfTimes, inf.infTimes.hpd, inf.infTimes.hpd.match)
 #print(infTimes.compare)
 
 
@@ -153,10 +156,10 @@ ess.recTimes = effectiveSize(as.mcmc(rec.recTimes))
 
 
 rec.recTimes.hpd = HPDinterval(as.mcmc(rec.recTimes))  +1 #convert back to numbering from 1 rather than zero
-rec.recTimes.hpd.match = true.recTimes[infectedPatients] >= rec.recTimes.hpd[,1] & true.recTimes[infectedPatients] <= rec.recTimes.hpd[,2]
+rec.recTimes.hpd.match = true.recTimes >= rec.recTimes.hpd[,1] & true.recTimes <= rec.recTimes.hpd[,2]
 
-rec.diffrecTimes = rec.meanrecTimes - true.recTimes[infectedPatients]
-recTimes.compare = cbind(rec.meanrecTimes, true.recTimes[infectedPatients], rec.diffrecTimes, rec.recTimes.hpd, rec.recTimes.hpd.match)
+rec.diffrecTimes = rec.meanrecTimes - true.recTimes
+recTimes.compare = cbind(rec.meanrecTimes, true.recTimes, rec.diffrecTimes, rec.recTimes.hpd, rec.recTimes.hpd.match)
 #print(recTimes.compare)
 
 
@@ -213,7 +216,6 @@ for (i in 1:ncol(inf.infSourceTypes)) {
                 length(which(inf.infSourceTypes[,i]==5))
   )
 }
-true.infSources = true.infSources[infectedPatients,]
 
 #MAP esitmate
 infSourceType.map = max.col(a)-1
@@ -320,7 +322,7 @@ print(transSummary)
 
 
 ##THINGS GET WRONG
-print("Patients with no match in source HPD")
+print("Patients with no source match in source HPD")
 errorPt = which(infSources.hpd==0)
 if(length(errorPt)>1) {
   errorTable = cbind(inf.infSources.mode[errorPt], infSourceType.map[errorPt], true.infSources[errorPt,])
@@ -335,7 +337,7 @@ if(length(errorPt)>1) {
 
 
 ixPatient = function(pt) {
-  ptIndex = which(infectedPatients==208)
+  ptIndex = which(infectedPatients==1)
   print(paste("t_inf:", true.infTimes[pt]))
   print(paste("t_sample:", sampleTimes[pt]))
   print(paste("true_src:", true.infSources[ptIndex,1]))
@@ -473,7 +475,7 @@ for (pt.R in infectedPatients) {
   i=i+1
   
   #plot difference in inferred infection time and true time
-  inf.diffs = inf.infTimes[,pt.index] - (true.infTimes[infectedPatients[pt.index]] - 1)
+  inf.diffs = inf.infTimes[,pt.index] - (true.infTimes[pt.index] - 1)
   d = table(inf.diffs, inf.infSourceTypes[,pt])
   dMin = min(inf.diffs)
   dMax = max(inf.diffs)
