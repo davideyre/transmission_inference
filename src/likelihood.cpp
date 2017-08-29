@@ -43,7 +43,7 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
              //get infectious numbers from other wards
              int nonWardInfs = 0;
              for(int nonWard : hospitalWards[ward]) {
-                nonWardInfs += wardI[t][nonWard];
+                 nonWardInfs += wardI[t][nonWard];
              }
              hospInfDays += nonWardInfs * wardLogNeverInf[t][ward];
              
@@ -318,23 +318,21 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
             //hence snp ~ Geom(p), where p = p = 1/(1+(1/Ne)), and PDF (1-p)p^snp
             double p = 1/(1+(1/(2*mu*Ne)));
             //double llNN = 0;
-            vector<int> potentialNN;
+            
+            //get average SNP difference to all potential NN
+            int nPotentialNN = 0;
+            double snpSum = 0.0;
+            
             for (int nn =0; nn<nInfPatients; nn++) {
                 if (infSources[nn]==-1 & nn!=patient) {
                     //nearest neighbours could be defined as the first case of every cluster - problem is this changes numbers
                     // as move source, therefore link to all except self
-                    potentialNN.push_back(nn);
+                    nPotentialNN ++;
+                    double snp = geneticDist[patient][nn];
+                    snpSum += snp;
                 }
             }
-            int nPotentialNN = (int)potentialNN.size();
 
-            //get average SNP difference to all potential NN
-            double snpSum = 0.0;
-            for(int nn: potentialNN) {
-                double snp = geneticDist[patient][nn];
-                snpSum += snp;
-            }
-            
             //use mean SNPs to calculate prob of NN
             double meanSnp = snpSum / nPotentialNN;
             double logProbNN = log(1-p) + meanSnp*log(p);
