@@ -36,16 +36,13 @@ int getI(int t, int ward, vector<int> &infTimes, vector<int> &recTimes, vector<v
 //function to return a 2d vector of the number of infectious individuals on each ward at all time points
 vector<vector<int>> getWardI(int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf);
 
-//function to get sporeI - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-void getSporeI(vector<vector<vector<int>>> &sporeI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes,
-               vector<vector<int>> &ptLocation);
+//function to get sporePatientI - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
+void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
 
-//udpate sporeI for a single patient and return proposed copy
-void updateSporeI(vector<vector<vector<int>>> &sporeI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes,
-                  vector<vector<int>> &ptLocation);
+//udpate sporePatientI for a single patient - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
+void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
 
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporeI,
-                          int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm);
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm);
 
 
 //function to get vector of days an intpatient - inPtDays[patient][ward] = {times...} (whereas wardLog[time][ward] = {patients...})

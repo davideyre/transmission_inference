@@ -11,7 +11,7 @@
 //log likelihood contribution from transmission model - p(I | parm)
 
 double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
-               vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
+               vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
@@ -47,8 +47,7 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
              }
              hospInfDays += nonWardInfs * wardLogNeverInf[t][ward];
              
-             //get number of spore day equivalents - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-             //spores decay according to geometric distribution
+             //get number of spore day equivalents - from sporeForceSummary
              sporeInfDays += sporeForceSummary[t][ward] * wardLogNeverInf[t][ward];
          }
     }
@@ -104,8 +103,7 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
                                 hospInfDays += wardI[t][nonWard];
                             }
                             
-                            //get number of spore day equivalents - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-                            //spores decay according to geometric distribution
+                            //get number of spore day equivalents - from sporeForceSummary
                             sporeInfDays += sporeForceSummary[t][ward];
                             
                         }
@@ -139,8 +137,7 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
                     hospIt += wardI[t][nonWard];
                 }
                 
-                //get number of spore day equivalents - sporeI[t][ward][pt] = spore_duation (numbering from 1...)
-                //spores decay according to geometric distribution
+                //get number of spore day equivalents - from sporeForceSummary
                 double sporeIt = sporeForceSummary[t][ward];
                 
                 betaI = parm.betaBgroundHosp + (parm.betaWard * wardIt) + (parm.betaHosp * hospIt) + (parm.betaWard * sporeIt);
@@ -166,15 +163,21 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
             } else if (infSourceType[patient] == SrcType::SPORE) {
                 //spore
                 int ward = ptLocation[patient][t];
-                double specificSporeDuration = sporeI[t][ward][infSources[patient]];
-                double specificSporeLevel = pow((1-getSporeP(parm)), specificSporeDuration);
+                double specificSporeLevel = 0;
+                for(int sporeTime: sporePatientI[ward][infSources[patient]]) { //for each time spore left on this ward
+                    if( sporeTime <= t) {
+                        int specificSporeDuration = t - sporeTime + 1; //get number of days since spore set, including day set
+                        specificSporeLevel += pow((1-getSporeP(parm)), specificSporeDuration);
+                    }
+                }
+                
                 // prob(infected) * prob(infected by spore) * prob(infected by specific spore), total spore force cancels top and bottom
                 probInfSource = probInf * (parm.betaWard  / betaI ) * (specificSporeLevel) ;
                 //if(patient==338) printf("%0.4f\t%0.4f\t%0.4f\n", probInf, betaI, specificSporeLevel);
                 
                 if(specificSporeLevel==0) {
                     printf("patient: %d\n", patient);
-                    printf("source %d on ward %d at t=%d (spore duration check %d)\n", infSources[patient], ward, t, sporeI[t][ward][infSources[patient]]);
+                    printf("source %d on ward %d at t=%d (spore duration error)\n", infSources[patient], ward, t);
                     printf("source diagnosis: %d\n source ward stays on ward %d: ", infTimes[infSources[patient]], ward);
                     for(int tt=0; tt<=maxTime; tt++) {
                         if(ptLocation[infSources[patient]][tt]==ward) {
@@ -386,14 +389,14 @@ double getPrior(Parm &parm) {
 //target distribution, i.e. non-normalised posterior
 double targetDist (vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
                    vector<int> &infSources, vector<int> &infSourceType,
-                   vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
+                   vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                    vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                    vector<vector<vector<int>>> &inPtDays,
                    vector<vector<int>> &ptLocation,
                    vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, Parm &parm) {
 
     
-    double td = llTrans(hospitalWards, infTimes, infSourceType, infSources, sporeI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
+    double td = llTrans(hospitalWards, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
                     llSample(nInfPatients, infTimes, sampleTimes, parm) +
                     llRecover(nInfPatients, sampleTimes, recoverTimes, parm) +
                     llGenetic(infTimes, sampleTimes, infSources, infSourceType, geneticDist, nInfPatients, parm) +

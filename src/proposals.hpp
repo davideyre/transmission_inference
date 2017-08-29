@@ -39,7 +39,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
 //get list of sources and their probabilities for a given patient and infection time, and parameter set
 SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
                       vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
-                      vector<vector<vector<int>>> &sporeI,
+                      vector<vector<vector<int>>> &sporePatientI,
                       vector<vector<int>> &ptLocation,
                       vector<vector<double>> &geneticDist,
                       int nWards,
@@ -50,7 +50,7 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
 //function to determine proposed source of infection conditionally
 Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
                              vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
-                             vector<vector<vector<int>>> &sporeI, vector<vector<int>> &ptLocation,
+                             vector<vector<vector<int>>> &sporePatientI, vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist,
                              int nWards, int nInfPatients, vector<vector<int>> &hospitalWards, Parm &parm);
 

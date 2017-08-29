@@ -129,27 +129,17 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     
     //current and proposed values
     vector<int> currentInfTimes, currentRecTimes, currentInfSources, currentInfSourceTypes, proposedInfTimes, proposedRecTimes, proposedInfSources, proposedInfSourceTypes;
-    vector<vector<vector<int>>> currentSporeI, proposedSporeI;
+    vector<vector<vector<int>>> currentSporePatientI, proposedSporePatientI;
     vector<vector<double>> currentSporeForceSummary, proposedSporeForceSummary;
     vector<vector<int>> currentWardI, proposedWardI; //set up wardI log - //create array of the number of infected individuals on each ward at each time point
     
     
-    //reserve memory for sporeI
-    //set up size of currentSporeI
-    currentSporeI.resize(maxTime+1);
-    for (int i = 0; i<=maxTime; i++) {
-        currentSporeI[i].resize(nWards);
-        for (int ward = 0; ward<nWards; ward++) {
-            currentSporeI[i][ward].resize(nInfPatients);
-        }
-    }
-    //set up size of proposedSporeI
-    proposedSporeI.resize(maxTime+1);
-    for (int i = 0; i<=maxTime; i++) {
-        proposedSporeI[i].resize(nWards);
-        for (int ward = 0; ward<nWards; ward++) {
-            proposedSporeI[i][ward].resize(nInfPatients);
-        }
+    //reserve memory for sporePatientI - current and proposed
+    currentSporePatientI.resize(nWards);
+    proposedSporePatientI.resize(nWards);
+    for (int ward = 0; ward<nWards; ward++) {
+        currentSporePatientI[ward].resize(nInfPatients);
+        proposedSporePatientI[ward].resize(nInfPatients);
     }
     
     //reserve memory for sporeForceSummary
@@ -183,16 +173,16 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     
     
     currentWardI = getWardI(maxTime, nWards, currentInfTimes, currentRecTimes, wardLogInf); //get initial values
-    getSporeI(currentSporeI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
-    getSporeForceSummary(currentSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
-    //also set proposedSporeI to start as current SporeI as only update this at the accept / reject step
-    proposedSporeI = currentSporeI;
+    getSporePatientI(currentSporePatientI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+    getSporeForceSummary(currentSporeForceSummary, currentSporePatientI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
+    //also set proposedSporePatientI to start as current SporePatientI as only update this at the accept / reject step
+    proposedSporePatientI = currentSporePatientI;
     
    
     //calculate initial targetDist value
     double currentLL = targetDist(hospitalWards, currentInfTimes, sampleTimes, currentRecTimes,
                                   currentInfSources, currentInfSourceTypes,
-                                  currentSporeI, currentSporeForceSummary,
+                                  currentSporePatientI, currentSporeForceSummary,
                                   wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
     printf("Starting target distribution value: %0.4f\n\n", currentLL);
     double proposedLL;
@@ -259,7 +249,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             double currentLLGenetic = llGenetic(currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, nInfPatients, currentParm);
             printf("LL genetic, current: %0.3f\n", currentLLGenetic);
             
-            double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporeI, currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
+            double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
             printf("LL trans, current: %0.3f\n", currentLLTrans);
             
             double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
@@ -294,15 +284,15 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             else {
                 
                 if(parmIndex==9) {
-                    getSporeForceSummary(proposedSporeForceSummary, currentSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, proposedParm);
+                    getSporeForceSummary(proposedSporeForceSummary, currentSporePatientI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, proposedParm);
                     proposedLL = targetDist(hospitalWards, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-                                            currentSporeI, proposedSporeForceSummary,
+                                            currentSporePatientI, proposedSporeForceSummary,
                                             wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, proposedParm);
                 }
                 else {
                     //2. Compute the probability of accepting the proposed jump.
                     proposedLL = targetDist(hospitalWards, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-                                            currentSporeI, currentSporeForceSummary,
+                                            currentSporePatientI, currentSporeForceSummary,
                                             wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, proposedParm);
                 }
                 
@@ -362,16 +352,16 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 //        currentInfSources = infSources;
 //        currentInfSourceTypes = infSourceTypes;
 //        currentWardI = getWardI(nPatients, maxTime, nWards, currentInfTimes, currentRecTimes, wardLog);
-//        getSporeI(currentSporeI, infectedPatients, nPatients, maxTime, nWards, infTimes, currentRecTimes, ptLocation);
-//        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, ptLocation, currentParm);
+//        getSporePatientI(currentSporePatientI, infectedPatients, nPatients, maxTime, nWards, infTimes, currentRecTimes, ptLocation);
+//        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporePatientI, maxTime, nWards, nPatients, currentInfTimes, ptLocation, currentParm);
        
         //generic over-ride
     
 //        currentParm = chain[i];
 //        currentLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-//                               currentSporeI, currentSporeForceSummary,
+//                               currentSporePatientI, currentSporeForceSummary,
 //                             wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap,currentParm);
-//         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporeI, maxTime, nWards, nPatients, currentInfTimes, ptLocation, currentParm);
+//         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporePatientI, maxTime, nWards, nPatients, currentInfTimes, ptLocation, currentParm);
         
         // end over-ride
 
@@ -392,7 +382,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             if (proposedPatient==-1) {
                 printf("i=%d, patient=%d, current LL: %0.3f\n", i, proposedPatient, currentLL);
                 double currentLLCheck = targetDist(hospitalWards, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-                                                   currentSporeI, currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
+                                                   currentSporePatientI, currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
                 printf("LL check: %0.3f\n", currentLLCheck);
                 debugPt = true;
             }
@@ -403,7 +393,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             proposedInfSources = currentInfSources;
             proposedInfSourceTypes = currentInfSourceTypes;
             
-            //proposedSporeI = currentSporeI; //costly to repeat here - handle this at each accept / reject step
+            //proposedSporePatientI = currentSporePatientI; //costly to repeat here - handle this at each accept / reject step
             
             vector<vector<trans>> proposedOnwardTransmission = onwardTransmission;
             
@@ -441,9 +431,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //propose a new source based on new infection time
             // the only changes by this time point are to the infection time of the proposed patient
-            // and so can use currentInfTimes, currentRecTimes, and currentSporeI to determine the new sources, as the proposed patient specifically excluded in the function
+            // and so can use currentInfTimes, currentRecTimes, and currentSporePatientI to determine the new sources, as the proposed patient specifically excluded in the function
             Src proposedSource = proposeConditionalSource(proposedPatient, proposedInfTime, currentInfTimes, sampleTimes, currentRecTimes,
-                                                                  wardLogInf, currentInfSourceTypes, currentSporeI, ptLocation,
+                                                                  wardLogInf, currentInfSourceTypes, currentSporePatientI, ptLocation,
                                                                   geneticDist, nWards, nInfPatients, hospitalWards, currentParm);
             
             proposedInfSources[proposedPatient] = proposedSource.srcIndex;
@@ -455,10 +445,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //calculate the probability of choosing the current source with the current sampling time (proposed --> current)
             // i.e. assuming that next move is to reverse the one above
-            // as only thing that changes is proposed patient can still use currentInfTimes, currentRecTimes, currentSporeI
+            // as only thing that changes is proposed patient can still use currentInfTimes, currentRecTimes, currentSporePatientI
             double pChooseSourceCurrent;
             SrcList srcProbsCurrent = getSourceProb(proposedPatient, currentInfTimes[proposedPatient], currentInfTimes, sampleTimes, currentRecTimes,
-                                  wardLogInf, currentInfSourceTypes, currentSporeI, ptLocation,
+                                  wardLogInf, currentInfSourceTypes, currentSporePatientI, ptLocation,
                                   geneticDist,
                                   nWards, nInfPatients, hospitalWards, currentParm);
             
@@ -514,9 +504,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             //determine proposed infectious individuals on wards under new infection time
             proposedWardI = getWardI(maxTime, nWards, proposedInfTimes, currentRecTimes, wardLogInf);
             
-            //update sporeI to reflect new infection times (as ward discharges while infectious may have changed)
-            updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
+            //update sporePatientI to reflect new infection times (as ward discharges while infectious may have changed)
+            updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, nWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
             
             //debugging code
             if(debugPt) {
@@ -528,9 +518,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 double proposedLLGenetic = llGenetic(proposedInfTimes, sampleTimes, proposedInfSources, proposedInfSourceTypes, geneticDist, nInfPatients, currentParm);
                 printf("LL genetic, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLGenetic, proposedLLGenetic, proposedLLGenetic-currentLLGenetic);
                 
-                double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporeI, currentSporeForceSummary,
+                double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary,
                                                 wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
-                double proposedLLTrans = llTrans(hospitalWards, proposedInfTimes, proposedInfSourceTypes, proposedInfSources, proposedSporeI, proposedSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
+                double proposedLLTrans = llTrans(hospitalWards, proposedInfTimes, proposedInfSourceTypes, proposedInfSources, proposedSporePatientI, proposedSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
                 printf("LL transmission, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLTrans, proposedLLTrans, proposedLLTrans-currentLLTrans);
                 
                 double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
@@ -550,7 +540,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 
             //2. Compute the probability of accepting the proposed jump.
             proposedLL = targetDist(hospitalWards, proposedInfTimes, sampleTimes, currentRecTimes, proposedInfSources, proposedInfSourceTypes,
-                                    proposedSporeI, proposedSporeForceSummary,
+                                    proposedSporePatientI, proposedSporeForceSummary,
                                     wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
             
             probAccept = min( log(1), proposedLL -  currentLL + hastingsRatio);
@@ -577,8 +567,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 currentWardI = proposedWardI;
                 currentLL = proposedLL;
                 
-                //currentSporeI = proposedSporeI; //this is costly - just update the bit we need to
-                updateSporeI(currentSporeI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
+                //currentSporePatientI = proposedSporePatientI; //this is costly - just update the bit we need to
+                updateSporePatientI(currentSporePatientI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
                 
                 
                 
@@ -595,8 +585,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 chainInfSources[i] = currentInfSources;
                 chainInfSourceTypes[i] = currentInfSourceTypes;
                 
-                //reset proposedSporeI back to currentSporeI
-                updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+                //reset proposedSporePatientI back to currentSporePatientI
+                updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
                 
             }
             
@@ -618,7 +608,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //set proposed recovery times to current times, and spore similarlly
             proposedRecTimes = currentRecTimes;
-            proposedSporeI = currentSporeI;
+            proposedSporePatientI = currentSporePatientI;
             
             //propose new recovery time
             int sdRecTime = 5;
@@ -646,9 +636,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //determine proposed infectious individuals on wards under new recovery time
             proposedWardI = getWardI(maxTime, nWards, currentInfTimes, proposedRecTimes, wardLogInf);
-            //update sporeI to reflect new recovery time
-            updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
+            //update sporePatientI to reflect new recovery time
+            updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, nWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
             
             
             if(debugPt) {
@@ -660,7 +650,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //2. Compute the probability of accepting the proposed jump.
             proposedLL = targetDist(hospitalWards, currentInfTimes, sampleTimes, proposedRecTimes, currentInfSources, currentInfSourceTypes,
-                                    proposedSporeI, proposedSporeForceSummary,
+                                    proposedSporePatientI, proposedSporeForceSummary,
                                     wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
             
             probAccept = min( log(1), proposedLL -  currentLL + hastingsRatio);
@@ -680,8 +670,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 currentWardI = proposedWardI;
                 currentLL = proposedLL;
                 
-                //currentSporeI = proposedSporeI; //again this is costly - just update the bit we need to
-                updateSporeI(currentSporeI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
+                //currentSporePatientI = proposedSporePatientI; //again this is costly - just update the bit we need to
+                updateSporePatientI(currentSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
                 
                 
                 currentSporeForceSummary = proposedSporeForceSummary;
@@ -695,8 +685,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 // reject the proposed jump, stay at current position
                 chainRecTimes[i] = currentRecTimes;;
                 
-                //reset proposedSporeI back to currentSporeI
-                updateSporeI(proposedSporeI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+                //reset proposedSporePatientI back to currentSporePatientI
+                updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
             }
             
             
@@ -876,10 +866,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 // 6. each change in source generates a component of the hastings ratio as before
                 
                 // update all as a block
-                // for proposedInfTimes, also need to update sporeI based on these - unlike above where only updating one case
+                // for proposedInfTimes, also need to update sporePatientI based on these - unlike above where only updating one case
                 proposedWardI = getWardI(maxTime, nWards, proposedInfTimes, proposedRecTimes, wardLogInf);
-                getSporeI(proposedSporeI, nInfPatients, maxTime, nWards, proposedInfTimes, proposedRecTimes, ptLocation);
-                getSporeForceSummary(proposedSporeForceSummary, proposedSporeI, maxTime, nWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
+                getSporePatientI(proposedSporePatientI, nInfPatients, maxTime, nWards, proposedInfTimes, proposedRecTimes, ptLocation);
+                getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, nWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
                 
                 //currentInfSourceTypes - is used to determine genetic likelihood - use this for all updates current --> proposed updates
                 // and converse (proposedInfSourceTypes) for proposed --> current updates
@@ -890,7 +880,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     
                     //get new source for each case
                     Src proposedSource = proposeConditionalSource(node, proposedInfTimes[node], proposedInfTimes,
-                                                sampleTimes, proposedRecTimes, wardLogInf, currentInfSourceTypes, proposedSporeI, ptLocation,
+                                                sampleTimes, proposedRecTimes, wardLogInf, currentInfSourceTypes, proposedSporePatientI, ptLocation,
                                                 geneticDist, nWards, nInfPatients, hospitalWards, currentParm);
                     proposedInfSources[node] = proposedSource.srcIndex;
                     proposedInfSourceTypes[node] = proposedSource.srcRoute;
@@ -927,10 +917,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 for (int node : nodeSet) {
                     // determine hastings ratio numerator: for (proposed --> current) for all updated cases
-                    // using currentInfTimes, currentRecTimes, currentSporeI
+                    // using currentInfTimes, currentRecTimes, currentSporePatientI
                     double pChooseSourceCurrent;
                     SrcList srcProbsCurrent = getSourceProb(node, currentInfTimes[node], currentInfTimes,
-                                sampleTimes, currentRecTimes, wardLogInf, proposedInfSourceTypes, currentSporeI, ptLocation,
+                                sampleTimes, currentRecTimes, wardLogInf, proposedInfSourceTypes, currentSporePatientI, ptLocation,
                                 geneticDist, nWards, nInfPatients, hospitalWards, currentParm);
                     
                     for (int ii=0; ii<srcProbsCurrent.sourceList.size(); ii++) {
@@ -951,7 +941,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 
                 proposedLL = targetDist(hospitalWards, proposedInfTimes, sampleTimes, proposedRecTimes, proposedInfSources, proposedInfSourceTypes,
-                                        proposedSporeI, proposedSporeForceSummary,
+                                        proposedSporePatientI, proposedSporeForceSummary,
                                         wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
                 
                 probAccept = min( log(1), proposedLL -  currentLL + hastingsRatio);
@@ -965,10 +955,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     double proposedLLGenetic = llGenetic(proposedInfTimes, sampleTimes, proposedInfSources, proposedInfSourceTypes, geneticDist, nInfPatients, currentParm);
                     printf("LL genetic, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLGenetic, proposedLLGenetic, proposedLLGenetic-currentLLGenetic);
                     
-                    double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporeI, currentSporeForceSummary,
+                    double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary,
                                                     wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
                     double proposedLLTrans = llTrans(hospitalWards, proposedInfTimes, proposedInfSourceTypes, proposedInfSources,
-                                                     proposedSporeI, proposedSporeForceSummary,
+                                                     proposedSporePatientI, proposedSporeForceSummary,
                                                      wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
                     printf("LL transmission, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLTrans, proposedLLTrans, proposedLLTrans-currentLLTrans);
                     
@@ -999,7 +989,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     currentRecTimes = proposedRecTimes;
                     currentWardI = proposedWardI;
                     currentLL = proposedLL;
-                    currentSporeI = proposedSporeI;
+                    currentSporePatientI = proposedSporePatientI;
                     currentSporeForceSummary = proposedSporeForceSummary;
                     
                 }
@@ -1007,8 +997,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     if (debugDisrupt) printf("Move rejected (acceptance prob: %f, currentLL: %f, proposedLL: %f)\n\n", probAccept, currentLL, proposedLL);
                     // reject the proposed jump, stay at current position, already saved in main data augmentation step
                     
-                    //reset proposed sporeI back to currentSporeI, this is done for other variables at the start of the data augmentation step
-                    proposedSporeI = currentSporeI;
+                    //reset proposed sporePatientI back to currentSporePatientI, this is done for other variables at the start of the data augmentation step
+                    proposedSporePatientI = currentSporePatientI;
                 }
                 
                 if (debugDisrupt) {
@@ -1022,7 +1012,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         
         double currentLLSample = llSample(nInfPatients, currentInfTimes, sampleTimes, currentParm);
         double currentLLGenetic = llGenetic(currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, nInfPatients, currentParm);
-        double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporeI,
+        double currentLLTrans = llTrans(hospitalWards, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI,
                                         currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
         double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
 
@@ -1263,7 +1253,7 @@ int main(int argc, const char * argv[]) {
     
     //runTest(infTimes, sampleTimes, recoverTimes, startParm,
     //        infSources, infSourceTypes,
-    //        sporeI, sporeForce, sporeForceSummary, geneticDist, geneticMap, wardLog,
+    //        sporePatientI, sporeForce, sporeForceSummary, geneticDist, geneticMap, wardLog,
     //        inPtDays, ptLocation, wardI, nPatients, nWards, maxTime);
     
     

@@ -21,7 +21,7 @@ using namespace std;
 
 //log likelihood contribution from transmission model - p(I | parm)
 double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
-               vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
+               vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
@@ -50,7 +50,7 @@ double getPrior(Parm &parm);
 //target distribution, i.e. non-normalised posterior
 double targetDist (vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
                    vector<int> &infSources, vector<int> &infSourceType,
-                   vector<vector<vector<int>>> &sporeI, vector<vector<double>> &sporeForceSummary,
+                   vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                    vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                    vector<vector<vector<int>>> &inPtDays,
                    vector<vector<int>> &ptLocation,

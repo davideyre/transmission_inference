@@ -10,7 +10,7 @@
 
 void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes, Parm &parm,
              vector<int> &infSources, vector<int> &infSourceType,
-             vector<vector<vector<int>>> &sporeI, vector<vector<vector<double>>> &sporeForce, vector<vector<double>> &sporeForceSummary,
+             vector<vector<vector<int>>> &sporePatientI, vector<vector<vector<double>>> &sporeForce, vector<vector<double>> &sporeForceSummary,
              vector<vector<double>> &geneticDist, vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
              vector<vector<vector<int>>> &inPtDays,
              vector<vector<int>> &ptLocation,
@@ -38,12 +38,12 @@ void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recov
     printf("TEST: Prior = %0.6f (Expected value: -9.559376)\n\n", testPrior);
     
     //test of transmission LL
-    double testTransLL = llTrans(hospitalWards, infTimes, infSourceType, infSources, sporeI, sporeForceSummary, wardLogInf, wardLogNeverInf,
+    double testTransLL = llTrans(hospitalWards, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf,
                                  inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm);
     printf("TEST: TransLL = %0.6f (Expected value: -1957.525)\n\n", testTransLL);
     
     //test of target distribution
-    double testTarget = targetDist(hospitalWards, infTimes, sampleTimes, recoverTimes, infSources, infSourceType, sporeI, sporeForceSummary,
+    double testTarget = targetDist(hospitalWards, infTimes, sampleTimes, recoverTimes, infSources, infSourceType, sporePatientI, sporeForceSummary,
                                    wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI,
                                    nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist,
                                    parm);
