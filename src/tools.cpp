@@ -109,55 +109,38 @@ void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updateP
 }
 
 
+//function to pre-calculate the sum of spore force of infection - sporeForceSummary[t][ward]
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int minTime, set<int> wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
 
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int nWards, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
-    //pre-calculate the sum of spore force of infection - [t][ward]
-
-    //reset current values of spore force summary to be zero
-    for (int t = 0; t<=maxTime; t++) { //can only add spore after infected, hence start from there
-        for (int ward = 0; ward<nWards; ward++) {
-            sporeForceSummary[t][ward] = 0;
-        }
-    }
-    
     //pre-calculate all spore probabilities
     double probSpore = 1-getSporeP(parm);
     vector<double> probSporeDay;
     probSporeDay.resize(maxTime+1);
-    for (int t=0; t<=maxTime; t++) {
+    for (int t=0; t<=(maxTime-minTime); t++) {
         probSporeDay[t] = pow(probSpore, t);
     }
     
     
-    //#pragma omp parallel num_threads(4) shared(sporeForceSummary)
-    //{
-    //    #pragma omp for schedule(static)
+    //iterate through wards
+    for (int ward : wardsToUpdate) {
+        //reset sporeForceSummary for all times between min and max time
+        for (int t=minTime; t<=maxTime; t++) {
+            sporeForceSummary[t][ward] = 0;
+        }
+        
+        //for each ward get any patient who sets spores
         for (int sporePt=0; sporePt< nInfPatients; sporePt++) {
-            
-            //check which wards this patient has been on since start time
-            int startTime = max({0, infTimes[sporePt]});
-            
-            set<int> wardList;
-            for (int t = startTime; t<=maxTime; t++) {
-            wardList.insert(ptLocation[sporePt][t]);
-            }
-            wardList.erase(-1); //remove community from wardList
-
-            for (int t = startTime; t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
-                for (int ward : wardList) { //iterate through list of wards has visited
-                    if(!sporePatientI[ward][sporePt].empty()) {
-                        for (int sporeTime : sporePatientI[ward][sporePt]) { //spores left more than once are cumulative
-                            if(sporeTime <= t) {
-                                //spore is present at or after t
-                                int sporeDuration = t - sporeTime + 1;
-                                sporeForceSummary[t][ward] += probSporeDay[sporeDuration];
-                            }
-                        }
+            if(!sporePatientI[ward][sporePt].empty()) {
+                // for each time spores are set
+                for (int sporeTime : sporePatientI[ward][sporePt]) {
+                    for (int t=sporeTime; t<=maxTime; t++) {
+                        int sporeDuration = t - sporeTime + 1;
+                        sporeForceSummary[t][ward] += probSporeDay[sporeDuration];
                     }
                 }
             }
-        } //end of calculation fo sporeForceSummary
-    //} //end of parallel loop
+        }
+    }
 }
 
 
