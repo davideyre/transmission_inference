@@ -176,6 +176,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     
     
     currentWardI = getWardI(maxTime, nWards, currentInfTimes, currentRecTimes, wardLogInf); //get initial values
+    proposedWardI = currentWardI;
     getSporePatientI(currentSporePatientI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
     int minTime = 0;
     set<int> allWards;
@@ -511,13 +512,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             
             
-            //determine proposed infectious individuals on wards under new infection time
-            proposedWardI = getWardI(maxTime, nWards, proposedInfTimes, currentRecTimes, wardLogInf);
-            
-            //update sporePatientI to reflect new infection times (as ward discharges while infectious may have changed)
-            updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
-            
-            //get limits for sporeForceSummary update
+            //get limits for ward I and sporeForceSummary update
             //first time could have set spores under current or proposed scenario
             int minPtTime = min({currentInfTimes[proposedPatient], proposedInfTime});
             if(minPtTime<0) {
@@ -531,6 +526,14 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             wardsToUpdate.erase(-1);
             
+            
+            //determine proposed infectious individuals on wards under new infection time
+            updateWardI(proposedWardI, maxTime, minPtTime, wardsToUpdate, proposedInfTimes, currentRecTimes, wardLogInf);
+            
+            //update sporePatientI to reflect new infection times (as ward discharges while infectious may have changed)
+            updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
+            
+            //update sporeForceSummary
             getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minPtTime, wardsToUpdate, nInfPatients, proposedInfTimes, ptLocation, currentParm);
             
             //debugging code
@@ -594,7 +597,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 //currentSporePatientI = proposedSporePatientI; //this is costly - just update the bit we need to
                 updateSporePatientI(currentSporePatientI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
-                
+                //update currentSporeI
+                updateWardI(currentWardI, maxTime, minPtTime, wardsToUpdate, proposedInfTimes, currentRecTimes, wardLogInf);
                 
                 
                 currentSporeForceSummary = proposedSporeForceSummary;
@@ -612,6 +616,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 //reset proposedSporePatientI back to currentSporePatientI
                 updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+                //reset proposedWardI
+                updateWardI(proposedWardI, maxTime, minPtTime, wardsToUpdate, currentInfTimes, currentRecTimes, wardLogInf);
+                
                 
             }
             
@@ -659,13 +666,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             proposedRecTimes[proposedPatient] = proposedRecTime;
             
-            //determine proposed infectious individuals on wards under new recovery time
-            proposedWardI = getWardI(maxTime, nWards, currentInfTimes, proposedRecTimes, wardLogInf);
-            //update sporePatientI to reflect new recovery time
-            updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
+
             
             
-            //get limits for sporeForceSummary update
+            //get limits for wardI and sporeForceSummary update
             //first time could have set spores under current or proposed scenario
             int minPtTime = currentInfTimes[proposedPatient];
             if(minPtTime<0) {
@@ -679,6 +683,13 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             wardsToUpdate.erase(-1);
             
+            //update wardI
+            updateWardI(proposedWardI, maxTime, minPtTime, wardsToUpdate, currentInfTimes, proposedRecTimes, wardLogInf);
+            
+            //update sporePatientI to reflect new recovery time
+            updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
+            
+            //update sporeForceSummary
             getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minPtTime, wardsToUpdate, nInfPatients, currentInfTimes, ptLocation, currentParm);
             
             
@@ -713,7 +724,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 //currentSporePatientI = proposedSporePatientI; //again this is costly - just update the bit we need to
                 updateSporePatientI(currentSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
-                
+                //update wardI
+                updateWardI(currentWardI, maxTime, minPtTime, wardsToUpdate, currentInfTimes, proposedRecTimes, wardLogInf);
                 
                 currentSporeForceSummary = proposedSporeForceSummary;
                 
@@ -728,6 +740,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 
                 //reset proposedSporePatientI back to currentSporePatientI
                 updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+                //reset proposed wardI
+                updateWardI(proposedWardI, maxTime, minPtTime, wardsToUpdate, currentInfTimes, currentRecTimes, wardLogInf);
             }
             
             

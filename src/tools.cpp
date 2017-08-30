@@ -46,6 +46,16 @@ vector<vector<int>> getWardI(int maxTime, int nWards, vector<int> &infTimes, vec
     return wardI;
 }
 
+//function to update wardI for subset of wards and times
+void updateWardI(vector<vector<int>> &wardI, int maxTime, int minTime, set<int> &wardsToUpdate, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf) {
+    //loop over times and wards
+    for (int t=minTime; t<maxTime; t++) {
+        for (int ward : wardsToUpdate) {
+            wardI[t][ward] = getI(t, ward, infTimes, recTimes, wardLogInf);
+        }
+    }
+}
+
 
 //function to get sporePatientI - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
 void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation) {

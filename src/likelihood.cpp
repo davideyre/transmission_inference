@@ -322,6 +322,17 @@ double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSo
 double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType,
                  vector<vector<double>> &geneticDist, int nInfPatients, Parm &parm) {
     double ll = 0.00;
+    
+    //determine all possible nearest neighbours for imported cases, i.e. all other imported cases
+    vector<int> nnList;
+    nnList.reserve(nInfPatients);
+    for (int nn =0; nn<nInfPatients; nn++) {
+        if (infSources[nn]==-1) {
+            nnList.push_back(nn);
+        }
+    }
+    
+    
     //#pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
     for (int patient =0; patient<nInfPatients; patient++) {
         //log likelihood for patient not infected = 0
@@ -340,10 +351,8 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
             int nPotentialNN = 0;
             double snpSum = 0.0;
             
-            for (int nn =0; nn<nInfPatients; nn++) {
-                if (infSources[nn]==-1 & nn!=patient) {
-                    //nearest neighbours could be defined as the first case of every cluster - problem is this changes numbers
-                    // as move source, therefore link to all except self
+            for (int nn : nnList) {
+                if (nn!=patient) {
                     nPotentialNN ++;
                     double snp = geneticDist[patient][nn];
                     snpSum += snp;

@@ -36,6 +36,9 @@ int getI(int t, int ward, vector<int> &infTimes, vector<int> &recTimes, vector<v
 //function to return a 2d vector of the number of infectious individuals on each ward at all time points
 vector<vector<int>> getWardI(int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf);
 
+//function to update wardI for subset of wards and times
+void updateWardI(vector<vector<int>> &wardI, int maxTime, int minTime, set<int> &wardsToUpdate, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf);
+
 //function to get sporePatientI - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
 void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
 
