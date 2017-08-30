@@ -10,7 +10,7 @@
 
 //log likelihood contribution from transmission model - p(I | parm)
 
-double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
+double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
                vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
                vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
@@ -59,7 +59,7 @@ double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2
              wardInfDays += wardI[t][ward] * wardLogNeverInf[t][ward]; // wardLogNeverInf[time][ward] = int for count of never infected patients
              
              //get hospital for current ward
-             int hosp = ward2Hospital.at(ward);
+             int hosp = ward2Hospital[ward];
              
              //get infectious numbers from other wards
              int nonWardInfs = hospitalI[t][hosp] - wardI[t][ward];
@@ -110,23 +110,20 @@ double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2
             double sporeInfDays = 0.00;
             int admissionDuration = 0;
             
-            //loop through all days an inpatient - inPtDays[patient][ward] = {times...}
-            for(int ward=0; ward < nWards; ward++) {
-                int hosp = ward2Hospital.at(ward); //get hospital ward on
-                if (inPtDays[patient][ward].size()>0) { // if inpatient on that ward
-                    for (int t: inPtDays[patient][ward]) {
-                        if(t < infTimes[patient]) { //if not yet infected
-                            //use wardI to look this up - wardI[t][ward] = nInf
-                            wardInfDays += wardI[t][ward];
-                            admissionDuration ++;
-                            
-                            //get infectious numbers from other wards
-                            hospInfDays += hospitalI[t][hosp] - wardI[t][ward];
-                            
-                            //get number of spore day equivalents - from sporeForceSummary
-                            sporeInfDays += sporeForceSummary[t][ward];
-                            
-                        }
+            //loop through all wards have ever been on using wardEver[pt] = {ward1, ward2, ...}
+            for (int ward : wardEver[patient]) {
+                int hosp = ward2Hospital[ward]; //get hospital ward on
+                for (int t: inPtDays[patient][ward]) { //loop through all days an inpatient - inPtDays[patient][ward] = {times...}
+                    if(t < infTimes[patient]) { //if not yet infected
+                        //use wardI to look this up - wardI[t][ward] = nInf
+                        wardInfDays += wardI[t][ward];
+                        admissionDuration ++;
+                        
+                        //get infectious numbers from other wards
+                        hospInfDays += hospitalI[t][hosp] - wardI[t][ward];
+                        
+                        //get number of spore day equivalents - from sporeForceSummary
+                        sporeInfDays += sporeForceSummary[t][ward];
                     }
                 }
             }
@@ -405,7 +402,7 @@ double getPrior(Parm &parm) {
 }
 
 //target distribution, i.e. non-normalised posterior
-double targetDist (vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
+double targetDist (vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
                    vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
                    vector<int> &infSources, vector<int> &infSourceType,
                    vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
@@ -415,7 +412,7 @@ double targetDist (vector<vector<int>> &hospitalWards, unordered_map<int,int> &w
                    vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, Parm &parm) {
 
     
-    double td = llTrans(hospitalWards, ward2Hospital, hospitalWardList, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
+    double td = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
                     llSample(nInfPatients, infTimes, sampleTimes, parm) +
                     llRecover(nInfPatients, sampleTimes, recoverTimes, parm) +
                     llGenetic(infTimes, sampleTimes, infSources, infSourceType, geneticDist, nInfPatients, parm) +

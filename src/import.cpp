@@ -84,7 +84,7 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unor
 void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup,
                    vector<vector<vector<int>>> &wardLogInf,
                    vector<vector<int>> &wardLogNeverInf,
-                   int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2Hospital, vector<vector<int>> &hospitalWardList) {
+                   int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList) {
     
     //temporary variables to hold text from CSV
     int tmp_admit, tmp_discharge;
@@ -136,9 +136,12 @@ void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, u
     }
     
     //generate a list of hospitals for each ward
-    for (int hospital=0; hospital<hospitalWardList.size(); hospital++) {
-        for (int ward : hospitalWardList[hospital]) {
-            ward2Hospital.insert( {ward, hospital} );
+    for (int ward=0; ward<nWards; ward++) {
+        for (int hospital=0; hospital<hospitalWardList.size(); hospital++) {
+            if(find(hospitalWardList[hospital].begin(), hospitalWardList[hospital].end(), ward) != hospitalWardList[hospital].end()) {
+                ward2Hospital.push_back(hospital);
+                break;
+            }
         }
     }
     

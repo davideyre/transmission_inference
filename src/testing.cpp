@@ -14,7 +14,7 @@ void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recov
              vector<vector<double>> &geneticDist, vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
              vector<vector<vector<int>>> &inPtDays,
              vector<vector<int>> &ptLocation,
-             vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2Hospital, vector<vector<int>> &hospitalWardList) {
+             vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList, vector<vector<int>> &wardEver, int maxTime) {
     
     //timer start
     clock_t start,end;
@@ -38,12 +38,12 @@ void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recov
     printf("TEST: Prior = %0.6f (Expected value: -9.559376)\n\n", testPrior);
     
     //test of transmission LL
-    double testTransLL = llTrans(hospitalWards, ward2Hospital, hospitalWardList, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf,
+    double testTransLL = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf,
                                  inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm);
     printf("TEST: TransLL = %0.6f (Expected value: -1957.525)\n\n", testTransLL);
     
     //test of target distribution
-    double testTarget = targetDist(hospitalWards, ward2Hospital, hospitalWardList, infTimes, sampleTimes, recoverTimes, infSources, infSourceType, sporePatientI, sporeForceSummary,
+    double testTarget = targetDist(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, sampleTimes, recoverTimes, infSources, infSourceType, sporePatientI, sporeForceSummary,
                                    wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI,
                                    nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist,
                                    parm);

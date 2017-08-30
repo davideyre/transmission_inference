@@ -50,6 +50,9 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vect
 vector<vector<vector<int>>> getInPtDays(int nInfPatients, int maxTime, int nWards,
                                         vector<vector<vector<int>>> &wardLogInf);
 
+//function to determine get list of wards ever visited by a patient - wardEver[pt] = {ward1, ward2, ...}
+vector<vector<int>> getWardEver(vector<vector<vector<int>>> &inPtDays, int nInfPatients, int nWards);
+
 //function to store the location of patients - ptLocation[patient][time] = wardId
 vector<vector<int>> getPtLocation(int nInfPatients, int maxTime, int nWards, vector<vector<vector<int>>> &inPtDays);
 
