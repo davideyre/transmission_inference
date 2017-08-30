@@ -534,7 +534,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, proposedInfTimes, currentRecTimes, ptLocation);
             
             //update sporeForceSummary
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minTime, allWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minPtTime, wardsToUpdate, nInfPatients, proposedInfTimes, ptLocation, currentParm);
             
             //debugging code
             if(debugPt) {
@@ -690,7 +690,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             updateSporePatientI(proposedSporePatientI, proposedPatient, maxTime, nWards, currentInfTimes, proposedRecTimes, ptLocation);
             
             //update sporeForceSummary
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minTime, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minPtTime, wardsToUpdate, nInfPatients, currentInfTimes, ptLocation, currentParm);
             
             
             if(debugPt) {

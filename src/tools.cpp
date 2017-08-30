@@ -144,7 +144,7 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vect
             if(!sporePatientI[ward][sporePt].empty()) {
                 // for each time spores are set
                 for (int sporeTime : sporePatientI[ward][sporePt]) {
-                    for (int t=sporeTime; t<=maxTime; t++) {
+                    for (int t=max({minTime, sporeTime}); t<=maxTime; t++) {
                         int sporeDuration = t - sporeTime + 1;
                         sporeForceSummary[t][ward] += probSporeDay[sporeDuration];
                     }
