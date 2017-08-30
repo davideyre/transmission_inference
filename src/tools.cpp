@@ -53,7 +53,7 @@ void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatien
     //reset sporePatientI for all infected patients to empty vector
     for(int ward=0; ward<nWards; ward++) {
         for(int pt=0; pt<nInfPatients; pt++) {
-            sporePatientI[ward][pt] = {};
+            sporePatientI[ward][pt].clear();
         }
     }
 
@@ -85,7 +85,7 @@ void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updateP
 
     //set current values for sporePatientI for this patient to empty vector
     for(int ward=0; ward<nWards; ward++) {
-        sporePatientI[ward][updatePt] = {};
+        sporePatientI[ward][updatePt].clear();
     }
     
     //set spores at recovery if inpatient - ptLocation[patient][time] = wardId
@@ -109,8 +109,9 @@ void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updateP
 }
 
 
+
 //function to pre-calculate the sum of spore force of infection - sporeForceSummary[t][ward]
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int minTime, set<int> wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int minTime, set<int> &wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
 
     //pre-calculate all spore probabilities
     double probSpore = 1-getSporeP(parm);
@@ -141,7 +142,71 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vect
             }
         }
     }
+    
+    int x;
+    x=1;
 }
+
+/*
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int minTime, set<int> &wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
+    
+    
+    int nWards = wardsToUpdate.size();
+    
+    //pre-calculate the sum of spore force of infection - [t][ward]
+    
+    //reset current values of spore force summary to be zero
+    for (int t = 0; t<=maxTime; t++) { //can only add spore after infected, hence start from there
+        for (int ward : wardsToUpdate) {
+            sporeForceSummary[t][ward] = 0;
+        }
+    }
+    
+    //pre-calculate all spore probabilities
+    double probSpore = 1-getSporeP(parm);
+    vector<double> probSporeDay;
+    probSporeDay.resize(maxTime+1);
+    for (int t=0; t<=maxTime; t++) {
+        probSporeDay[t] = pow(probSpore, t);
+    }
+    
+    
+    for (int sporePt=0; sporePt< nInfPatients; sporePt++) {
+        
+        //check which wards this patient has been on since start time
+        int startTime = max({0, infTimes[sporePt]});
+        
+        set<int> wardList;
+        for (int t = startTime; t<=maxTime; t++) {
+            wardList.insert(ptLocation[sporePt][t]);
+        }
+        wardList.erase(-1); //remove community from wardList
+        
+        for (int t = startTime; t<=maxTime; t++) { //can only add spore after infected, hence start from there or t=0 if later, as spore only set after t=0
+            
+            for (auto &ward : wardsToUpdate) { //iterate through list of wards has visited
+                //printf("%d\n", ward);
+                for (int sporeTime : sporePatientI[ward][sporePt]) { //spores left more than once are cumulative
+                    //printf("%d\n", sporeTime);
+                    if(sporeTime <= t) {
+                        //spore is present at or after t
+                        int sporeDuration = t - sporeTime + 1;
+                        sporeForceSummary[t][ward] += probSporeDay[sporeDuration];
+                    }
+                }
+                
+            }
+        }
+    } //end of calculation fo sporeForceSummary
+}
+
+*/
+
+
+
+
+
+
 
 
 

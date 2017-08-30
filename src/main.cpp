@@ -176,9 +176,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     getSporePatientI(currentSporePatientI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
     int minTime = 0;
     set<int> allWards;
-    for (int ward; ward<nWards; ward++) {
+    for (int ward=0; ward<nWards; ward++) {
         allWards.insert(ward);
     }
+    
     
     getSporeForceSummary(currentSporeForceSummary, currentSporePatientI, maxTime, minTime, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
     //also set proposedSporePatientI to start as current SporePatientI as only update this at the accept / reject step
@@ -204,7 +205,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     //generate random walk
     for(int i=1; i<steps; i++) {
         
-        /*
+        
         //timer for every iteration for testing
         printf("Starting iteration %d\n", i);
         struct timeval currentSystemTimeIter;
@@ -216,7 +217,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
         }
         previousSystemTimeIter = currentSystemTimeIter;
-        */
+        
         
         //PARAMETER AND TUNING REPORTING
         //every 100 steps
@@ -527,7 +528,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             wardsToUpdate.erase(-1);
             
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, 0, allWards, nInfPatients, proposedInfTimes, ptLocation, currentParm);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minPtTime, wardsToUpdate, nInfPatients, proposedInfTimes, ptLocation, currentParm);
             
             //debugging code
             if(debugPt) {
@@ -675,7 +676,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             wardsToUpdate.erase(-1);
             
-            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, 0, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
+            getSporeForceSummary(proposedSporeForceSummary, proposedSporePatientI, maxTime, minPtTime, wardsToUpdate, nInfPatients, currentInfTimes, ptLocation, currentParm);
             
             
             if(debugPt) {
