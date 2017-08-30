@@ -16,8 +16,7 @@ double llTrans(vector<vector<int>> &hospitalWards, vector<int> &infTimes, vector
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
                vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, Parm &parm) {
-     
-    
+
     double ll = 0.00;
 
     int wardInfDays = 0; // patient - days of ward pressure exposed to

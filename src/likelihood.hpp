@@ -11,6 +11,7 @@
 
 #define MATHLIB_STANDALONE
 #include <Rmath.h>
+
 #include <unordered_map>
 #include <vector>
 #include "tools.hpp"
