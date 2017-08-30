@@ -29,8 +29,7 @@ double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2
     double probNotStartInf = 1 - getStartInfP(parm);
     ll += nNeverInfPatients*log(probNotStartInf);
     
-    // wardLogNeverInf[time][ward] = int for count of never infected patients
-    //loop over wardLogNeverInf
+    //loop over each time step - get numbers infectious and at risk who are never infected
     for(int t=0; t<=maxTime; t++) {
         
         //get total number of infected cases in each hospital at this time point
@@ -38,11 +37,11 @@ double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2
         hospitalI.resize(hospitalWardList.size());
         for( int hosp = 0; hosp<hospitalWardList.size(); hosp++) {
             hospitalI[hosp] = 0;
-            for (int ward : hospitalWards[hosp]) {
+            for (int ward : hospitalWardList[hosp]) {
                 hospitalI[hosp] += wardI[t][ward];
             }
         }
-        
+      
         //loop over wards
          for(int ward=0; ward < nWards; ward++) {
              
@@ -50,7 +49,7 @@ double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2
              admissionDuration += wardLogNeverInf[t][ward];
              
              //ward infected person-days exposed to - wardI[t][ward] = nInf
-             wardInfDays += wardI[t][ward] * wardLogNeverInf[t][ward];
+             wardInfDays += wardI[t][ward] * wardLogNeverInf[t][ward]; // wardLogNeverInf[time][ward] = int for count of never infected patients
              
              //get hospital for current ward
              int hosp = ward2Hospital.at(ward);
@@ -63,6 +62,8 @@ double llTrans(vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2
              sporeInfDays += sporeForceSummary[t][ward] * wardLogNeverInf[t][ward];
              
          }
+        
+         
     }
 
     int nonAdmissionDuration = (nNeverInfPatients*maxTime) - admissionDuration;
