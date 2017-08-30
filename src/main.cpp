@@ -209,7 +209,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     //generate random walk
     for(int i=1; i<steps; i++) {
         
-        
+        /*
         //timer for every iteration for testing
         printf("Starting iteration %d\n", i);
         struct timeval currentSystemTimeIter;
@@ -221,7 +221,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
         }
         previousSystemTimeIter = currentSystemTimeIter;
-        
+        */
         
         //PARAMETER AND TUNING REPORTING
         //every 100 steps
@@ -411,7 +411,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             double hastingsRatio = 0; //store log hastings ratio
             
             //propose infection infection time
-            double sdInfTime = 2.5; //sd for normal distribution for infection time updates
+            double sdInfTime = 5; //sd for normal distribution for infection time updates
             int proposedInfTime = proposeInfectionTime(proposedPatient, currentInfTimes[proposedPatient], onwardTransmission,
                                                       sampleTimes, maxTime, sdInfTime, ptLocation);
 
