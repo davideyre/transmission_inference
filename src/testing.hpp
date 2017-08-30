@@ -22,6 +22,6 @@ void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recov
              vector<vector<double>> &geneticDist, vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
              vector<vector<vector<int>>> &inPtDays,
              vector<vector<int>> &ptLocation,
-             vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, vector<vector<int>> hospitalWards, int maxTime);
+             vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2Hospital, vector<vector<int>> &hospitalWardList, int maxTime);
 
 #endif /* testing_hpp */

@@ -84,14 +84,11 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unor
 void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup,
                    vector<vector<vector<int>>> &wardLogInf,
                    vector<vector<int>> &wardLogNeverInf,
-                   int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards) {
+                   int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards, unordered_map<int,int> &ward2Hospital, vector<vector<int>> &hospitalWardList) {
     
     //temporary variables to hold text from CSV
     int tmp_admit, tmp_discharge;
     string tmp_ward, tmp_pt, tmp_hospital;
-    
-    //create ward list for each hospital
-    vector<vector<int>> wardList;
     
     //create a lookup for all the wards, and obtain the last discharge date at the same time
     io::CSVReader<3> in(filePath);
@@ -105,7 +102,7 @@ void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, u
         if (itHosp==hospitalLookup.end()) {
             hospitalLookup.insert( {tmp_hospital, h});
             h++;
-            wardList.push_back({});
+            hospitalWardList.push_back({});
         }
         
         string tmp_wardHosp = tmp_hospital+": "+tmp_ward;
@@ -113,7 +110,7 @@ void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, u
         if (it==wardLookup.end()) {
             wardLookup.insert( { tmp_wardHosp, i }); //save name of ward
             int hChk = hospitalLookup.at(tmp_hospital); //save which hospital ward is in
-            wardList[hChk].push_back(i);
+            hospitalWardList[hChk].push_back(i);
             i++;
         }
         tmp_discharge -= 1; //convert tmp_discharge to number from zero
@@ -129,14 +126,22 @@ void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, u
     //generate list of wards in the same hospital as each ward
     hospitalWards.resize(nWards);
     for (int hosp=0; hosp<nHospitals; hosp++) {
-        for (int ptWard : wardList[hosp]) {
-            for (int ward: wardList[hosp]) {
+        for (int ptWard : hospitalWardList[hosp]) {
+            for (int ward: hospitalWardList[hosp]) {
                 if (ward!=ptWard) {
                     hospitalWards[ptWard].push_back(ward);
                 }
             }
         }
     }
+    
+    //generate a list of hospitals for each ward
+    for (int hospital=0; hospital<hospitalWardList.size(); hospital++) {
+        for (int ward : hospitalWardList[hospital]) {
+            ward2Hospital.insert( {ward, hospital} );
+        }
+    }
+    
     
     //get max time
     int maxTimeWard = lastDischarge;
