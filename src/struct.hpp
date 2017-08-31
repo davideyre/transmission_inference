@@ -98,7 +98,7 @@ public:
             case 16 : return currentLLSample;
             case 17 : return currentLLRecovery;
                 
-            default: throw std::runtime_error( "Parameter structure: bad index\n" );
+            default: throw runtime_error( "Parameter structure: bad index\n" );
         }
     }
     
