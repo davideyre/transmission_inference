@@ -397,7 +397,8 @@ double getPrior(Parm &parm) {
     double priorBeta2 = dgamma(parm.betaHosp, 2, 0.002, 1); //dexp(parm.betaHosp, 100, 1);
     double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
     double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-20
-    double priorDirectNe = dgamma(parm.directNe, 2, 2, 1); //dexp(parm.directNe, 1, 1);
+    //double priorDirectNe = dgamma(parm.directNe, 2, 2, 1); //dexp(parm.directNe, 1, 1); //within host diversity = 2.mu.Ne = 0.3, i.e Ne = 22.5
+    double priorDirectNe = dnorm(parm.directNe, 22.5, 0.1, 1);
     double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
     double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
     double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1); //relatively uniform over 0 to 1
