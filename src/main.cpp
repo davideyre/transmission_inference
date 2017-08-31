@@ -328,6 +328,12 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 else {
                     // reject the proposed jump, stay at current position
                     chain[i][parmIndex] = currentParm[parmIndex];
+                    
+                    //reset proposedSporeForceSummary
+                    if(parmIndex ==9) {
+                        proposedSporeForceSummary = currentSporeForceSummary;
+                    }
+                    
                     //printf("Move rejected for parameter %d at iteration %d (current: %0.4f, proposed %0.4f\n", parmIndex, i, currentParm[parmIndex], proposedValue);
                 }
             }
