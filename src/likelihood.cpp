@@ -404,8 +404,11 @@ double getPrior(Parm &parm) {
     double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1); //relatively uniform over 0 to 1
     double priorBetaComm = dexp(parm.betaComm, 1, 1);
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //relatively uniform over 0 to 1
+    //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 5, 2, 1);//favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,5,2))))
+    //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 6, 2, 1);//strong favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,6,2))))
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
-    double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
+    //double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
+    double priorrecMu = dnorm(parm.recMu, 90, 3, 1); //longer recovery, mean 90 days, see in R: hist(rnbinom(1000,size=3,mu=90))
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorSampleSize + priorSampleMu +
     priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + priorRecSize + priorrecMu;
     return(prior);

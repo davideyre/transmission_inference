@@ -1285,7 +1285,7 @@ int main(int argc, const char * argv[]) {
     startParm.betaComm = 0.005;
     startParm.sporeProbLogit = 0.5;
     startParm.recSize = 3;
-    startParm.recMu = 30;
+    startParm.recMu = 90;
     
     vector<double> startSigma = {0.001, 0.001, 0.001, 0.2, 0.2, 0.2, 100, 0.01, 0.0005, 0.1, 0.1, 0.1, 0.1};
     
