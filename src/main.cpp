@@ -288,13 +288,16 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             //1. proposal distribution, i.e. proposed change in value of beta
             proposedValue = currentParm[parmIndex] + rnorm(0 , sigma[parmIndex]);
             
+            /*
             if(parmIndex==13) {
                 proposedValue=0.4; //temporary over-ride to fix at simualted value
             }
+            */
             
             proposedParm = currentParm; proposedParm[parmIndex] = proposedValue;
-            if(proposedValue <= 0 & parmIndex !=9 & parmIndex !=10) {
+            if((proposedValue <= 0 & parmIndex !=9 & parmIndex !=10) | (parmIndex==13 & proposedValue>1)) {
                 //if invalid proposed value skip this step - probabilities on logit scale so can be negative
+                //don't allow spore multipliers >1 for now
                 chain[i][parmIndex] = chain[i-1][parmIndex];
             }
             else {
