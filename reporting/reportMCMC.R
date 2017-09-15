@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/nejm_data/"
+path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/nejm_data_st42/"
 
 #read in genetic distances
 geneticDist = read.table(file=paste(path, "input/geneticDistances_snps.txt", sep=""))
@@ -184,13 +184,6 @@ sourceHPD = function(x, rowCount) {
   return (sources)
 }
 
-infSources.hpd = rep(0, ncol(inf.infSources))
-for (i in 1:ncol(inf.infSources)) {
-  if( true.infSources[i,1] %in% sourceHPD(inf.infSources[,i] ,rowCount) ) {
-    infSources.hpd[i] = 1
-  }
-}
-
 infSrc.summary = cbind(names(inf.infSources.mode), inf.infSources.mode)
 colnames(infSrc.summary) = c("recipient", "mode_source")
 rownames(infSrc.summary) = NULL
@@ -211,102 +204,129 @@ for (i in 1:nCases) {
    minSNPs[i] = min(geneticDist[as.character(infSrc.summary[i,1]), which(colnames(geneticDist)!=as.character(infSrc.summary[i,1]))])
 }
 
-infSrc.summary = as.data.frame(cbind(infSrc.summary, snpList, minSNPs, ess.infTimes))
-colnames(infSrc.summary) = c("recipient", "mode_source", "SNPs_to_mode", "minSNPs", "ESS_inf_times")
+infSrc.summary = as.data.frame(cbind(infSrc.summary, infSourceType.map, snpList, minSNPs, ess.infTimes))
+colnames(infSrc.summary) = c("recipient", "mode_source", "mode_source_type","SNPs_to_mode", "minSNPs", "ESS_inf_times")
 
 srcFile = paste(path, "inference/source_summary.csv", sep="")
 write.csv(infSrc.summary, srcFile, row.names=F)
 
 
 
-##extra check of ESS for infection times - restricting to smaller values
-hist(ess.infTimes, xlim=c(0,100), breaks=2000)
 
 
-# 
-# 
-# 
-# ## create plots of infection sources and times
-# 
-# 
-# getRoute = function(srcType) {
-#   o = factor(srcType, levels=c(0, 1,2,3,4,5),
-#              labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore"))
-#   return(as.character(o))
-# }
-# 
-# colors = brewer.pal(6,"Spectral")
-# 
-# #save plots as list
-# plot=list()
-# i=1
-# for (pt.R in infectedPatients) {
-#   pt = paste("patient_", pt.R, sep="")
-#   pt.index = which(infectedPatients==pt.R)
-#   d = table(inf.infSources[,pt], inf.infSourceTypes[,pt])
-#   d = as.data.frame(cbind(as.numeric(rownames(d)), d))
-#   colnames(d)[1] = "source"
-#   rownames(d) = 1:nrow(d)
-#   d = melt(d, id=c("source"))
-#   d = cbind(d, d[,3]/sum(d[,3]))
-#   colnames(d) = c("Source", "SourceType", "Frequency", "Probability")
-#   d = d[which(d$Frequency>0),]
-#   plot[[i]] = ggplot(d, aes(x=factor(Source), y=Probability,
-#                             fill=factor(SourceType, levels=c(0, 1,2,3,4,5),
-#                                         labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore")))) +
-#     geom_bar(stat="identity") +
-#     scale_y_continuous(limits=c(0,1)) +
-#     labs(y="Posterior probability", x="Source",
-#          title=paste("Infection sources for patient ", pt.R,
-#                      " (true source: ", true.infSources[pt.index,1],
-#                      " via route: ", getRoute(true.infSources[pt.index,2]), ")", sep="")) +
-#     scale_fill_manual(values=colors, drop=F, name="Source Type") +
-#     theme(legend.text=element_text(size=10), legend.title=element_text(size=10),
-#           axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10))
-#   i=i+1
-# 
-#   #plot difference in inferred infection time and true time
-#   inf.diffs = inf.infTimes[,pt.index] - (true.infTimes[pt.index] - 1)
-#   d = table(inf.diffs, inf.infSourceTypes[,pt])
-#   dMin = min(inf.diffs)
-#   dMax = max(inf.diffs)
-#   d = as.data.frame(cbind(as.numeric(rownames(d)), d))
-#   colnames(d)[1] = "inf_times"
-#   rownames(d) = 1:nrow(d)
-#   d = melt(d, id=c("inf_times"))
-#   d = cbind(d, d[,3]/sum(d[,3]))
-#   colnames(d) = c("InfectionTimes", "SourceType", "Frequency", "Probability")
-#   d = d[which(d$Frequency>0),]
-#   plot[[i]] = ggplot(d, aes(x=InfectionTimes, y=Probability,
-#                             fill=factor(SourceType, levels=c(0, 1,2,3,4,5),
-#                                         labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore")))) +
-#     geom_bar(stat="identity") +
-#     scale_y_continuous(limits=c(0,1)) +
-#     labs(y="Posterior probability", x="Estimated - true infection time",
-#          title=paste("Infection times for patient ", pt.R, sep="")) +
-#     scale_fill_manual(values=colors, drop=F, name="Source Type") +
-#     theme(legend.text=element_text(size=10), legend.title=element_text(size=10),
-#           axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10)) +
-#     scale_x_continuous(breaks=dMin:dMax)
-# 
-#   # d = as.data.frame(inf.infTimes[,pt.index] - true.infTimes[infectedPatients[pt.index]])
-#   # dMin = min(d)
-#   # dMax = max(d)
-#   # colnames(d) = c("infTimes")
-#   # plot[[i]] = ggplot(d, aes(x=infTimes)) +
-#   #   geom_histogram(binwidth = 1, col="orange", fill="orange", alpha=0.7) +
-#   #   labs(x="Estimated - true infection time", y="Frequency", title=paste("Infection times for patient ", pt.R, sep="")) +
-#   #   theme_bw() +
-#   #   theme(axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10)) +
-#   #   scale_x_continuous(breaks=dMin:dMax)
-# 
-#   i = i+1
-# }
-# 
-# #save plots to pdf - 4 per page
-# srcPlotFile = paste(path, "inference/source_plots.pdf", sep="")
-# glist = lapply(plot, ggplotGrob)
-# ggsave(srcPlotFile, marrangeGrob(glist, nrow = 2, ncol = 2, top=""), width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
-# 
-# 
-# 
+
+
+
+## create plots of infection sources and times
+
+
+getRoute = function(srcType) {
+  o = factor(srcType, levels=c(0, 1,2,3,4,5),
+             labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore"))
+  return(as.character(o))
+}
+
+colors = brewer.pal(6,"Spectral")
+
+#save plots as list
+plot=list()
+i=1
+for (pt in infectedPatients) {
+  d = as.data.frame(table(inf.infSources[,pt], inf.infSourceTypes[,pt]))
+  colnames(d)[1:2] = c("Source", "SourceType")
+  d = melt(d, id=c("Source", "SourceType"))
+  d = cbind(d[,c(1,2,4)], d[,4]/sum(d[,4]))
+  colnames(d) = c("Source", "SourceType", "Frequency", "Probability")
+  d = d[which(d$Frequency>0),]
+  plot[[i]] = ggplot(d, aes(x=factor(Source), y=Probability,
+                            fill=factor(SourceType, levels=c(0, 1,2,3,4,5),
+                                        labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore")))) +
+    geom_bar(stat="identity") +
+    scale_y_continuous(limits=c(0,1)) +
+    labs(y="Posterior probability", x="Source",
+         title=paste("Infection sources for patient ", patientLog$patient_id[pt], sep="")) +
+    scale_fill_manual(values=colors, drop=F, name="Source Type") +
+    theme(legend.text=element_text(size=10), legend.title=element_text(size=10),
+          axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10))
+  i=i+1
+
+  #plot inferred infection times
+  inf.times = inf.infTimes[,pt] +1 #convert back to number from 1
+  d = table(inf.times, inf.infSourceTypes[,pt])
+  dMin = min(inf.times)
+  dMax = max(inf.times)
+  d = as.data.frame(cbind(as.numeric(rownames(d)), d))
+  colnames(d)[1] = "inf_times"
+  rownames(d) = 1:nrow(d)
+  d = melt(d, id=c("inf_times"))
+  d = cbind(d, d[,3]/sum(d[,3]))
+  colnames(d) = c("InfectionTimes", "SourceType", "Frequency", "Probability")
+  d = d[which(d$Frequency>0),]
+  plot[[i]] = ggplot(d, aes(x=InfectionTimes, y=Probability,
+                            fill=factor(SourceType, levels=c(0, 1,2,3,4,5),
+                                        labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore")))) +
+    geom_bar(stat="identity") +
+    scale_y_continuous(limits=c(0,1)) +
+    labs(y="Posterior probability", x="Estimated infection time",
+         title=paste("Infection times for patient ", patientLog$patient_id[pt], sep="")) +
+    scale_fill_manual(values=colors, drop=F, name="Source Type") +
+    theme(legend.text=element_text(size=10), legend.title=element_text(size=10),
+          axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10)) +
+    scale_x_continuous(breaks=dMin:dMax)
+  i = i+1
+}
+
+#save plots to pdf - 4 per page
+srcPlotFile = paste(path, "inference/source_plots.pdf", sep="")
+glist = lapply(plot, ggplotGrob)
+ggsave(srcPlotFile, marrangeGrob(glist, nrow = 2, ncol = 2, top=""), width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
+
+
+
+#read in wardLog
+wardLog = read.csv(file = paste(path, "input/wardLog.csv", sep=""), stringsAsFactors=F)
+
+#read in SNPs
+snpList
+
+#get wardLog for list of patients
+plotWard = function(searchString, wardLog, wardMinMax, expand, patientLog) {
+   wardLogSelectPatient = which(wardLog$patient_id %in% searchString)
+   wardLogSubset = wardLog[wardLogSelectPatient,]
+   
+   patientLogSelectPatient = which(patientLog$patient_id %in% searchString)
+   patientLogSubset = patientLog[patientLogSelectPatient,]
+   
+   wardMinMax = c(wardMinMax[1]-expand,wardMinMax[2]+expand)
+   #restrict to min max
+   df.ward = wardLogSubset[which(wardLogSubset$t_discharge>=wardMinMax[1] & wardLogSubset$t_admit<=wardMinMax[2]),]
+   
+   df.ward.sample = cbind(df.ward, patientLog$t_sample[match(df.ward$patient_id, patientLog$patient_id)])
+   colnames(df.ward.sample) = c(colnames(df.ward), "t_sample")
+   
+   
+   
+   #df.ward.sample$t_sample[which(df.ward.sample$t_sample>df.ward.sample$t_discharge | df.ward.sample$t_sample<df.ward.sample$t_admit)] = NA
+   
+   print(df.ward.sample)
+   print(patientLogSubset)
+   
+   p = ggplot(data=df.ward.sample) +
+      geom_errorbarh(mapping=aes(y=factor(ward), x=t_admit, xmin=t_admit, xmax=t_discharge, 
+                                               color=factor(patient_id)), height=0.4, size=1) +
+      geom_point(mapping=aes(y=factor(ward), x=t_sample, color=factor(patient_id)), size=3, shape=4, stroke=1.5)
+   print(p)
+}
+
+plotWardWrapper = function(ptString, wardLog, patientLog, inf.infSources, inf.infTimes) {
+   expand = 50
+   pt = which(patientLog$patient_id==ptString)
+   sources = table(inf.infSources[,pt])
+   ptList = c(ptString, names(sources))
+   inf.times = inf.infTimes[,pt] +1
+   wardMinMax = c(min(inf.times), max(inf.times))
+   plotWard(ptList, wardLog, wardMinMax, expand, patientLog)
+}
+
+
+plotWardWrapper(ptString = "C00006232", wardLog, patientLog, inf.infSources, inf.infTimes)
