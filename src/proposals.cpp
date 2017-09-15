@@ -355,7 +355,7 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
                             }
                         }
 
-                        sourceLogLikelihood[srcIndex] = log(parm.betaWard * parm.sporeMultiplier * specificSporeLevel) + llGeneticSingle(sampleTimes, proposedPatient, sourceList[srcIndex],
+                        sourceLogLikelihood[srcIndex] = log(parm.betaWard * getSporeMultiplier(parm) * specificSporeLevel) + llGeneticSingle(sampleTimes, proposedPatient, sourceList[srcIndex],
                                                                                                                   infSourceType, geneticDist, nInfPatients, parm);
                     }
                     

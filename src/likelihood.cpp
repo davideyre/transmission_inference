@@ -79,7 +79,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                                          + (parm.betaWard * wardInfDays) //ward infection force
                                          + (parm.betaHosp * hospInfDays) //across hospital infection force
                                          + (parm.betaComm * nonAdmissionDuration) //community background
-                                         + (parm.betaWard * parm.sporeMultiplier * sporeInfDays ) //ward-based spore force
+                                         + (parm.betaWard * getSporeMultiplier(parm) * sporeInfDays ) //ward-based spore force
                                          );
     ll += logProbAvoidInf;
 
@@ -134,7 +134,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                                          + (parm.betaWard * wardInfDays) //ward infection force
                                          + (parm.betaHosp * hospInfDays) //across hospital infection force
                                          + (parm.betaComm * nonAdmissionDuration) //community background
-                                         + (parm.betaWard * parm.sporeMultiplier * sporeInfDays ) //ward-based spore force
+                                         + (parm.betaWard * getSporeMultiplier(parm) * sporeInfDays ) //ward-based spore force
                                          );
             
             //Pr(infecetd at t)
@@ -157,7 +157,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                 //get number of spore day equivalents - from sporeForceSummary
                 double sporeIt = sporeForceSummary[t][ward];
                 
-                betaI = parm.betaBgroundHosp + (parm.betaWard * wardIt) + (parm.betaHosp * hospIt) + (parm.betaWard * parm.sporeMultiplier * sporeIt);
+                betaI = parm.betaBgroundHosp + (parm.betaWard * wardIt) + (parm.betaHosp * hospIt) + (parm.betaWard * getSporeMultiplier(parm) * sporeIt);
             }
             
             double probInf = 1 - exp(-betaI);
@@ -189,7 +189,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                 }
                 
                 // prob(infected) * prob(infected by spore) * prob(infected by specific spore), total spore force cancels top and bottom
-                probInfSource = probInf * (parm.sporeMultiplier * parm.betaWard  / betaI ) * (specificSporeLevel) ;
+                probInfSource = probInf * ((getSporeMultiplier(parm) * parm.betaWard)  / betaI ) * (specificSporeLevel) ;
                 //if(patient==338) printf("%0.4f\t%0.4f\t%0.4f\n", probInf, betaI, specificSporeLevel);
                 
                 if(specificSporeLevel==0) {
@@ -404,14 +404,14 @@ double getPrior(Parm &parm) {
     double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1); //relatively uniform over 0 to 1
     double priorBetaComm = dexp(parm.betaComm, 1, 1);
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //relatively uniform over 0 to 1
-    double priorSporeMultiplier = dgamma(parm.sporeMultiplier, 5, 1/0.1, 1);
+    double priorSporeMultiplierLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //relatively uniform over 0 to 1
     //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 5, 2, 1);//favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,5,2))))
     //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 6, 2, 1);//strong favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,6,2))))
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
     //double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
     double priorrecMu = dnorm(parm.recMu, 90, 3, 1); //longer recovery, mean 90 days, see in R: hist(rnbinom(1000,size=3,mu=90))
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorSampleSize + priorSampleMu +
-    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + priorSporeMultiplier + priorRecSize + priorrecMu;
+    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + priorSporeMultiplierLogit + priorRecSize + priorrecMu;
     return(prior);
 }
 

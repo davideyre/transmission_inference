@@ -112,7 +112,7 @@ private:
 public:
     void displayLog() {
         printf("Current Values\n beta0: %0.7f\t beta1: %0.7f\t beta2: %0.7f\n sampleSize: %0.4f\t sampleMu: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\tsporeMultiplier: %0.4f\n recSize: %0.4f\t recMu %0.4f\n\nCurrentLL:  %0.1f\n",
-               betaBgroundHosp, betaWard, betaHosp, sampleSize, sampleMu, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), sporeMultiplier, recSize, recMu, currentLL);
+               betaBgroundHosp, betaWard, betaHosp, sampleSize, sampleMu, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), logistic(sporeMultiplier), recSize, recMu, currentLL);
         
         int x=1;
         
@@ -133,5 +133,7 @@ double getSporeP(Parm &parm);
 //function to return start infected prob
 double getStartInfP(Parm &parm);
 
+//function to report spore multiplier
+double getSporeMultiplier(Parm &parm);
 
 #endif /* struct_h */

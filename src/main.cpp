@@ -295,9 +295,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             */
             
             proposedParm = currentParm; proposedParm[parmIndex] = proposedValue;
-            if((proposedValue <= 0 & parmIndex !=9 & parmIndex !=10) | (parmIndex==13 & proposedValue>1)) {
+            if(proposedValue <= 0 & parmIndex !=9 & parmIndex !=10 & parmIndex !=13) {
                 //if invalid proposed value skip this step - probabilities on logit scale so can be negative
-                //don't allow spore multipliers >1 for now
                 chain[i][parmIndex] = chain[i-1][parmIndex];
             }
             else {

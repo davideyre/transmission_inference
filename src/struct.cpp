@@ -39,3 +39,9 @@ double getStartInfP(Parm &parm) {
     double pStartInf = logistic(parm.probStartInfLogit);
     return(pStartInf);
 }
+
+//function to report spore multiplier
+double getSporeMultiplier(Parm &parm) {
+    double sporeMultiplier = logistic(parm.sporeMultiplier);
+    return (sporeMultiplier);
+}
