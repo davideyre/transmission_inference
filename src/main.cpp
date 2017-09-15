@@ -371,24 +371,30 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         
         //over-ride for data augmentation
         
-//        currentInfTimes = infTimes;
-//        currentRecTimes = recoveryTimes;
-//        currentInfSources = infSources;
-//        currentInfSourceTypes = infSourceTypes;
-//        currentWardI = getWardI(nPatients, maxTime, nWards, currentInfTimes, currentRecTimes, wardLog);
-//        getSporePatientI(currentSporePatientI, infectedPatients, nPatients, maxTime, nWards, infTimes, currentRecTimes, ptLocation);
-//        getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporePatientI, maxTime, minTime, allWards, nPatients, currentInfTimes, ptLocation, currentParm);
-       
+        currentInfTimes = infTimes;
+        currentRecTimes = recoveryTimes;
+        currentInfSources = infSources;
+        currentInfSourceTypes = infSourceTypes;
+        currentWardI = getWardI(maxTime, nWards, currentInfTimes, currentRecTimes, wardLogInf);
+        getSporePatientI(currentSporePatientI, nInfPatients, maxTime, nWards, currentInfTimes, currentRecTimes, ptLocation);
+        getSporeForceSummary(currentSporeForceSummary, currentSporePatientI, maxTime, minTime, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
+     
         //generic over-ride
     
-//        currentParm = chain[i];
-//        currentLL = targetDist(infectedPatients, uninfectedPatients, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
-//                               currentSporePatientI, currentSporeForceSummary,
-//                             wardLog, inPtDays, ptLocation, currentWardI, nPatients, nWards, maxTime, geneticDist, geneticMap,currentParm);
-//         getSporeForceSummary(currentSporeForceSummary, infectedPatients, currentSporePatientI, maxTime, minTime, allWards, nPatients, currentInfTimes, ptLocation, currentParm);
+        currentParm = chain[i];
+        currentLL = targetDist(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, sampleTimes, currentRecTimes, currentInfSources, currentInfSourceTypes,
+                               currentSporePatientI, currentSporeForceSummary,
+                               wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
         
+        
+        currentLL = targetDist(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, sampleTimes, currentRecTimes,
+                               currentInfSources, currentInfSourceTypes,
+                               currentSporePatientI, currentSporeForceSummary,
+                               wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist, currentParm);
+        
+         getSporeForceSummary(currentSporeForceSummary, currentSporePatientI, maxTime, minTime, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
         // end over-ride
-
+/*
         
         //DATA AUGMENTATION
         
@@ -1077,7 +1083,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
         } //end of disruption section
         
-        
+        */
         double currentLLSample = llSample(nInfPatients, currentInfTimes, sampleTimes, currentParm);
         double currentLLGenetic = llGenetic(currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, nInfPatients, currentParm);
         double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI,
