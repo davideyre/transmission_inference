@@ -123,7 +123,7 @@ mutationRate = 2 #mutations per genome per year
 #save settings
 settings = list(bgroundBeta=bgroundBeta, wardBeta=wardBeta, hospBeta=hospBeta, 
                 commBeta=commBeta, pStartPos=pStartPos, sample.size=sample.size, sample.mu=sample.mu, rec.size=rec.size, rec.mu=rec.mu,
-                spore.p=spore.p, directNe=directNe, introNe=introNe, bottleneck=bottleneck, nWards=nWards,
+                spore.p=spore.p, spore.multiplier=spore.multiplier, directNe=directNe, introNe=introNe, bottleneck=bottleneck, nWards=nWards,
                 nPopulation=nPopulation, pAdmit=pAdmit, losMean=losMean, maxTime=maxTime, randomSeed=randomSeed)
 
 capture.output(settings, file = paste(outDir, "/initial_settings.txt", sep=""))
