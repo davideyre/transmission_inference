@@ -119,8 +119,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     chainInfSources[0] = startInfSources;
     chainInfSourceTypes[0] = startInfSourceTypes;
     
-    //set up acceptance counters - "beta0", "beta1", "beta2", "sampleSize", "sampleMu", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "recSize", "recMu", , "augmentation moves - infection", "aug - recovery", "disruption moves"
-    vector<int> nAccepted = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    //set up acceptance counters - "beta0", "beta1", "beta2", "sampleSize", "sampleMu", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "recSize", "recMu", "sporeMultiplier", "augmentation moves - infection", "aug - recovery", "disruption moves"
+    vector<int> nAccepted = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     
     //initial sd for MH updates
     vector<double> sigma = startSigma;
@@ -228,9 +228,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         if(i % 100 == 0) {
             printf("Starting iteration %d\n", i);
             //tune proposal distributions - update sigma based on nAccepted
-            printf("Accepted Moves\n beta0: %d\tbeta1: %d\tbeta2: %d\tsampleSize: %d\tsampleMu: %d\tdirectNe: %d\tintroNe: %d\tmu: %d\t betaComm: %d\nsporeProb: %d\tpStartInf: %d\trecSize %d\trecMu %d\n",
-                   nAccepted[0], nAccepted[1], nAccepted[2], nAccepted[3], nAccepted[4], nAccepted[5], nAccepted[6], nAccepted[7], nAccepted[8], nAccepted[9], nAccepted[10], nAccepted[11], nAccepted[12]);
-            for (int j=0; j<13; j++) {
+            printf("Accepted Moves\n beta0: %d\tbeta1: %d\tbeta2: %d\tsampleSize: %d\tsampleMu: %d\tdirectNe: %d\tintroNe: %d\tmu: %d\t betaComm: %d\nsporeProb: %d\tsporeMultiplier: %d\tpStartInf: %d\trecSize %d\trecMu %d\n",
+                   nAccepted[0], nAccepted[1], nAccepted[2], nAccepted[3], nAccepted[4], nAccepted[5], nAccepted[6], nAccepted[7], nAccepted[8], nAccepted[9], nAccepted[13], nAccepted[10], nAccepted[11], nAccepted[12]);
+            for (int j=0; j<14; j++) {
                 if(nAccepted[j]<20) {
                     sigma[j] = sigma[j] * 0.8;
                 } else if (nAccepted[j]>40) {
@@ -240,14 +240,14 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             
             //print augmentation moves
-            printf("Augmentation (infection) moves accepted %d\n", nAccepted[13]);
-            nAccepted[13] = 0;
-            printf("Augmentation (recovery) moves accepted %d\n", nAccepted[14]);
+            printf("Augmentation (infection) moves accepted %d\n", nAccepted[14]);
             nAccepted[14] = 0;
+            printf("Augmentation (recovery) moves accepted %d\n", nAccepted[15]);
+            nAccepted[15] = 0;
             
             //print disruption moves - cumulative total
-            printf("Disruption moves accepted %d\n", nAccepted[15]);
-            nAccepted[15] = 0;
+            printf("Disruption moves accepted %d\n", nAccepted[16]);
+            nAccepted[16] = 0;
             
             
             //display current parameter values
@@ -282,11 +282,16 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 
         
         //PARAMETER UPDATES
-        for (int parmIndex=0; parmIndex<13; parmIndex++) {
+        for (int parmIndex=0; parmIndex<14; parmIndex++) {
                 
             //iterate through parmameters - see Parm class for list in struct.hpp
             //1. proposal distribution, i.e. proposed change in value of beta
             proposedValue = currentParm[parmIndex] + rnorm(0 , sigma[parmIndex]);
+            
+            if(parmIndex==13) {
+                proposedValue=0.4; //temporary over-ride to fix at simualted value
+            }
+            
             proposedParm = currentParm; proposedParm[parmIndex] = proposedValue;
             if(proposedValue <= 0 & parmIndex !=9 & parmIndex !=10) {
                 //if invalid proposed value skip this step - probabilities on logit scale so can be negative
@@ -338,7 +343,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 }
             }
             
-        } //end 13 parameter updates
+        } //end 14 parameter updates
         
         
         
@@ -589,7 +594,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 chainInfSourceTypes[i] = proposedInfSourceTypes;
                 
                 //increment accepted counter
-                nAccepted[13] += 1;
+                nAccepted[14] += 1;
                 
                 //update onward transmission log
                 onwardTransmission = proposedOnwardTransmission;
@@ -721,7 +726,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 chainRecTimes[i] = proposedRecTimes;
                 
                 //increment accepted counter
-                nAccepted[14] += 1;
+                nAccepted[15] += 1;
                 
                 //set current values to the proposed values
                 currentRecTimes = proposedRecTimes;
@@ -1038,7 +1043,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     chainRecTimes[i] = proposedRecTimes;
                     
                     //increment distruption moves accepted counter
-                    nAccepted[15] += 1;
+                    nAccepted[16] += 1;
                     
                     //update onward transmission log
                     onwardTransmission = proposedOnwardTransmission;
@@ -1078,15 +1083,15 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
 
         //log posterior
-        chain[i][13] = currentLL;
+        chain[i][14] = currentLL;
         //log trans likelihood
-        chain[i][14] = currentLLTrans;
+        chain[i][15] = currentLLTrans;
         //log genetic likelihood
-        chain[i][15] = currentLLGenetic;
-        // log sampling likelihood
-        chain[i][16] = currentLLSample;
+        chain[i][16] = currentLLGenetic;
+        // log samling likelihood
+        chain[i][17] = currentLLSample;
         //log recovery likelihood
-        chain[i][17] = currentLLRecovery;
+        chain[i][18] = currentLLRecovery;
         
         
     } //end of MCMC steps
@@ -1271,7 +1276,7 @@ int main(int argc, const char * argv[]) {
 
     
     
-    //parameters: "beta0", "beta1", "beta2", "sampleSize", "sampleMu", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "recoverSize", "recMu",
+    //parameters: "beta0", "beta1", "beta2", "sampleSize", "sampleMu", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "recoverSize", "recMu", "sporeMultiplier"
     Parm startParm;
     startParm.betaBgroundHosp = 0.005;
     startParm.betaWard = 0.005;
@@ -1286,8 +1291,9 @@ int main(int argc, const char * argv[]) {
     startParm.sporeProbLogit = 0.5;
     startParm.recSize = 3;
     startParm.recMu = 90;
+    startParm.sporeMultiplier = 0.4;
     
-    vector<double> startSigma = {0.001, 0.001, 0.001, 0.2, 0.2, 0.2, 100, 0.01, 0.0005, 0.1, 0.1, 0.1, 0.1};
+    vector<double> startSigma = {0.001, 0.001, 0.001, 0.2, 0.2, 0.2, 100, 0.01, 0.0005, 0.1, 0.1, 0.1, 0.1, 0.01}; //follows order of parameters above
     
     
     //2d vector for results = columns: "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm"; rows = each iteration

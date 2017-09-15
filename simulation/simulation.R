@@ -64,8 +64,8 @@ if(!dir.exists(outDirBase)) {
 ### PARAMETERS ###
 #transmission parameters
 bgroundBeta = 0.002
-wardBeta = 0.007
-hospBeta = 0.002
+wardBeta = 0.005
+hospBeta = 0.001
 commBeta = 0.000
 
 pStartPos= 0.0
@@ -75,11 +75,12 @@ sample.mu = 10 #mean delay to sampling
 
 #recovery - neg binom distribution
 rec.size = 3
-rec.mu = 30
+rec.mu = 90
 
 #spore decay - geometric distn
 #hist(rgeom(1000,0.7))
 spore.p = 0.2
+spore.multiplier = 0.5 #the relatively infectiousness of spores
 
 #genetic parameters
 directNe = 1 #within host population size
@@ -88,7 +89,7 @@ bottleneck = 1000 #set to 1000 for high bottleneck
 
 #ward set up
 nWardsPerHospital = 4
-nHospitals = 2
+nHospitals = 1
 nWards = nWardsPerHospital * nHospitals
 
 hospitalWards = matrix(NA, nrow=nHospitals, ncol=nWardsPerHospital)
@@ -239,7 +240,7 @@ for(t in 2:maxTime) {
          vectorSporeLevel = sporeLevel[t,vectorISpore,ptWard]
          sumSporeLevel = sum(vectorSporeLevel)
          
-         betaI = c(bgroundBeta, (wardBeta*nIWard), (hospBeta*nIHosp), (wardBeta*sumSporeLevel)) #overall rate of infection
+         betaI = c(bgroundBeta, (wardBeta*nIWard), (hospBeta*nIHosp), (wardBeta*spore.multiplier*sumSporeLevel)) #overall rate of infection
          totalBetaI = sum(betaI) 
          probSource = betaI/totalBetaI #vector of probabilities for each source type
          

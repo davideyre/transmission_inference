@@ -71,6 +71,7 @@ public:
     double sporeProbLogit; //for geometric distn
     double recSize;
     double recMu;
+    double sporeMultiplier;
     
     //likelihood values stored with parameters in chain
     double currentLL, currentLLTrans, currentLLGenetic, currentLLSample, currentLLRecovery;
@@ -91,12 +92,13 @@ public:
             case 10 : return probStartInfLogit;
             case 11 : return recSize;
             case 12 : return recMu;
+            case 13 : return sporeMultiplier;
                 
-            case 13 : return currentLL;
-            case 14 : return currentLLTrans;
-            case 15 : return currentLLGenetic;
-            case 16 : return currentLLSample;
-            case 17 : return currentLLRecovery;
+            case 14 : return currentLL;
+            case 15 : return currentLLTrans;
+            case 16 : return currentLLGenetic;
+            case 17 : return currentLLSample;
+            case 18 : return currentLLRecovery;
                 
             default: throw runtime_error( "Parameter structure: bad index\n" );
         }
@@ -109,8 +111,10 @@ private:
     
 public:
     void displayLog() {
-        printf("Current Values\n beta0: %0.7f\t beta1: %0.7f\t beta2: %0.7f\n sampleSize: %0.4f\t sampleMu: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\n recSize: %0.4f\t recMu %0.4f\n\nCurrentLL:  %0.1f\n",
-               betaBgroundHosp, betaWard, betaHosp, sampleSize, sampleMu, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), recSize, recMu, currentLL);
+        printf("Current Values\n beta0: %0.7f\t beta1: %0.7f\t beta2: %0.7f\n sampleSize: %0.4f\t sampleMu: %0.4f\n directNe: %0.4f\t introNe: %0.4f\tmu: %0.4f\n pStartInfLogit: %0.6f\t pStartInf: %0.6f\n betaComm: %0.7f\n parm.sporeProbLogit: %0.4f\tsporeProb: %0.4f\tsporeMultiplier: %0.4f\n recSize: %0.4f\t recMu %0.4f\n\nCurrentLL:  %0.1f\n",
+               betaBgroundHosp, betaWard, betaHosp, sampleSize, sampleMu, directNe, introNe, mu, probStartInfLogit, logistic(probStartInfLogit), betaComm, sporeProbLogit, logistic(sporeProbLogit), sporeMultiplier, recSize, recMu, currentLL);
+        
+        int x=1;
         
     }
     
