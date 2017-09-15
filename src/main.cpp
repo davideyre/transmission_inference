@@ -368,7 +368,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
 //        chain[i].recMu = 30;
         
         
-        
+        /*
         //over-ride for data augmentation
         
         currentInfTimes = infTimes;
@@ -394,7 +394,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         
          getSporeForceSummary(currentSporeForceSummary, currentSporePatientI, maxTime, minTime, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
         // end over-ride
-/*
+*/
         
         //DATA AUGMENTATION
         
@@ -1083,7 +1083,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
         } //end of disruption section
         
-        */
+        
         double currentLLSample = llSample(nInfPatients, currentInfTimes, sampleTimes, currentParm);
         double currentLLGenetic = llGenetic(currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, nInfPatients, currentParm);
         double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI,
