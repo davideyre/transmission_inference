@@ -1290,7 +1290,7 @@ int main(int argc, const char * argv[]) {
     startParm.betaWard = 0.005;
     startParm.betaHosp = 0.005;
     startParm.sampleSize = 3;
-    startParm.sampleMu = 5;
+    startParm.sampleMu = 20;
     startParm.directNe =  1;
     startParm.introNe = 500;
     startParm.mu = 2/365.25;

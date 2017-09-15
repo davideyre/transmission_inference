@@ -329,4 +329,4 @@ plotWardWrapper = function(ptString, wardLog, patientLog, inf.infSources, inf.in
 }
 
 
-plotWardWrapper(ptString = "C00006232", wardLog, patientLog, inf.infSources, inf.infTimes)
+plotWardWrapper(ptString = "C00002816", wardLog, patientLog, inf.infSources, inf.infTimes)
