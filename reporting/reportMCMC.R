@@ -4,6 +4,7 @@ rm(list = ls())
 library(coda)
 library(optparse)
 library(ggplot2)
+#devtools::install_github("baptiste/gridextra")
 library(gridExtra)
 library(reshape)
 library(RColorBrewer)
@@ -24,6 +25,9 @@ geneticDist = read.table(file=paste(path, "input/geneticDistances_snps.txt", sep
 patientLog = read.csv(file = paste(path, "input/patientLog.csv", sep=""), stringsAsFactors=F)
 infectedPatients = which(!is.na(patientLog$t_sample))
 sampleTimes = patientLog$t_sample[infectedPatients]
+
+#read in wardLog
+wardLog = read.csv(file = paste(path, "input/wardLog.csv", sep=""), stringsAsFactors=F)
 
 #read in parameters
 mcmcLog = paste(path, "inference/chain_parameters.txt", sep="")
@@ -220,6 +224,54 @@ write.csv(infSrc.summary, srcFile, row.names=F)
 ## create plots of infection sources and times
 
 
+## functions for ward overlap plotting
+#get wardLog for list of patients
+plotWard = function(searchString, wardLog, wardMinMax, expand, patientLog) {
+   wardLogSelectPatient = which(wardLog$patient_id %in% searchString)
+   wardLogSubset = wardLog[wardLogSelectPatient,]
+   
+   patientLogSelectPatient = which(patientLog$patient_id %in% searchString)
+   patientLogSubset = patientLog[patientLogSelectPatient,]
+   
+   wardMinMax = c(wardMinMax[1]-expand,wardMinMax[2]+expand)
+   #restrict to min max
+   df.ward = wardLogSubset[which(wardLogSubset$t_discharge>=wardMinMax[1] & wardLogSubset$t_admit<=wardMinMax[2]),]
+   
+   df.ward.sample = cbind(df.ward, patientLog$t_sample[match(df.ward$patient_id, patientLog$patient_id)])
+   colnames(df.ward.sample) = c(colnames(df.ward), "t_sample")
+   
+   
+   
+   #df.ward.sample$t_sample[which(df.ward.sample$t_sample>df.ward.sample$t_discharge | df.ward.sample$t_sample<df.ward.sample$t_admit)] = NA
+   
+   #print(df.ward.sample)
+   #print(patientLogSubset)
+   
+   p = ggplot(data=df.ward.sample) +
+      geom_errorbarh(mapping=aes(y=factor(ward), x=t_admit, xmin=t_admit, xmax=t_discharge, 
+                                 color=factor(patient_id)), height=0.4, size=1, alpha=0.5) +
+      geom_point(mapping=aes(y=factor(ward), x=t_sample, color=factor(patient_id)), size=3, shape=4, stroke=1.5) +
+      labs(y="Ward", x="Time",
+           title=paste("Ward overlaps")) +
+      scale_colour_discrete(name="Patient")
+   return(p)
+}
+
+plotWardWrapper = function(ptString, wardLog, patientLog, inf.infSources, inf.infTimes) {
+   expand = 100
+   pt = which(patientLog$patient_id==ptString)
+   sources = table(inf.infSources[,pt])
+   ptList = c(ptString, names(sources))
+   inf.times = inf.infTimes[,pt] +1
+   wardMinMax = c(min(inf.times), max(inf.times))
+   p = plotWard(ptList, wardLog, wardMinMax, expand, patientLog)
+   return(p)
+}
+
+
+## start loop through all infection source and time plotting
+
+
 getRoute = function(srcType) {
   o = factor(srcType, levels=c(0, 1,2,3,4,5),
              labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore"))
@@ -247,7 +299,9 @@ for (pt in infectedPatients) {
          title=paste("Infection sources for patient ", patientLog$patient_id[pt], sep="")) +
     scale_fill_manual(values=colors, drop=F, name="Source Type") +
     theme(legend.text=element_text(size=10), legend.title=element_text(size=10),
-          axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10))
+          axis.text=element_text(size=10), axis.text.x=element_text(angle=45,hjust=1),
+          axis.title=element_text(size=10), plot.title=element_text(size=10))
+
   i=i+1
 
   #plot inferred infection times
@@ -262,71 +316,33 @@ for (pt in infectedPatients) {
   d = cbind(d, d[,3]/sum(d[,3]))
   colnames(d) = c("InfectionTimes", "SourceType", "Frequency", "Probability")
   d = d[which(d$Frequency>0),]
+  
+  dLen = dMax-dMin
+  x.ticks = seq(dMin, dMax, ceiling(dLen/10))
+  
   plot[[i]] = ggplot(d, aes(x=InfectionTimes, y=Probability,
                             fill=factor(SourceType, levels=c(0, 1,2,3,4,5),
                                         labels=c("Hospital background", "Ward", "Hospital-wide", "Community background", "Start positive", "Spore")))) +
     geom_bar(stat="identity") +
     scale_y_continuous(limits=c(0,1)) +
+    scale_x_discrete(limits=x.ticks) +
     labs(y="Posterior probability", x="Estimated infection time",
          title=paste("Infection times for patient ", patientLog$patient_id[pt], sep="")) +
     scale_fill_manual(values=colors, drop=F, name="Source Type") +
     theme(legend.text=element_text(size=10), legend.title=element_text(size=10),
-          axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10)) +
-    scale_x_continuous(breaks=dMin:dMax)
+          axis.text=element_text(size=10), axis.title=element_text(size=10), plot.title=element_text(size=10))
+  i = i+1
+  
+  plot[[i]] = plotWardWrapper(ptString = patientLog$patient_id[pt], wardLog, patientLog, inf.infSources, inf.infTimes)
+  
   i = i+1
 }
 
 #save plots to pdf - 4 per page
 srcPlotFile = paste(path, "inference/source_plots.pdf", sep="")
 glist = lapply(plot, ggplotGrob)
-ggsave(srcPlotFile, marrangeGrob(glist, nrow = 2, ncol = 2, top=""), width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
+ggsave(srcPlotFile, marrangeGrob(glist, layout_matrix=matrix(c(1,2,3,3), 2), nrow=2, ncol=2), width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
 
 
 
-#read in wardLog
-wardLog = read.csv(file = paste(path, "input/wardLog.csv", sep=""), stringsAsFactors=F)
 
-#read in SNPs
-snpList
-
-#get wardLog for list of patients
-plotWard = function(searchString, wardLog, wardMinMax, expand, patientLog) {
-   wardLogSelectPatient = which(wardLog$patient_id %in% searchString)
-   wardLogSubset = wardLog[wardLogSelectPatient,]
-   
-   patientLogSelectPatient = which(patientLog$patient_id %in% searchString)
-   patientLogSubset = patientLog[patientLogSelectPatient,]
-   
-   wardMinMax = c(wardMinMax[1]-expand,wardMinMax[2]+expand)
-   #restrict to min max
-   df.ward = wardLogSubset[which(wardLogSubset$t_discharge>=wardMinMax[1] & wardLogSubset$t_admit<=wardMinMax[2]),]
-   
-   df.ward.sample = cbind(df.ward, patientLog$t_sample[match(df.ward$patient_id, patientLog$patient_id)])
-   colnames(df.ward.sample) = c(colnames(df.ward), "t_sample")
-   
-   
-   
-   #df.ward.sample$t_sample[which(df.ward.sample$t_sample>df.ward.sample$t_discharge | df.ward.sample$t_sample<df.ward.sample$t_admit)] = NA
-   
-   print(df.ward.sample)
-   print(patientLogSubset)
-   
-   p = ggplot(data=df.ward.sample) +
-      geom_errorbarh(mapping=aes(y=factor(ward), x=t_admit, xmin=t_admit, xmax=t_discharge, 
-                                               color=factor(patient_id)), height=0.4, size=1) +
-      geom_point(mapping=aes(y=factor(ward), x=t_sample, color=factor(patient_id)), size=3, shape=4, stroke=1.5)
-   print(p)
-}
-
-plotWardWrapper = function(ptString, wardLog, patientLog, inf.infSources, inf.infTimes) {
-   expand = 50
-   pt = which(patientLog$patient_id==ptString)
-   sources = table(inf.infSources[,pt])
-   ptList = c(ptString, names(sources))
-   inf.times = inf.infTimes[,pt] +1
-   wardMinMax = c(min(inf.times), max(inf.times))
-   plotWard(ptList, wardLog, wardMinMax, expand, patientLog)
-}
-
-
-plotWardWrapper(ptString = "C00002816", wardLog, patientLog, inf.infSources, inf.infTimes)
