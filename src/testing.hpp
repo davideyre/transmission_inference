@@ -18,7 +18,7 @@ using namespace std;
 
 void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes, Parm &parm,
              vector<int> &infSources, vector<int> &infSourceType,
-             vector<vector<vector<int>>> &sporePatientI, vector<vector<vector<double>>> &sporeForce, vector<vector<double>> &sporeForceSummary,
+             vector<vector<vector<SporeEvent>>> &sporePatientI, vector<vector<vector<double>>> &sporeForce, vector<vector<double>> &sporeForceSummary,
              vector<vector<double>> &geneticDist, vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
              vector<vector<vector<int>>> &inPtDays,
              vector<vector<int>> &ptLocation,

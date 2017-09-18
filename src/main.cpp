@@ -132,7 +132,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     
     //current and proposed values
     vector<int> currentInfTimes, currentRecTimes, currentInfSources, currentInfSourceTypes, proposedInfTimes, proposedRecTimes, proposedInfSources, proposedInfSourceTypes;
-    vector<vector<vector<int>>> currentSporePatientI, proposedSporePatientI;
+    vector<vector<vector<SporeEvent>>> currentSporePatientI, proposedSporePatientI;
     vector<vector<double>> currentSporeForceSummary, proposedSporeForceSummary;
     vector<vector<int>> currentWardI, proposedWardI; //set up wardI log - //create array of the number of infected individuals on each ward at each time point
     

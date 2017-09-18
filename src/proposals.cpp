@@ -243,7 +243,7 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
 //get list of sources and their probabilities for a given patient and infection time, and parameter set
 SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
                              vector<vector<vector<int>>> &wardLogInf, vector<int> infSourceType,
-                             vector<vector<vector<int>>> &sporePatientI,
+                             vector<vector<vector<SporeEvent>>> &sporePatientI,
                              vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist,
                              int nWards,
@@ -301,8 +301,8 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
             //potential spore sources
             for (int srcPt = 0; srcPt<nInfPatients; srcPt ++) {
                 if(!sporePatientI[ward][srcPt].empty()) {
-                    for (int sporeTime: sporePatientI[ward][srcPt]) {
-                        if(sporeTime<=proposedInfTime & srcPt!=proposedPatient) {
+                    for (SporeEvent sporeEvent: sporePatientI[ward][srcPt]) {
+                        if(sporeEvent.start<=proposedInfTime & sporeEvent.end>=proposedInfTime & srcPt!=proposedPatient) {
                             sourceList.push_back(srcPt);
                             sourceTypeList.push_back(SrcType::SPORE);
                             break;
@@ -348,9 +348,9 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
                         
                         //get the relative infectious level of this spore
                         double specificSporeLevel = 0;
-                        for(int sporeTime: sporePatientI[ward][sourceList[srcIndex]]) {
-                            if (sporeTime <= proposedInfTime) {
-                                int specificSporeDuration = proposedInfTime - sporeTime + 1;
+                        for(SporeEvent sporeEvent: sporePatientI[ward][sourceList[srcIndex]]) {
+                            if (sporeEvent.start <= proposedInfTime & sporeEvent.end >= proposedInfTime) {
+                                int specificSporeDuration = proposedInfTime - sporeEvent.start + 1;
                                 specificSporeLevel += pow((1-getSporeP(parm)), specificSporeDuration);
                             }
                         }
@@ -378,7 +378,7 @@ SrcList getSourceProb(int proposedPatient, int proposedInfTime, vector<int> &inf
 
 //function to determine proposed source of infection conditionally
 Src proposeConditionalSource(int proposedPatient, int proposedInfTime, vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoveryTimes,
-                             vector<vector<vector<int>>> &wardLog, vector<int> infSourceType, vector<vector<vector<int>>> &sporePatientI,
+                             vector<vector<vector<int>>> &wardLog, vector<int> infSourceType, vector<vector<vector<SporeEvent>>> &sporePatientI,
                              vector<vector<int>> &ptLocation,
                              vector<vector<double>> &geneticDist, int nWards, int nInfPatients, vector<vector<int>> &hospitalWards, Parm &parm) {
     Src output; //struct of type Src to store output

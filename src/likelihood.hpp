@@ -23,7 +23,7 @@ using namespace std;
 //log likelihood contribution from transmission model - p(I | parm)
 double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
                vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
-               vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
+               vector<vector<vector<SporeEvent>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
@@ -53,7 +53,7 @@ double getPrior(Parm &parm);
 double targetDist (vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
                    vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
                    vector<int> &infSources, vector<int> &infSourceType,
-                   vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
+                   vector<vector<vector<SporeEvent>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                    vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                    vector<vector<vector<int>>> &inPtDays,
                    vector<vector<int>> &ptLocation,

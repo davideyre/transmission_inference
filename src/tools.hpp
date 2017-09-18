@@ -40,13 +40,13 @@ vector<vector<int>> getWardI(int maxTime, int nWards, vector<int> &infTimes, vec
 void updateWardI(vector<vector<int>> &wardI, int maxTime, int minTime, set<int> &wardsToUpdate, vector<int> &infTimes, vector<int> &recTimes, vector<vector<vector<int>>> &wardLogInf);
 
 //function to get sporePatientI - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
-void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
+void getSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
 
 //udpate sporePatientI for a single patient - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
-void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
+void updateSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation);
 
 //function to pre-calculate the sum of spore force of infection - sporeForceSummary[t][ward]
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int minTime, set<int> &wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm);
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<SporeEvent>>> &sporePatientI, int maxTime, int minTime, set<int> &wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm);
 
 
 //function to get vector of days an intpatient - inPtDays[patient][ward] = {times...} (whereas wardLog[time][ward] = {patients...})

@@ -12,7 +12,7 @@
 
 double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
                vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
-               vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
+               vector<vector<vector<SporeEvent>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                vector<vector<vector<int>>> &inPtDays,
                vector<vector<int>> &ptLocation,
@@ -181,9 +181,9 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                 //spore
                 int ward = ptLocation[patient][t];
                 double specificSporeLevel = 0;
-                for(int sporeTime: sporePatientI[ward][infSources[patient]]) { //for each time spore left on this ward
-                    if( sporeTime <= t) {
-                        int specificSporeDuration = t - sporeTime + 1; //get number of days since spore set, including day set
+                for(SporeEvent sporeEvent: sporePatientI[ward][infSources[patient]]) { //for each time spore left on this ward
+                    if( sporeEvent.start <= t & sporeEvent.end >=t) { //find the correct spore event
+                        int specificSporeDuration = t - sporeEvent.start + 1; //get number of days since spore set, including day set
                         specificSporeLevel += pow((1-getSporeP(parm)), specificSporeDuration);
                     }
                 }
@@ -420,7 +420,7 @@ double getPrior(Parm &parm) {
 double targetDist (vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
                    vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recoverTimes,
                    vector<int> &infSources, vector<int> &infSourceType,
-                   vector<vector<vector<int>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
+                   vector<vector<vector<SporeEvent>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                    vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                    vector<vector<vector<int>>> &inPtDays,
                    vector<vector<int>> &ptLocation,

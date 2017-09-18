@@ -37,6 +37,12 @@ struct SrcList {
     vector<double> sourceProbabilities; //vector of probabilities for each source
 };
 
+//structure for holding spore events
+struct SporeEvent {
+    int start; //date spores start being present
+    int end; //date spores end, i.e. 1 time step prior to readmission
+};
+
 
 //operator to allow comparison of transmission events
 bool operator==(const trans& lhs, const trans& rhs);

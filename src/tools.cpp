@@ -58,7 +58,7 @@ void updateWardI(vector<vector<int>> &wardI, int maxTime, int minTime, set<int> 
 
 
 //function to get sporePatientI - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
-void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation) {
+void getSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int nInfPatients, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation) {
     
     //reset sporePatientI for all infected patients to empty vector
     for(int ward=0; ward<nWards; ward++) {
@@ -74,7 +74,10 @@ void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatien
         if(recTimes[pt]<=maxTime) {
             int recoveryWard = ptLocation[pt][recTimes[pt]];
             if(recoveryWard>-1) {
-                sporePatientI[recoveryWard][pt].push_back(recTimes[pt]);
+                SporeEvent spore;
+                spore.start = recTimes[pt];
+                spore.end = maxTime;
+                sporePatientI[recoveryWard][pt].push_back(spore);
             }
         }
         // B) set spores for each discharge while still infectious, i.e. from time step after infected to time step before recovery
@@ -83,7 +86,10 @@ void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatien
         for(int t = t0; t<= min({recTimes[pt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
             if(ptLocation[pt][t] != currentWard & currentWard!=-1) {
                 //discharge has occured at time, t-1, set spores to start at time t on previous location
-                sporePatientI[currentWard][pt].push_back(t);
+                SporeEvent spore;
+                spore.start = t;
+                spore.end = maxTime;
+                sporePatientI[currentWard][pt].push_back(spore);
             }
             currentWard = ptLocation[pt][t];
         }
@@ -91,7 +97,7 @@ void getSporePatientI(vector<vector<vector<int>>> &sporePatientI, int nInfPatien
 }
 
 //udpate sporePatientI for a single patient - sporePatientI[ward][pt] = vector of time intervals spore first present in (allow for multiple ward discharges while infectious)
-void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation) {
+void updateSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int updatePt, int maxTime, int nWards, vector<int> &infTimes, vector<int> &recTimes, vector<vector<int>> &ptLocation) {
 
     //set current values for sporePatientI for this patient to empty vector
     for(int ward=0; ward<nWards; ward++) {
@@ -102,7 +108,10 @@ void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updateP
     if(recTimes[updatePt]<=maxTime) {
         int recoveryWard = ptLocation[updatePt][recTimes[updatePt]];
         if(recoveryWard>-1) {
-            sporePatientI[recoveryWard][updatePt].push_back(recTimes[updatePt]);
+            SporeEvent spore;
+            spore.start = recTimes[updatePt];
+            spore.end = maxTime;
+            sporePatientI[recoveryWard][updatePt].push_back(spore);
         }
     }
     
@@ -112,7 +121,10 @@ void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updateP
     for(int t = t0; t<= min({recTimes[updatePt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
         if(ptLocation[updatePt][t] != currentWard & currentWard!=-1) {
             //discharge has occured at time, t-1, set spores to start at time t, set spores on previous ward
-            sporePatientI[currentWard][updatePt].push_back(t);
+            SporeEvent spore;
+            spore.start = t;
+            spore.end = maxTime;
+            sporePatientI[currentWard][updatePt].push_back(spore);
         }
         currentWard = ptLocation[updatePt][t];
     }
@@ -121,7 +133,7 @@ void updateSporePatientI(vector<vector<vector<int>>> &sporePatientI, int updateP
 
 
 //function to pre-calculate the sum of spore force of infection - sporeForceSummary[t][ward]
-void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<int>>> &sporePatientI, int maxTime, int minTime, set<int> &wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
+void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vector<vector<SporeEvent>>> &sporePatientI, int maxTime, int minTime, set<int> &wardsToUpdate, int nInfPatients, vector<int> &infTimes, vector<vector<int>> &ptLocation, Parm parm) {
 
     //pre-calculate all spore probabilities
     double probSpore = 1-getSporeP(parm);
@@ -143,9 +155,9 @@ void getSporeForceSummary(vector<vector<double>> &sporeForceSummary, vector<vect
         for (int sporePt=0; sporePt< nInfPatients; sporePt++) {
             if(!sporePatientI[ward][sporePt].empty()) {
                 // for each time spores are set
-                for (int sporeTime : sporePatientI[ward][sporePt]) {
-                    for (int t=max({minTime, sporeTime}); t<=maxTime; t++) {
-                        int sporeDuration = t - sporeTime + 1;
+                for (SporeEvent sporeEvent : sporePatientI[ward][sporePt]) {
+                    for (int t=max({minTime, sporeEvent.start}); t<=min({maxTime, sporeEvent.end}); t++) {
+                        int sporeDuration = t - sporeEvent.start + 1;
                         sporeForceSummary[t][ward] += probSporeDay[sporeDuration];
                     }
                 }
