@@ -93,7 +93,7 @@ void getSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int nIn
                 int sporeWard = currentWard;
                 
                 //check for next admission, if have another admission while still infectious then spores end in the time interval before the admission starts
-                for(int t_chk = spore.start+1; t_chk<=min({maxTime, recTimes[pt]-1}; t_chk++) {
+                for(int t_chk = spore.start+1; t_chk<=min({maxTime, recTimes[pt]-1}); t_chk++) {
                     if(ptLocation[pt][t_chk] == sporeWard) {
                         spore.end = t_chk-1;
                         break; 
