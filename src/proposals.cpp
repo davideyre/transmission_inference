@@ -162,28 +162,42 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
     
     
     //determine if new recovery time interfers with any existing spore transmission
+    
     for (trans transmission : onwardTransmission[proposedPatient]) {
         if(transmission.srcType == SrcType::SPORE){
             //iterate over spore transmissions from this patient
             int sporeError = 9; //default spore error
             
-            //check if the spore could be created by patient recovery under the new recovery time
-            if(proposedRecTime<=maxTime) {
-                if(transmission.ward==ptLocation[proposedPatient][proposedRecTime]) {
-                    //patient recovered on the same ward as the spore transmission, check timings
-                    //patient must recover in or before the time step of spore transmission
-                    if(proposedRecTime>transmission.t) {
-                        //check the proposed recovery time does not occur after a spore transmission
-                        sporeError = 1;
-                    }
-                    else {
-                        //no error
-                        sporeError = 0;
+            //first check if now an inpatient and infectious during a spore transmission
+            if(transmission.ward==ptLocation[proposedPatient][transmission.t]) {
+                //transmission occured on the same ward as the patient's location at the point of transmission, i.e. must be caused by recovery if due to spore
+                if(proposedRecTime>transmission.t) {
+                    //patient recovers after point of transmission, i.e. still infectious in this time step - therefore spore transmission not possible
+                    sporeError = 3;
+                }
+                
+            }
+            
+            if(sporeError!=3) { //if still no error
+                //check if the spore could be created by patient recovery under the new recovery time
+                if(proposedRecTime<=maxTime) {
+                    if(transmission.ward==ptLocation[proposedPatient][proposedRecTime]) {
+                        //patient recovered on the same ward as the spore transmission, check timings
+                        //patient must recover in or before the time step of spore transmission
+                        if(proposedRecTime>transmission.t) {
+                            //check the proposed recovery time does not occur after a spore transmission
+                            sporeError = 1;
+                        }
+                        else {
+                            //no error
+                            sporeError = 0;
+                        }
                     }
                 }
             }
+
             
-            if(sporeError!=0) {
+            if(sporeError!=0 & sporeError!=3) {
                 //need to check if the spore could have been created by a ward discharge between infection time +1 and the new recovery time
                 int dischargeFound = 0;
                 
@@ -220,6 +234,9 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
                 }
                 else if(sporeError==2) {
                     printf("Proposed recovery time does not allow for a transmission requiring a discharge, move rejected\n");
+                }
+                else if(sporeError==3) {
+                    printf("Proposed recovery time now makes infectious during a spore transmission previous due to recovery, move rejected\n");
                 }
                 else {
                     printf("ERROR - HALT\n\n");
