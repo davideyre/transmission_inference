@@ -527,6 +527,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 newTrans.victim = proposedPatient;
                 newTrans.srcType = proposedInfSourceTypes[proposedPatient];
                 newTrans.ward = ptLocation[proposedPatient][proposedInfTime];
+                
                 proposedOnwardTransmission[proposedInfSources[proposedPatient]].push_back(newTrans);
             }
             
@@ -664,7 +665,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             //propose new recovery time
             int sdRecTime = 5;
             int proposedRecTime = proposeRecoveryTime(proposedPatient, currentRecTimes[proposedPatient],
-                                                      onwardTransmission, sampleTimes, maxTime, sdRecTime, ptLocation, currentInfTimes);
+                                                      onwardTransmission, sampleTimes, maxTime, minTime, sdRecTime, ptLocation, currentInfTimes);
             
             //proposedRecTime = recoveryTimes[proposedPatient];//temp OVER-RIDE for TESTING
             
@@ -927,7 +928,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 for(int node : nodeSet) {
                     int sdDisruptRecTime = 5;
                     int proposedRecoveryTime = proposeRecoveryTime(node, currentRecTimes[node], proposedOnwardTransmission,
-                                                                   sampleTimes, maxTime, sdDisruptRecTime, ptLocation, proposedInfTimes);
+                                                                   sampleTimes, maxTime, minTime, sdDisruptRecTime, ptLocation, proposedInfTimes);
                     if(proposedRecoveryTime == std::numeric_limits<int>::min()) {
                         //keep current infection time
                         proposedRecoveryTime = currentRecTimes[node];

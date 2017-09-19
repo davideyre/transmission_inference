@@ -32,7 +32,7 @@ int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes, P
 
 //function to propose a new recovery time
 int proposeRecoveryTime(int proposedPatient, int currentRecTime,
-                        vector<vector<trans>> &onwardTransmission, vector<int> &sampleTimes, int maxTime, double delta,
+                        vector<vector<trans>> &onwardTransmission, vector<int> &sampleTimes, int maxTime, int minTime, double delta,
                         vector<vector<int>> &ptLocation, vector<int> &infTimes);
 
 

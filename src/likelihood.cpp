@@ -201,6 +201,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                             printf("%d, ", tt);
                         }
                     }
+                    
                     printf("\n");
                 }
                 

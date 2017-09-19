@@ -129,7 +129,7 @@ int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes, P
 //function to propose a new recovery time
   // this is constrained by {last onward transmission and sampling} to {first spore transmission}
 int proposeRecoveryTime(int proposedPatient, int currentRecTime,
-                        vector<vector<trans>> &onwardTransmission, vector<int> &sampleTimes, int maxTime, double delta,
+                        vector<vector<trans>> &onwardTransmission, vector<int> &sampleTimes, int maxTime, int minTime, double delta,
                         vector<vector<int>> &ptLocation, vector<int> &infTimes) {
     
     //propose a new recovery time
@@ -188,8 +188,9 @@ int proposeRecoveryTime(int proposedPatient, int currentRecTime,
                 int dischargeFound = 0;
                 
                 //search for ward discharges
-                int currentLocation = ptLocation[proposedPatient][infTimes[proposedPatient]+1];
-                for(int t=infTimes[proposedPatient]+2; t<=proposedRecTime+1; t++) {
+                int startTime = max({minTime, infTimes[proposedPatient]+1}); //find search window - set to start at minTime for cases infected before minTime
+                int currentLocation = ptLocation[proposedPatient][startTime];
+                for(int t=startTime+1; t<=proposedRecTime+1; t++) {
                     if(ptLocation[proposedPatient][t] != currentLocation &  currentLocation!=-1) {
                         //a discharge has occured
                         int dischargeDate = t-1;
