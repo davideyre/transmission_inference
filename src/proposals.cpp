@@ -55,6 +55,13 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
         for (trans transmission : onwardTransmission[proposedPatient]) {
             if(transmission.srcType == SrcType::SPORE) {
                 
+                //check for any spore transmissions prior
+                int orderEvents = 0;
+                if(transmission.t<=proposedInfTime) {
+                    //infection time proposed is after spore transmission - not possible (also not possible to be infected and set spore in same time interval)
+                    orderEvents = 1;
+                }
+                
                 //check if any of these spore transmissions depend on discharge between the current and proposed infection times
                 int dependDischarge = 0;
                 int currentLocation = ptLocation[proposedPatient][currentInfTime+1]; //location at time first infectious
@@ -69,16 +76,20 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
                             //discharge from the ward of transmission, before the spore transmission between current and proposed times becomes infectious
                             dependDischarge=1;
                             
-                            //check no subsequent discharge from this ward before transmission.t
-                            //first check no re-admission
-                            for(int tt=t; tt<=proposedInfTime+1; tt++) {
+                            //check no subsequent discharge from this ward, after proposedInfTime and before transmission.t
+                            //check for re-admission from t onwards
+                            for(int tt=t; tt<=transmission.t; tt++) {
                                 if(ptLocation[proposedPatient][tt] == transmission.ward) {
                                     //readmission has occured, now check for discharge
                                     for (int ttt=tt; ttt<=proposedInfTime+1; ttt++) {
                                         if(ptLocation[proposedPatient][ttt]!= transmission.ward) {
-                                            ///discharge has occured
-                                            dependDischarge = 0;
-                                            break;
+                                            ///discharge has occured at ttt-1
+                                            int dischargeDate = ttt-1;
+                                            /// check if date after proposedInfTime
+                                            if(dischargeDate > proposedInfTime) {
+                                                dependDischarge = 0;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -93,7 +104,7 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
                     currentLocation = ptLocation[proposedPatient][t];
                 }
                 
-                if(dependDischarge==1) {
+                if(dependDischarge==1 | orderEvents==1) {
                     
                     //onward transmission depends on being discharged while infectious
                     //printf("Proposed infection time does not allow for a transmission requiring a discharge while infectious, move rejected\n");

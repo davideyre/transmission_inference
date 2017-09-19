@@ -193,9 +193,19 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                 //if(patient==338) printf("%0.4f\t%0.4f\t%0.4f\n", probInf, betaI, specificSporeLevel);
                 
                 if(specificSporeLevel==0) {
-                    printf("patient: %d\n", patient);
-                    printf("source %d on ward %d at t=%d (spore duration error)\n", infSources[patient], ward, t);
-                    printf("source diagnosis: %d\n source ward stays on ward %d: ", infTimes[infSources[patient]], ward);
+                    printf("spore duration error\n\n");
+                    printf("victim: %d\n", patient);
+                    printf("infected t=%d via spore on ward %d\n", infTimes[patient], ward);
+                    printf("victim ward stays on ward %d: ", ward);
+                    for(int tt=0; tt<=maxTime; tt++) {
+                        if(ptLocation[patient][tt]==ward) {
+                            printf("%d, ", tt);
+                        }
+                    }
+                    printf("\n\n");
+                    printf("source: %d\n", infSources[patient]);
+                    printf("infected t=%d\n", infTimes[infSources[patient]]);
+                    printf("source ward stays on ward %d: ", ward);
                     for(int tt=0; tt<=maxTime; tt++) {
                         if(ptLocation[infSources[patient]][tt]==ward) {
                             printf("%d, ", tt);
