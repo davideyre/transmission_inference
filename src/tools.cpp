@@ -74,6 +74,7 @@ void getSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int nIn
         if(recTimes[pt]<=maxTime) {
             int recoveryWard = ptLocation[pt][recTimes[pt]];
             if(recoveryWard>-1) {
+                //has recovered on ward and as SIR model, by definition this is the last spore that can be set, therefore continues until the end of time
                 SporeEvent spore;
                 spore.start = recTimes[pt];
                 spore.end = maxTime;
@@ -85,11 +86,24 @@ void getSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int nIn
         int currentWard = ptLocation[pt][t0];
         for(int t = t0; t<= min({recTimes[pt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
             if(ptLocation[pt][t] != currentWard & currentWard!=-1) {
-                //discharge has occured at time, t-1, set spores to start at time t on previous location
+                //discharge has occured at time, t-1, set spores to start at time t, set spores on previous ward
                 SporeEvent spore;
                 spore.start = t;
-                spore.end = maxTime;
-                sporePatientI[currentWard][pt].push_back(spore);
+                spore.end = maxTime; //default to a spore end time of the max time, but...
+                int sporeWard = currentWard;
+                
+                //check for next admission, if have another admission while still infectious then spores end in the time interval before the admission starts
+                for(int t_chk = spore.start+1; t_chk<=min({maxTime, recTimes[pt]-1}; t_chk++) {
+                    if(ptLocation[pt][t_chk] == sporeWard) {
+                        spore.end = t_chk-1;
+                        break; 
+                    }
+                }
+                
+                //save the spore event provided it does not start and end on the same day
+                if(spore.end>spore.start) {
+                    sporePatientI[sporeWard][pt].push_back(spore);
+                }
             }
             currentWard = ptLocation[pt][t];
         }
@@ -107,7 +121,8 @@ void updateSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int 
     //set spores at recovery if inpatient - ptLocation[patient][time] = wardId
     if(recTimes[updatePt]<=maxTime) {
         int recoveryWard = ptLocation[updatePt][recTimes[updatePt]];
-        if(recoveryWard>-1) {
+        if(recoveryWard!=-1) {
+            //has recovered on ward and as SIR model, by definition this is the last spore that can be set, therefore continues until the end of time
             SporeEvent spore;
             spore.start = recTimes[updatePt];
             spore.end = maxTime;
@@ -118,13 +133,30 @@ void updateSporePatientI(vector<vector<vector<SporeEvent>>> &sporePatientI, int 
     //set spores for each discharge while still infectious, i.e. from time step after infected to time step before recovery
     int t0 = max({0, infTimes[updatePt]+1});
     int currentWard = ptLocation[updatePt][t0];
-    for(int t = t0; t<= min({recTimes[updatePt], maxTime}); t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
+    int lastSpore = min({recTimes[updatePt], maxTime});
+    
+    for(int t = t0; t<= lastSpore; t++) { //infectious from day after infected, until day before recover (need to go to next day to find discharge on day of recovery)
         if(ptLocation[updatePt][t] != currentWard & currentWard!=-1) {
             //discharge has occured at time, t-1, set spores to start at time t, set spores on previous ward
             SporeEvent spore;
             spore.start = t;
-            spore.end = maxTime;
-            sporePatientI[currentWard][updatePt].push_back(spore);
+            spore.end = maxTime; //default to a spore end time of the max time, but...
+            int sporeWard = currentWard;
+            
+            //check for next admission, if have another admission while still infectious then spores end in the time interval before the admission starts
+            for(int t_chk = spore.start+1; t_chk<=min({maxTime, recTimes[updatePt]-1}); t_chk++) {
+                if(ptLocation[updatePt][t_chk] == sporeWard) {
+                    spore.end = t_chk-1;
+                    break;
+                }
+            }
+
+            //save the spore event provided it does not start and end on the same day
+            if(spore.end>spore.start) {
+                sporePatientI[sporeWard][updatePt].push_back(spore);
+            }
+            
+            
         }
         currentWard = ptLocation[updatePt][t];
     }
