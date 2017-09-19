@@ -175,10 +175,21 @@ for(pt in 1:nPopulation) {
              #discharge event has occured from a ward, currentLocation, i.e. location at last iteration
              spore.start = tt
              spore.end = maxTime 
-             spore.ages = 1:(maxTime-tt+1)
-             sporeLevel[spore.start:spore.end, pt, currentLocation] = sporeLevel[spore.start:spore.end, pt, currentLocation] + (1-spore.p)^spore.ages
-             print(paste("Patient", pt, "has contaminated ward", currentLocation, 
-                         "after discharge with spores from", spore.start, "until", spore.end))
+             #check if re-admitted to the same ward, if so end the spore at this point if still infectious
+             sporeWard = currentLocation
+             for(t_chk in spore.start:min(maxTime, t.rec-1)) {
+                if(ptLocation[t_chk,pt]==sporeWard) {
+                   spore.end = t_chk - 1
+                   break
+                }
+             }
+             if(spore.end>spore.start) {
+                spore.ages = 1:(maxTime-tt+1)
+                sporeLevel[spore.start:spore.end, pt, currentLocation] = sporeLevel[spore.start:spore.end, pt, currentLocation] + (1-spore.p)^spore.ages
+                print(paste("Patient", pt, "has contaminated ward", currentLocation, 
+                            "after discharge with spores from", spore.start, "until", spore.end))
+             }
+
             }
           currentLocation = ptLocation[tt,pt]
        }
@@ -188,7 +199,7 @@ for(pt in 1:nPopulation) {
           if(recoveryLocation>0) {
              spore.start = t.rec
              spore.end = maxTime 
-             spore.ages = 1:(maxTime-t.rec+1)
+             spore.ages = 1:(spore.end-t.rec+1)
              sporeLevel[spore.start:spore.end, pt, recoveryLocation] = sporeLevel[spore.start:spore.end, pt, recoveryLocation] + (1-spore.p)^spore.ages
              print(paste("Patient", pt, "has contaminated ward", recoveryLocation, 
                          "after recovery with spores from", spore.start, "until", spore.end))
@@ -296,12 +307,22 @@ for(t in 2:maxTime) {
                  if(ptLocation[tt,pt]!=currentLocation & currentLocation!=0) {
                     #discharge event has occured from a ward, currentLocation, i.e. location at last iteration
                     spore.start = tt
-                    spore.end = maxTime 
-                    spore.ages = 1:(maxTime-tt+1)
-                    sporeLevel[spore.start:spore.end, pt, currentLocation] = sporeLevel[spore.start:spore.end, pt, currentLocation] + (1-spore.p)^spore.ages
-                    print(paste("Patient", pt, "has contaminated ward", currentLocation, 
-                                "after discharge with spores from", spore.start, "until", spore.end))
-                     }
+                    spore.end = maxTime
+                    #check if re-admitted to the same ward, if so end the spore at this point if still infectious
+                    sporeWard = currentLocation
+                    for(t_chk in spore.start:min(maxTime, t.rec-1)) {
+                       if(ptLocation[t_chk,pt]==sporeWard) {
+                          spore.end = t_chk - 1
+                          break
+                       }
+                    }
+                    if(spore.end>spore.start) {
+                       spore.ages = 1:(spore.end-tt+1)
+                       sporeLevel[spore.start:spore.end, pt, currentLocation] = sporeLevel[spore.start:spore.end, pt, currentLocation] + (1-spore.p)^spore.ages
+                       print(paste("Patient", pt, "has contaminated ward", currentLocation, 
+                                   "after discharge with spores from", spore.start, "until", spore.end))
+                    }
+                  }
                  currentLocation = ptLocation[tt,pt]
               }
               if(t.rec<=maxTime) {
