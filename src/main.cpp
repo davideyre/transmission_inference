@@ -1000,7 +1000,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     
                     for (int ii=0; ii<srcProbsCurrent.sourceList.size(); ii++) {
                         //iterate over possible sources until find current source
-                        if(srcProbsCurrent.sourceList[ii] ==  currentInfSources[node]) {
+                        if(srcProbsCurrent.sourceList[ii] == currentInfSources[node] & srcProbsCurrent.sourceTypeList[ii] == currentInfSourceTypes[node]) {
                             pChooseSourceCurrent = srcProbsCurrent.sourceProbabilities[ii];
                             break;
                         }
