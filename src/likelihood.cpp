@@ -415,8 +415,8 @@ double getPrior(Parm &parm) {
     double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
     double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1); //relatively uniform over 0 to 1
     double priorBetaComm = dexp(parm.betaComm, 1, 1);
-    double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 2, 1); //relatively uniform over 0 to 1
-    double priorSporeMultiplierLogit = dnorm(parm.sporeMultiplier, 0, 2, 1); //relatively uniform over 0 to 1
+    double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
+    double priorSporeMultiplierLogit = dnorm(parm.sporeMultiplier, 0, 1.7, 1); //relatively uniform over 0 to 1
     //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 5, 2, 1);//favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,5,2))))
     //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 6, 2, 1);//strong favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,6,2))))
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
