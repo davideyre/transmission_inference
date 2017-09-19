@@ -484,7 +484,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             for (int ii=0; ii<srcProbsCurrent.sourceList.size(); ii++) {
                 //iterate over current sources
-                if(srcProbsCurrent.sourceList[ii] ==  currentInfSources[proposedPatient]) {
+                if(srcProbsCurrent.sourceList[ii] == currentInfSources[proposedPatient] & srcProbsCurrent.sourceTypeList[ii] == currentInfSourceTypes[proposedPatient]) {
                     pChooseSourceCurrent = srcProbsCurrent.sourceProbabilities[ii];
                     break;
                 }
