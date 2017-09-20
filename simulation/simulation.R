@@ -83,7 +83,7 @@ spore.p = 0.2
 spore.multiplier = 0.5 #the relatively infectiousness of spores
 
 #genetic parameters
-directNe = 1 #within host population size
+directNe = 22.5 #within host population size
 introNe = 10000
 bottleneck = 1000 #set to 1000 for high bottleneck
 
