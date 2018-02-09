@@ -1,10 +1,9 @@
 To do
 =====
 
-Update spore handling
- - when readmitted reset spore, i.e. no spore while admitted and only one spore running at any one time
+*** Review the need for the starting infected paramters
 
-THIS IS PARTIALLY DONE - NEED TO FINISH UPDATING THE PART THAT SETS SPORES
+
 
 Testing
 -------

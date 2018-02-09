@@ -413,8 +413,8 @@ double getPrior(Parm &parm) {
     double priorDirectNe = dnorm(parm.directNe, 22.5, 0.1, 1);
     double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
     double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
-    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1, 1); //relatively uniform over 0 to 1
-    double priorBetaComm = dexp(parm.betaComm, 1, 1);
+    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
+    double priorBetaComm = dgamma(parm.betaComm, 2, 0.002, 1);
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
     double priorSporeMultiplierLogit = dnorm(parm.sporeMultiplier, 0, 1.7, 1); //relatively uniform over 0 to 1
     //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 5, 2, 1);//favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,5,2))))
