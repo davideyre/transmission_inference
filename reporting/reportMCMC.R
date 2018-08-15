@@ -344,5 +344,37 @@ glist = lapply(plot, ggplotGrob)
 ggsave(srcPlotFile, marrangeGrob(glist, layout_matrix=matrix(c(1,2,3,3), 2), nrow=2, ncol=2), width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
 
 
+#create a graph of the mode sources
+library(igraph)
+g = make_empty_graph() 
+# add all the cases
+g = g + vertices(as.character(infSrc.summary$recipient), size=5, label.cex=0.5)
+
+#add edges for genetic links
+geneticList = melt(cbind(rownames(geneticDist), geneticDist))
+geneticMatches = geneticList[which(geneticList$value<=2),]
+for (i in 1:nrow(geneticMatches)) {
+   if (gsub("C","",geneticMatches[i,1]) < gsub("C","",geneticMatches[i,2])) {
+      g = g + edge(geneticMatches[i,1], geneticMatches[i,2], 
+                   color="grey", size=2, arrow.width=0.1, arrow.size=0.1)
+   }
+}
+
+
+#add edges for transmitted cases
+for (i in 1:nrow(infSrc.summary)) {
+   if (infSrc.summary$mode_source[i]!=-1) {
+         g = g + edge(as.character(infSrc.summary$mode_source[i]), as.character(infSrc.summary$recipient[i]), 
+                      color="red", size=2, arrow.width=1, arrow.size=10)
+   }
+}
+
+#graph summary
+#g
+#V(g)[[]]
+pdf(file=paste(path, "inference/transmission_snp_network.pdf", sep=""),  width=297/25.4, height=210/25.4)
+plot(g, layout=layout_with_kk(g, epsilon=0, maxiter=50000, kkconst=200))
+dev.off()
+#this can be compared with epi plots, e.g. /Users/davideyre/Drive/academic/research/c_difficile/archive/WGS1400/sst/sst20/epi/sst2_epi_network.pdf
 
 
