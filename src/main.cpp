@@ -1285,7 +1285,7 @@ int main(int argc, const char * argv[]) {
 
     
     
-    //parameters: "beta0", "beta1", "beta2", "sampleSize", "sampleMu", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "recoverSize", "recMu", "sporeMultiplier"
+    //starting values for parameters
     Parm startParm;
     startParm.betaBgroundHosp = 0.0005;
     startParm.betaWard = 0.0005;
@@ -1302,6 +1302,7 @@ int main(int argc, const char * argv[]) {
     startParm.recMu = 90;
     startParm.sporeMultiplier = 0.4;
     
+    //starting values for standard deviation for metropolis updates to parameters
     Parm startSigma;
     startSigma.betaBgroundHosp = 0.0001;
     startSigma.betaWard = 0.0001;
@@ -1309,10 +1310,10 @@ int main(int argc, const char * argv[]) {
     startSigma.sampleSize = 0.1;
     startSigma.sampleMu = 0.1;
     startSigma.directNe =  0.1;
-    startSigma.introNe = 1;
+    startSigma.introNe = 10;
     startSigma.mu = 2/365.25/10;
-    startSigma.probStartInfLogit = logit(0.01/10);
-    startSigma.betaComm = 0.0001;
+    startSigma.probStartInfLogit = 0.01;
+    startSigma.betaComm = 0.001;
     startSigma.sporeProbLogit = 0.1;
     startSigma.recSize = 0.1;
     startSigma.recMu = 1;
