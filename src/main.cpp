@@ -1296,7 +1296,7 @@ int main(int argc, const char * argv[]) {
     startParm.introNe = 500;
     startParm.mu = 2/365.25;
     startParm.probStartInfLogit = logit(0.01);
-    startParm.betaComm = 0.00001;
+    startParm.betaComm = 0.0005;
     startParm.sporeProbLogit = 0.5;
     startParm.recSize = 3;
     startParm.recMu = 90;
@@ -1313,7 +1313,7 @@ int main(int argc, const char * argv[]) {
     startSigma.introNe = 100;
     startSigma.mu = 2/365.25/10;
     startSigma.probStartInfLogit = 0.05;
-    startSigma.betaComm = 0.0000005;
+    startSigma.betaComm = 0.0001;
     startSigma.sporeProbLogit = 0.1;
     startSigma.recSize = 0.1;
     startSigma.recMu = 1;
