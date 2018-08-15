@@ -1296,7 +1296,7 @@ int main(int argc, const char * argv[]) {
     startParm.introNe = 500;
     startParm.mu = 2/365.25;
     startParm.probStartInfLogit = logit(0.01);
-    startParm.betaComm = 0.0005;
+    startParm.betaComm = 0.00001;
     startParm.sporeProbLogit = 0.5;
     startParm.recSize = 3;
     startParm.recMu = 90;
@@ -1310,14 +1310,14 @@ int main(int argc, const char * argv[]) {
     startSigma.sampleSize = 0.1;
     startSigma.sampleMu = 0.1;
     startSigma.directNe =  0.1;
-    startSigma.introNe = 10;
+    startSigma.introNe = 100;
     startSigma.mu = 2/365.25/10;
-    startSigma.probStartInfLogit = 0.01;
-    startSigma.betaComm = 0.001;
+    startSigma.probStartInfLogit = 0.05;
+    startSigma.betaComm = 0.0000005;
     startSigma.sporeProbLogit = 0.1;
     startSigma.recSize = 0.1;
     startSigma.recMu = 1;
-    startSigma.sporeMultiplier = 0.01;
+    startSigma.sporeMultiplier = 0.05;
 
     
     //2d vector for results = columns: "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm"; rows = each iteration
