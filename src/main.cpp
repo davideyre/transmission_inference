@@ -38,7 +38,7 @@ using namespace std;
 //function to run MCMC
 void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainRecTimes, vector<vector<int>> &chainInfSources,
               vector<vector<int>> &chainInfSourceTypes,
-              int steps, Parm startParm, vector<double> startSigma,
+              int steps, Parm startParm, Parm startSigma,
               vector<int> &sampleTimes,
               vector<vector<vector<int>>> &wardLogInf,
               vector<vector<int>> &wardLogNeverInf,
@@ -123,7 +123,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     vector<int> nAccepted = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     
     //initial sd for MH updates
-    vector<double> sigma = startSigma;
+    Parm sigma = startSigma;
     
     //variables used during MCMC
     Parm currentParm; currentParm = chain[0];
@@ -1287,23 +1287,37 @@ int main(int argc, const char * argv[]) {
     
     //parameters: "beta0", "beta1", "beta2", "sampleSize", "sampleMu", "directNe", "introNe", "mu", "startInf", "betaComm", "sporeProb", "recoverSize", "recMu", "sporeMultiplier"
     Parm startParm;
-    startParm.betaBgroundHosp = 0.005;
-    startParm.betaWard = 0.005;
-    startParm.betaHosp = 0.005;
+    startParm.betaBgroundHosp = 0.0005;
+    startParm.betaWard = 0.0005;
+    startParm.betaHosp = 0.0005;
     startParm.sampleSize = 3;
     startParm.sampleMu = 10;
     startParm.directNe =  1;
     startParm.introNe = 500;
     startParm.mu = 2/365.25;
     startParm.probStartInfLogit = logit(0.01);
-    startParm.betaComm = 0.005;
+    startParm.betaComm = 0.0005;
     startParm.sporeProbLogit = 0.5;
     startParm.recSize = 3;
     startParm.recMu = 90;
     startParm.sporeMultiplier = 0.4;
     
-    vector<double> startSigma = {0.001, 0.001, 0.001, 0.2, 0.2, 0.2, 100, 0.01, 0.0005, 0.1, 0.1, 0.1, 0.1, 0.01}; //follows order of parameters above
-    
+    Parm startSigma;
+    startSigma.betaBgroundHosp = 0.0001;
+    startSigma.betaWard = 0.0001;
+    startSigma.betaHosp = 0.0001;
+    startSigma.sampleSize = 0.1;
+    startSigma.sampleMu = 0.1;
+    startSigma.directNe =  0.1;
+    startSigma.introNe = 1;
+    startSigma.mu = 2/365.25/10;
+    startSigma.probStartInfLogit = logit(0.01/10);
+    startSigma.betaComm = 0.0001;
+    startSigma.sporeProbLogit = 0.1;
+    startSigma.recSize = 0.1;
+    startSigma.recMu = 1;
+    startSigma.sporeMultiplier = 0.01;
+
     
     //2d vector for results = columns: "beta0", "beta1", "beta2", "epsilon", "directNe", "introNe", "mu", "startInf", "betaComm"; rows = each iteration
     //2d vectors for infection times, infection sources, and source types, columns for each patient, row = each iteration
