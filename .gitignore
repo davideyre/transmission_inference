@@ -3,8 +3,7 @@
 build/
 transmission_inference.xcodeproj
 sim_data/
-nejm_data/
-nejm_data_st42/
+nejm_data*/
 
 # R
 .Rhistory
