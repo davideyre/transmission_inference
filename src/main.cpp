@@ -1291,7 +1291,7 @@ int main(int argc, const char * argv[]) {
     startParm.betaWard = 0.0005;
     startParm.betaHosp = 0.0005;
     startParm.sampleSize = 3;
-    startParm.sampleMu = 10;
+    startParm.sampleMu = 30;
     startParm.directNe =  1;
     startParm.introNe = 500;
     startParm.mu = 2/365.25;
