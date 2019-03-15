@@ -12,8 +12,6 @@
 #define MATHLIB_STANDALONE
 #include <Rmath.h>
 
-#include <omp.h>
-
 #include <vector>
 #include<set>
 #include <algorithm> //for removing first element from a vector

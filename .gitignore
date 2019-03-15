@@ -1,5 +1,6 @@
 # Xcode
 .DS_Store
+bin/
 build/
 transmission_inference.xcodeproj
 sim_data/
@@ -7,3 +8,4 @@ nejm_data*/
 
 # R
 .Rhistory
+.Rproj.user

@@ -236,7 +236,6 @@ double llSample(int nInfPatients, vector<int> &infTimes, vector<int> &sampleTime
     double sampleProb = sampleSize / (sampleSize + sampleMu);
     
     double ll = 0;
-    //#pragma omp parallel for reduction(+:ll) num_threads(4)
     for(int pt=0; pt<nInfPatients; pt++) {
         //for all infected patients
         int dd = sampleTimes[pt] - infTimes[pt];
@@ -257,7 +256,6 @@ double llRecover(int nInfPatients, vector<int> &sampleTimes, vector<int> &recTim
     double recProb = recSize / (recSize + recMu);
 
     double ll = 0;
-    //#pragma omp parallel for reduction(+:ll) num_threads(4)
     for(int pt=0; pt<nInfPatients; pt++) {
         //for those patients with infections
         int dd = recTimes[pt] - sampleTimes[pt];
@@ -356,7 +354,6 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
     }
     
     
-    //#pragma omp parallel for reduction(+:ll) num_threads(4) schedule(static)
     for (int patient =0; patient<nInfPatients; patient++) {
         //log likelihood for patient not infected = 0
         //therefore, determine log likelihood for infected patients only

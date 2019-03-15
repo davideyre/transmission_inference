@@ -87,8 +87,8 @@ for Xcode:
 
 ### Compile - mac
 ```
-cd /Users/davideyre/Dropbox/Epi_WGS_MCMC/cpp_inference_scratchpad/inference_test/inference_test
-g++ -o transmission_test -std=c++11 -I /usr/local/include/ -L /usr/local/lib -lRmath *.cpp
+cd /Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/src
+g++ -o ../bin/transmission_test -std=c++11 -I /usr/local/include/ -L /usr/local/lib -lRmath -O2 *.cpp 
 ```
 
 then test:
