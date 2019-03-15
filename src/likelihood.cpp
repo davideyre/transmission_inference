@@ -423,27 +423,33 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
 
 //prior
 double getPrior(Parm &parm) {
-    double priorBeta0 = dgamma(parm.betaBgroundHosp, 2, 0.002, 1); //dexp(parm.betaBgroundHosp, 100, 1);
-    double priorBeta1 = dgamma(parm.betaWard, 2, 0.002, 1); //dexp(parm.betaWard, 100, 1);
-    double priorBeta2 = dgamma(parm.betaHosp, 2, 0.002, 1); //dexp(parm.betaHosp, 100, 1);
-    double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
-    double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-20
-    //double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.05, 1); //push mean up higher to around 50-60
-    //double priorDirectNe = dgamma(parm.directNe, 2, 2, 1); //dexp(parm.directNe, 1, 1); //within host diversity = 2.mu.Ne = 0.3, i.e Ne = 22.5
-    double priorDirectNe = dnorm(parm.directNe, 22.5, 0.1, 1);
-    double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
-    double priorMu = dnorm(parm.mu, 2/365.25, 0.05/365.25, 1); //relatively tight prior around 2 SNPs per year
-    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
+    //set gamma priors on beta values
+    double priorBeta0 = dgamma(parm.betaBgroundHosp, 2, 0.002, 1);
+    double priorBeta1 = dgamma(parm.betaWard, 2, 0.002, 1);
+    double priorBeta2 = dgamma(parm.betaHosp, 2, 0.002, 1);
     double priorBetaComm = dgamma(parm.betaComm, 2, 0.002, 1);
+    
+    //interval from infection to sampling - set to be relatively imformative
+    double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
+    double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-30
+    
+    //genetic priors - base directNe on within host diversity estimates, and my on previous SNPs per year
+    double priorDirectNe = dnorm(parm.directNe, 22.5, 0.1, 1); //within host diversity = 2.mu.Ne = 0.3, i.e Ne = 22.5
+    double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
+    double priorMu = dnorm(parm.mu, 1/365.25, 0.05/365.25, 1); //relatively tight prior around 1 SNP per year
+    
+    //set logit transformed probabilties to be relatively uniform over 0 to 1, set priors on transformed scale to avoid Jacobian
+    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
     double priorSporeMultiplierLogit = dnorm(parm.sporeMultiplier, 0, 1.7, 1); //relatively uniform over 0 to 1
-    //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 5, 2, 1);//favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,5,2))))
-    //double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 6, 2, 1);//strong favour short lived spore, see in R - hist(1/(1+exp(-rnorm(1000,6,2))))
+    
+    //set recovery prior to be moderately informative
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
-    //double priorrecMu = dnorm(parm.recMu, 30, 3, 1);   //dgamma(parm.recMu, 5, 1/0.15, 1); //in the 5 to 60 range
     double priorrecMu = dnorm(parm.recMu, 90, 3, 1); //longer recovery, mean 90 days, see in R: hist(rnbinom(1000,size=3,mu=90))
+    
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorSampleSize + priorSampleMu +
-    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm + priorSporeProbLogit + priorSporeMultiplierLogit + priorRecSize + priorrecMu;
+                    priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm +
+                    priorSporeProbLogit + priorSporeMultiplierLogit + priorRecSize + priorrecMu;
     return(prior);
 }
 
