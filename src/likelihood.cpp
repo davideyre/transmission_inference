@@ -300,26 +300,28 @@ double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSo
                 potentialNN.push_back(nn);
             }
         }
-        int nPotentialNN = (int)potentialNN.size();
         
         //get average SNP difference to all potential NN
         double snpSum = 0;
-        bool nnMatch = false; //keep track of if have identified any nearest neighbours
+        int sumNN = 0; //keep track of if have any nearest neighbours within 100 SNPs
+        
         for(int nn : potentialNN) {
             double snp = geneticDist[patient][nn];
             if(snp<=100) { //restrict to only consider nearest neighbours within 100 snps
                 snpSum += snp;
-                nnMatch = true;
+                sumNN ++;
             }
         }
+        
         //use mean SNPs to calculate prob of NN
         double meanSnp;
-        if (nnMatch) {
-            meanSnp = snpSum / nPotentialNN;
+        if (sumNN>0) {
+            meanSnp = snpSum / sumNN;
         }
         else {
             meanSnp = 100; // if no nearest neighbours set the meanSnp to be the upper limit of 100
         }
+        
         double logProbNN = log(1-p) + meanSnp*log(p);
         ll = logProbNN;
     }
@@ -369,23 +371,23 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
             //double llNN = 0;
             
             //get average SNP difference to all potential NN
-            int nPotentialNN = 0;
             double snpSum = 0.0;
-            bool nnMatch = false;
+            int sumNN = 0; //keep track of if have any nearest neighbours within 100 SNPs
             
             for (int nn : nnList) {
                 if (nn!=patient) {
-                    nPotentialNN ++;
                     double snp = geneticDist[patient][nn];
-                    snpSum += snp;
-                    nnMatch = true;
+                    if(snp<=100) { //restrict to only consider nearest neighbours within 100 snps
+                        snpSum += snp;
+                        sumNN ++;
+                    }
                 }
             }
 
             //use mean SNPs to calculate prob of NN
             double meanSnp;
-            if (nnMatch) {
-                meanSnp = snpSum / nPotentialNN;
+            if (sumNN>0) {
+                meanSnp = snpSum / sumNN;
             }
             else {
                 meanSnp = 100;
