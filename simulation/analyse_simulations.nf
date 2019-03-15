@@ -2,13 +2,14 @@
 
 /*
 Example to run (from root of repository):
-nextflow run simulation/analyse_simulations.nf --simDirPath sim_data/5_scenarios --infBin bin/transmission_test -resume -profile standard
+nextflow run simulation/analyse_simulations.nf --simDirPath sim_data/5_scenarios --infBin bin/transmission_test --iter 5000 -profile standard
 */
 
 
 // parameters 
 params.simDirPath = ""
 params.infBin = ""
+params.iter = "10000"
 
 // initial logging
 log.info "\n" 
@@ -22,6 +23,7 @@ Channel
 	.set {simList}
 
 infBin = file(params.infBin)
+iter = params.iter
 
 
 process runInference {
@@ -30,7 +32,7 @@ process runInference {
 		file simDir from simList
 	
 	"""
-	$infBin -i 5000 -p $simDir
+	$infBin -i $iter -p $simDir
 	"""
 
 }
