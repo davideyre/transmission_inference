@@ -94,9 +94,6 @@ g++ -o ../bin/transmission_test -std=c++11 -I /usr/local/include/ -L /usr/local/
 then test:
 `./transmission_test -s 4598174 -i 5000 -p /Users/davideyre/Dropbox/Epi_WGS_MCMC/ward_hosp_comm_sim/simulation_97674744`
 
-### Compile on linux - GEL
-On GEL cannot install Rmath to standard location, therefore
-`g++ -o test *.cpp -std=c++11 -I /home/local/GEL/davide/bin/R/include -L /home/local/GEL/davide/bin/R/lib -Wl,-rpath,/home/local/GEL/davide/bin/R/lib -lRmath -lpthread`
 
 ### Compile on linux - ResComp
 
@@ -104,8 +101,8 @@ On GEL cannot install Rmath to standard location, therefore
 module purge
 module load R/3.2.2
 module load gcc/5.4.0
-cd /well/bag/deyre/analysis/transmission_inference/src
-g++ -o ../transmission *.cpp -std=c++11 -lRmath -I /apps/well/R/3.2.2/lib64/R/include -L /apps/well/R/3.2.2/lib64 -Wl,-rpath,/apps/well/R/3.2.2/lib64
+cd /users/bag/deyre/analysis/transmission_inference/src
+g++ -o ../bin/transmission_test *.cpp -std=c++11 -lRmath -I /apps/well/R/3.2.2/lib64/R/include -L /apps/well/R/3.2.2/lib64 -lpthread -Wl,-rpath,/apps/well/R/3.2.2/lib64
 ```
 last -Wl option required to ensure can find dynamic library for RMath
 
