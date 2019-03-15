@@ -13,3 +13,4 @@ nejm_data*/
 # nextflow
 .nextflow*
 work/
+nextflow_reports/
