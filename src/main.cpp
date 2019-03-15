@@ -429,7 +429,11 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             double hastingsRatio = 0; //store log hastings ratio
             
             //propose infection infection time
-            double sdInfTime = 5; //sd for normal distribution for infection time updates
+            double sdInfTime = 5;
+            if(i % 10 == 0) {
+                sdInfTime = 25; // for 1 in 10 updates propose a bigger SD to improve chances of moving between adjacent admissions
+            }
+             //sd for normal distribution for infection time updates
             int proposedInfTime = proposeInfectionTime(proposedPatient, currentInfTimes[proposedPatient], onwardTransmission,
                                                       sampleTimes, maxTime, sdInfTime, ptLocation);
 
