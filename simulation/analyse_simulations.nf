@@ -16,6 +16,7 @@ log.info "\n"
 log.info "Perform inference over a collection of simulations -- version 0.1"
 log.info "Simulation directory        :  ${params.simDirPath}"
 log.info "Path to binary for MCMC     :  ${params.infBin}"
+log.info "MCMC iterations             :  ${params.iter}"
 log.info "\n"
 
 Channel
