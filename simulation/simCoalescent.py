@@ -512,7 +512,7 @@ if __name__ == "__main__":
 	
 	#run seq-gen - assume 1000 bases, at 2 base per year, rate 0.002 per year, per day 0.000005475701574
 	mu = float(opts.mutationRate) / opts.alnLength / 365.25
-	cmd = '/Applications/Seq-Gen.v1.3.3/seq-gen -mHKY -l%s -op -z%s -s%s %s/sim_newick.tree > %s/sim_alignment.phy'%(opts.alnLength, opts.seed, mu, pathDir, pathDir)
+	cmd = 'seq-gen -mHKY -l%s -op -z%s -s%s %s/sim_newick.tree > %s/sim_alignment.phy'%(opts.alnLength, opts.seed, mu, pathDir, pathDir)
 	sys.stdout.write(cmd+"\n")
 	os.system(cmd+"\n")
 	
