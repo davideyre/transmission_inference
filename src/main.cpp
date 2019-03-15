@@ -8,7 +8,6 @@
 
 #define MATHLIB_STANDALONE
 #include <Rmath.h>
-#include <armadillo>
 
 #include <iostream>
 #include <fstream>
