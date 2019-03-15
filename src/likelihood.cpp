@@ -164,7 +164,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
             //if(patient==338) printf("%0.4f\t%0.4f\n", probInf, betaI);
             
             //Pr(infected by specific source)
-            double probInfSource;
+            double probInfSource = 0;
             if (infSourceType[patient] == SrcType::BGROUND_COMM) {
                 //background - community
                 probInfSource = parm.betaComm/betaI * probInf;
@@ -294,7 +294,7 @@ double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSo
             //nearest neighbours defined for now as the first case of every cluster
         vector<int> potentialNN;
         for (int nn=0; nn<nInfPatients; nn++) {
-            if (nn!=patient & (infSourceType[nn]== SrcType::BGROUND_HOSP
+            if ((nn!=patient) & (infSourceType[nn]== SrcType::BGROUND_HOSP
                                | infSourceType[nn] == SrcType::BGROUND_COMM
                                | infSourceType[nn] == SrcType::START_POS)) {
                 potentialNN.push_back(nn);
