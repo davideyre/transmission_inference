@@ -304,12 +304,22 @@ double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSo
         
         //get average SNP difference to all potential NN
         double snpSum = 0;
+        bool nnMatch = false; //keep track of if have identified any nearest neighbours
         for(int nn : potentialNN) {
             double snp = geneticDist[patient][nn];
-            snpSum += snp;
+            if(snp<=100) { //restrict to only consider nearest neighbours within 100 snps
+                snpSum += snp;
+                nnMatch = true;
+            }
         }
         //use mean SNPs to calculate prob of NN
-        double meanSnp = snpSum / nPotentialNN;
+        double meanSnp;
+        if (nnMatch) {
+            meanSnp = snpSum / nPotentialNN;
+        }
+        else {
+            meanSnp = 100; // if no nearest neighbours set the meanSnp to be the upper limit of 100
+        }
         double logProbNN = log(1-p) + meanSnp*log(p);
         ll = logProbNN;
     }
@@ -361,17 +371,25 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
             //get average SNP difference to all potential NN
             int nPotentialNN = 0;
             double snpSum = 0.0;
+            bool nnMatch = false;
             
             for (int nn : nnList) {
                 if (nn!=patient) {
                     nPotentialNN ++;
                     double snp = geneticDist[patient][nn];
                     snpSum += snp;
+                    nnMatch = true;
                 }
             }
 
             //use mean SNPs to calculate prob of NN
-            double meanSnp = snpSum / nPotentialNN;
+            double meanSnp;
+            if (nnMatch) {
+                meanSnp = snpSum / nPotentialNN;
+            }
+            else {
+                meanSnp = 100;
+            }
             double logProbNN = log(1-p) + meanSnp*log(p);
             ll += logProbNN;
         }
