@@ -9,3 +9,7 @@ nejm_data*/
 # R
 .Rhistory
 .Rproj.user
+
+# nextflow
+.nextflow*
+work/
