@@ -16,7 +16,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/nejm_data_st10/"
+path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/nejm_data_st42_st10/"
 
 #read in genetic distances
 geneticDist = read.table(file=paste(path, "input/geneticDistances_snps.txt", sep=""))
