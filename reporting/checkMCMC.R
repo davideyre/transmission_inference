@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Dropbox/Transmission_Inference/xcode_project/sim_data/simulation_2854/"
+path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/sim_data/5_scenarios/simulation_157/"
 
 #parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
 option_list = list(
@@ -25,11 +25,27 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 path = paste(opt$directory, "/", sep="")
 
-simId = strsplit(opt$directory, '/')[[1]]
-simId = simId[length(simId)]
+simId = tail(strsplit(path, '/')[[1]], n=1)
 
 
 ## read in true values
+parm.list = list()
+f = file(paste(path, "input/simulation_settings.txt", sep=""), "r")
+while (TRUE) {
+  l = readLines(f, n=1)
+  if (length(l)==0) {
+    break
+  }
+  if(startsWith(l, "$")) {
+    var.name = gsub("\\$", "", l)
+  }
+  else if(startsWith(l, "[1] ")) {
+    var.value = gsub("\\[1\\] ", "", l)
+    parm.list[var.name] = var.value
+  }
+}
+close(f)
+
 patientLog = read.csv(file = paste(path, "input/patientLog.csv", sep=""), stringsAsFactors=F)
 wardLog = read.csv(file = paste(path, "input/wardLog.csv", sep=""))
 geneticDist = read.table(file=paste(path, "input/simDistances.txt", sep=""))
@@ -89,16 +105,22 @@ ess = effectiveSize(as.mcmc(finalChain))
 # effectiveSize(as.mcmc(logistic(finalChain$spore_prob)))
 # effectiveSize(as.mcmc((finalChain$beta1)))
 
+names(mean) = c("bgroundBeta", "wardBeta", "hospBeta", "sample.size", "sample.mu", "directNe", "introNe",
+                "mutationRate", "commBeta", "spore_prob_logit", "p_start_inf_logit", "spore.multiplier",
+                "rec.size", "rec.mu", "posterior", "ll_trans", "ll_genetic", "ll_sampling", "ll_recovery",
+                "spore.p", "pAdmit")
 
+true.parm = parm.list[names(mean)]
+true.parm = unlist(as.character(true.parm))
 
 #print parameter summary and save to file
-parmSummary = cbind(mean, hpd, ess)
+parmSummary = cbind(mean, hpd, ess, true.parm)
 print(parmSummary)
 parmSummary = cbind(rep(simId, nrow(parmSummary)), rownames(parmSummary), parmSummary)
-colnames(parmSummary) = c("simulation", "parameter", "mean", "lower", "upper", "ess")
+colnames(parmSummary) = c("simulation", "parameter", "mean", "lower", "upper", "ess", "true_value")
 parmSummary = as.data.frame(parmSummary, row.names=1:nrow(parmSummary))
 parmFile = paste(path, "inference/parm_summary.csv", sep="")
-write.csv(parmSummary, parmFile, row.names=F)
+write.csv(as.data.frame(parmSummary), parmFile, row.names=F)
 
 
 #epsilon check
