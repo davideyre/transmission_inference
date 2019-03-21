@@ -259,7 +259,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             double currentLLGenetic = llGenetic(currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, nInfPatients, currentParm);
             printf("LL genetic, current: %0.3f\n", currentLLGenetic);
             
-            double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
+            double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentRecTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
             printf("LL trans, current: %0.3f\n", currentLLTrans);
             
             double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
@@ -393,7 +393,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
         
          getSporeForceSummary(currentSporeForceSummary, currentSporePatientI, maxTime, minTime, allWards, nInfPatients, currentInfTimes, ptLocation, currentParm);
         // end over-ride
-*/
+         */
         
         //DATA AUGMENTATION
         
@@ -430,11 +430,13 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             //propose infection infection time
             double sdInfTime = 5;
+ 
             if(i % 10 == 0) {
                 sdInfTime = 25; // for 1 in 10 updates propose a bigger SD to improve chances of moving between adjacent admissions
             }
+             
              //sd for normal distribution for infection time updates
-            int proposedInfTime = proposeInfectionTime(proposedPatient, currentInfTimes[proposedPatient], onwardTransmission,
+            int proposedInfTime = proposeInfectionTime(i, proposedPatient, currentInfTimes[proposedPatient], onwardTransmission,
                                                       sampleTimes, maxTime, sdInfTime, ptLocation);
 
             //proposedInfTime = infTimes[proposedPatient]; //over-ride for testing
@@ -569,9 +571,10 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 double proposedLLGenetic = llGenetic(proposedInfTimes, sampleTimes, proposedInfSources, proposedInfSourceTypes, geneticDist, nInfPatients, currentParm);
                 printf("LL genetic, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLGenetic, proposedLLGenetic, proposedLLGenetic-currentLLGenetic);
                 
-                double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary,
+                double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentRecTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary,
                                                 wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
-                double proposedLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, proposedInfTimes, proposedInfSourceTypes, proposedInfSources, proposedSporePatientI, proposedSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
+                
+                double proposedLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, proposedInfTimes, currentRecTimes, proposedInfSourceTypes, proposedInfSources, proposedSporePatientI, proposedSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
                 printf("LL transmission, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLTrans, proposedLLTrans, proposedLLTrans-currentLLTrans);
                 
                 double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
@@ -909,7 +912,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 for (int node : nodeSet) {
                     
                     int sdDisruptInfTime = 4;
-                    int proposedInfTime = proposeInfectionTime(node, currentInfTimes[node], proposedOnwardTransmission,
+                    int proposedInfTime = proposeInfectionTime(i, node, currentInfTimes[node], proposedOnwardTransmission,
                                                            sampleTimes, maxTime, sdDisruptInfTime, ptLocation);
                     if(proposedInfTime == std::numeric_limits<int>::min()) {
                         proposedInfTime = currentInfTimes[node]; //keep current infection time
@@ -1033,9 +1036,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                     double proposedLLGenetic = llGenetic(proposedInfTimes, sampleTimes, proposedInfSources, proposedInfSourceTypes, geneticDist, nInfPatients, currentParm);
                     printf("LL genetic, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLGenetic, proposedLLGenetic, proposedLLGenetic-currentLLGenetic);
                     
-                    double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary,
+                    double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentRecTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI, currentSporeForceSummary,
                                                     wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
-                    double proposedLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, proposedInfTimes, proposedInfSourceTypes, proposedInfSources,
+                    double proposedLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, proposedInfTimes, currentRecTimes, proposedInfSourceTypes, proposedInfSources,
                                                      proposedSporePatientI, proposedSporeForceSummary,
                                                      wardLogInf, wardLogNeverInf, inPtDays, ptLocation, proposedWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
                     printf("LL transmission, current: %0.3f, proposed: %0.3f, difference = %0.3f\n", currentLLTrans, proposedLLTrans, proposedLLTrans-currentLLTrans);
@@ -1086,11 +1089,11 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             
         } //end of disruption section
-        
+       
         
         double currentLLSample = llSample(nInfPatients, currentInfTimes, sampleTimes, currentParm);
         double currentLLGenetic = llGenetic(currentInfTimes, sampleTimes, currentInfSources, currentInfSourceTypes, geneticDist, nInfPatients, currentParm);
-        double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI,
+        double currentLLTrans = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, currentInfTimes, currentRecTimes, currentInfSourceTypes, currentInfSources, currentSporePatientI,
                                         currentSporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, currentWardI, nInfPatients, nNeverInfPatients, nWards, maxTime, currentParm);
         double currentLLRecovery = llRecover(nInfPatients, sampleTimes, currentRecTimes, currentParm);
 

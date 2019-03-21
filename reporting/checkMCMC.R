@@ -15,7 +15,7 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/sim_data/5_scenarios/simulation_157/"
+path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/sim_data/5_scenarios/simulation_911145/"
 
 #parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
 option_list = list(
@@ -108,7 +108,7 @@ ess = effectiveSize(as.mcmc(finalChain))
 names(mean) = c("bgroundBeta", "wardBeta", "hospBeta", "sample.size", "sample.mu", "directNe", "introNe",
                 "mutationRate", "commBeta", "spore_prob_logit", "p_start_inf_logit", "spore.multiplier",
                 "rec.size", "rec.mu", "posterior", "ll_trans", "ll_genetic", "ll_sampling", "ll_recovery",
-                "spore.p", "pAdmit")
+                "spore.p", "pStartPos")
 
 true.parm = parm.list[names(mean)]
 true.parm = unlist(as.character(true.parm))

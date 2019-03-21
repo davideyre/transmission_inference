@@ -20,7 +20,7 @@ using namespace std;
 
 
 //function to propose a new infection time (note will update recovery time at same iteration, and so not constrained by recovery)
-int proposeInfectionTime(int proposedPatient, int currentInfTime,
+int proposeInfectionTime(int i, int proposedPatient, int currentInfTime,
                          vector<vector<trans>> &onwardTransmission,
                          vector<int> &sampleTimes,
                          int maxTime,

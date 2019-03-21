@@ -38,7 +38,7 @@ void runTest(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &recov
     printf("TEST: Prior = %0.6f (Expected value: -9.559376)\n\n", testPrior);
     
     //test of transmission LL
-    double testTransLL = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf,
+    double testTransLL = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, recoverTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf,
                                  inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm);
     printf("TEST: TransLL = %0.6f (Expected value: -1957.525)\n\n", testTransLL);
     

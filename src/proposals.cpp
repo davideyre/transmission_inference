@@ -11,7 +11,7 @@
 
 
 //function to propose a new infection time - based on uniform dis  (note will update recovery time at same iteration, and so not constrained by recovery)
-int proposeInfectionTime(int proposedPatient, int currentInfTime,
+int proposeInfectionTime(int i, int proposedPatient, int currentInfTime,
                          vector<vector<trans>> &onwardTransmission,
                          vector<int> &sampleTimes,
                          int maxTime,
@@ -47,6 +47,12 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
         return proposedInfTime;
     }
     
+    //temp over-rule
+    if (proposedInfTime<0) {
+        //impossible move - reject
+        proposedInfTime = std::numeric_limits<int>::min();;
+        return proposedInfTime;
+    }
     
     //now check for onward transmission from spore arising from ward discharge whlie infectious - moving earlier will not result in loss of opportunity to leave spore, therefore...
     //only applies if moving the infection time later
@@ -58,15 +64,21 @@ int proposeInfectionTime(int proposedPatient, int currentInfTime,
                 //check for any spore transmissions prior
                 int orderEvents = 0;
                 if(transmission.t<=proposedInfTime) {
-                    //infection time proposed is after spore transmission - not possible (also not possible to be infected and set spore in same time interval)
-                    orderEvents = 1;
+                    //infection time proposed is after spore transmission - not possible
+                    // (also not possible to be infected and set spore in same time interval)
+                    orderEvents = 1; //flag for rejection of move - see below
                 }
                 
-                //check if any of these spore transmissions depend on discharge between the current and proposed infection times
+                //check if any of these spore transmissions depend on a discharge that occurs
+                // earlier than one day after the proposed infection time
+                // (only need to start searching for transmission that occur 2 days after the current infection time
+                //  as shortest time is infected on day -1, discharged on day 0, spore starts on day 1
                 int dependDischarge = 0;
-                int currentLocation = ptLocation[proposedPatient][currentInfTime+1]; //location at time first infectious
                 
+                int currentLocation = ptLocation[proposedPatient][currentInfTime+1]; //location at time first infectious
                 for(int t=currentInfTime+2; t<=proposedInfTime+1; t++) {
+                    //from the time interval after infected, i.e. from when infectious - look for a discharge
+                    // --> look forr discharge 2 days after infected, hence currentInfTime+2 above
                     if(ptLocation[proposedPatient][t] != currentLocation &  currentLocation!=-1) {
                         //a discharge has occured
                         int dischargeDate = t-1;
@@ -131,6 +143,10 @@ int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes, P
     //propose infection time sampling from negative binomial distribution
     double sampleProb = parm.sampleSize / (parm.sampleSize + parm.sampleMu);
     int proposedInfTime = sampleTimes[proposedPatient] - rnbinom(parm.sampleSize, sampleProb);
+    //temp over-rule
+    if(proposedInfTime<0) {
+        proposedInfTime = 0;
+    }
     return proposedInfTime;
 }
 

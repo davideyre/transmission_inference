@@ -11,7 +11,7 @@
 //log likelihood contribution from transmission model - p(I | parm)
 
 double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList,
-               vector<int> &infTimes, vector<int> &infSourceType, vector<int> &infSources,
+               vector<int> &infTimes, vector<int> &recTimes, vector<int> &infSourceType, vector<int> &infSources,
                vector<vector<vector<SporeEvent>>> &sporePatientI, vector<vector<double>> &sporeForceSummary,
                vector<vector<vector<int>>> &wardLogInf, vector<vector<int>> &wardLogNeverInf,
                vector<vector<vector<int>>> &inPtDays,
@@ -193,6 +193,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                 //if(patient==338) printf("%0.4f\t%0.4f\t%0.4f\n", probInf, betaI, specificSporeLevel);
                 
                 if(specificSporeLevel==0) {
+                    printf("--------------------------\n");
                     printf("spore duration error\n\n");
                     printf("victim: %d\n", patient);
                     printf("infected t=%d via spore on ward %d\n", infTimes[patient], ward);
@@ -205,6 +206,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                     printf("\n\n");
                     printf("source: %d\n", infSources[patient]);
                     printf("infected t=%d\n", infTimes[infSources[patient]]);
+                    printf("recovered t=%d\n", recTimes[infSources[patient]]);
                     printf("source ward stays on ward %d: ", ward);
                     for(int tt=0; tt<=maxTime; tt++) {
                         if(ptLocation[infSources[patient]][tt]==ward) {
@@ -212,7 +214,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
                         }
                     }
                     
-                    printf("\n");
+                    printf("\n--------------------------\n\n");
                 }
                 
             }
@@ -436,9 +438,11 @@ double getPrior(Parm &parm) {
     double priorMu = dnorm(parm.mu, 1/365.25, 0.05/365.25, 1); //relatively tight prior around 1 SNP per year
     
     //set logit transformed probabilties to be relatively uniform over 0 to 1, set priors on transformed scale to avoid Jacobian
-    double priorStartInfLogit = dnorm(parm.probStartInfLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
     double priorSporeMultiplierLogit = dnorm(parm.sporeMultiplier, 0, 1.7, 1); //relatively uniform over 0 to 1
+
+    //probability of starting infected, set to be relatively informative, i.e. that starting infected is rare (with CDI, not just carriage)
+    double priorStartInfLogit = dnorm(parm.probStartInfLogit, -8, 1, 1); //mostly <1/2000 with some mass up to around 1/200
     
     //set recovery prior to be moderately informative
     double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
@@ -461,7 +465,7 @@ double targetDist (vector<vector<int>> &wardEver, vector<vector<int>> &hospitalW
                    vector<vector<int>> &wardI, int nInfPatients, int nNeverInfPatients, int nWards, int maxTime, vector<vector<double>> &geneticDist, Parm &parm) {
 
     
-    double td = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
+    double td = llTrans(wardEver, hospitalWards, ward2Hospital, hospitalWardList, infTimes, recoverTimes, infSourceType, infSources, sporePatientI, sporeForceSummary, wardLogInf, wardLogNeverInf, inPtDays, ptLocation, wardI, nInfPatients, nNeverInfPatients, nWards, maxTime, parm) +
                     llSample(nInfPatients, infTimes, sampleTimes, parm) +
                     llRecover(nInfPatients, sampleTimes, recoverTimes, parm) +
                     llGenetic(infTimes, sampleTimes, infSources, infSourceType, geneticDist, nInfPatients, parm) +

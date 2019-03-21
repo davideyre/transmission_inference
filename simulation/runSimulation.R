@@ -17,8 +17,8 @@ randomSeed = as.numeric(gsub("0.", "", as.character(round(runif(1),8))))
 #transmission parameters
 bgroundBeta = 0.002
 wardBeta = 0.005
-hospBeta = 0.001
-commBeta = 0.000
+hospBeta = 0.000
+commBeta = 0.001
 
 pStartPos= 0.0
 
@@ -34,7 +34,7 @@ spore.multiplier = 0.5 #the relatively infectiousness of spores
 
 #genetic parameters
 directNe = 22.5 #within host population size
-introNe = 2000
+introNe = 20000
 bottleneck = 1000 #set to 1000 for high bottleneck
 
 #ward set up
