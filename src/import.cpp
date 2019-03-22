@@ -236,6 +236,10 @@ void importGeneticData(string filePathGenetic, vector<vector<double>> &geneticDi
                         //for subsequent fields save SNPs
                         pt2 = ptIdHeader[fieldNumber-1];
                         geneticDist[pt1][pt2] = stod(field);
+                        //set any negative distances to be zero, assuming that they are closely related and this is artefact from the distance matrix generation process
+                        if(geneticDist[pt1][pt2]<0) {
+                            geneticDist[pt1][pt2] = 0;
+                        }
                         
                     }
                     fieldNumber ++;
