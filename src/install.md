@@ -111,7 +111,7 @@ Once off  to install R and required packages for RMath and reporting
 sudo apt-get install r-base-core r-mathlib libcurl4-gnutls-dev
 sudo apt-get install libssl-dev
 R
-install.packages(c("coda", "optparse", "ggplot2", "reshape", "RColorBrewer", "devtools"))
+install.packages(c("coda", "optparse", "ggplot2", "reshape", "RColorBrewer", "devtools", "igraph"))
 install.packages("gridExtra")
 ```
 
