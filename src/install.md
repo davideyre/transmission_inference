@@ -102,8 +102,30 @@ module purge
 module load R/3.2.2
 module load gcc/5.4.0
 cd /users/bag/deyre/analysis/transmission_inference/src
-g++ -o ../bin/transmission_test *.cpp -std=c++11 -lRmath -I /apps/well/R/3.2.2/lib64/R/include -L /apps/well/R/3.2.2/lib64 -lpthread -Wl,-rpath,/apps/well/R/3.2.2/lib64
+g++ -o ../bin/transmission_test *.cpp -std=c++11 -lRmath -I /apps/well/R/3.2.2/lib64/R/include -L /apps/well/R/3.2.2/lib64 -lpthread -Wl,-rpath,/apps/well/R/3.2.2/lib64 -O2
 ```
+
+### Compile of linux - Ophelia
+Once off  to install R and required packages for RMath and reporting
+```
+sudo apt-get install r-base-core r-mathlib libcurl4-gnutls-dev
+sudo apt-get install libssl-dev
+R
+install.packages(c("coda", "optparse", "ggplot2", "reshape", "RColorBrewer", "devtools"))
+install.packages("gridExtra")
+```
+
+And now compile this software
+```
+
+cd /home/davideyre/transmission_inference
+git pull
+cd src
+g++ -o ../bin/transmission_test *.cpp -std=c++11 -lRmath -I /usr/share/R/include -L /usr/lib/R/library -lpthread  -O2
+```
+
+
+
 last -Wl option required to ensure can find dynamic library for RMath
 
 ### Compile on linux - ARC

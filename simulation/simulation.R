@@ -62,6 +62,7 @@ runSim = function(simSettings) {
   
   #save settings
   capture.output(simSettings, file = paste(outDir, "/simulation_settings.txt", sep=""))
+  save(simSettings, file = paste(outDir, "/simulation_settings.Rdata", sep=""))
   
   #set up hospital wards
   nWards = nWardsPerHospital * nHospitals
@@ -448,6 +449,8 @@ runSim = function(simSettings) {
   print("true transmission tree written")
   
   print("all done")
+  
+  return(table(infections[,3]))
 }
 
 

@@ -16,7 +16,15 @@ Mode <- function(x) {
 }
 
 #allow path to be hard coded, but also allow this to be changed at run time
-path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/nejm_data_st42_st10/"
+path = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/sim_data/5_scenarios/simulation_911145/"
+
+#parse command line options - more here - https://www.r-bloggers.com/passing-arguments-to-an-r-script-from-command-lines/
+option_list = list(
+  make_option( c("-d", "--directory"), type="character", default=path, 
+               metavar="character") )
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
+path = paste(opt$directory, "/", sep="")
 
 #read in genetic distances
 geneticDist = read.table(file=paste(path, "input/geneticDistances_snps.txt", sep=""))
