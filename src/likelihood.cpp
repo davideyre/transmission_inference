@@ -303,11 +303,11 @@ double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSo
         
         //get average SNP difference to all potential NN
         double snpSum = 0;
-        int sumNN = 0; //keep track of if have any nearest neighbours within 100 SNPs
+        int sumNN = 0; //keep track of if have any nearest neighbours within 3000 SNPs
         
         for(int nn : potentialNN) {
             double snp = geneticDist[patient][nn];
-            if(snp<=100) { //restrict to only consider nearest neighbours within 100 snps
+            if(snp<=3000) { //restrict to only consider nearest neighbours within 3000 snps
                 snpSum += snp;
                 sumNN ++;
             }
@@ -319,7 +319,7 @@ double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSo
             meanSnp = snpSum / sumNN;
         }
         else {
-            meanSnp = 100; // if no nearest neighbours set the meanSnp to be the upper limit of 100
+            meanSnp = 3000; // if no nearest neighbours set the meanSnp to be the upper limit of 3000
         }
         
         double logProbNN = log(1-p) + meanSnp*log(p);
@@ -371,12 +371,12 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
             
             //get average SNP difference to all potential NN
             double snpSum = 0.0;
-            int sumNN = 0; //keep track of if have any nearest neighbours within 100 SNPs
+            int sumNN = 0; //keep track of if have any nearest neighbours within 3000 SNPs
             
             for (int nn : nnList) {
                 if (nn!=patient) {
                     double snp = geneticDist[patient][nn];
-                    if(snp<=100) { //restrict to only consider nearest neighbours within 100 snps
+                    if(snp<=3000) { //restrict to only consider nearest neighbours within 3000 snps
                         snpSum += snp;
                         sumNN ++;
                     }
@@ -389,7 +389,7 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
                 meanSnp = snpSum / sumNN;
             }
             else {
-                meanSnp = 100;
+                meanSnp = 3000;
             }
             double logProbNN = log(1-p) + meanSnp*log(p);
             ll += logProbNN;
