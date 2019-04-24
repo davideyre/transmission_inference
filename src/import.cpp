@@ -81,7 +81,8 @@ void importPatientLog(string filePath, unordered_map<string,int> &ptLookup, unor
 //    wardLogInf -  // wardLogInf[time][ward] = {patients...} for infected patients
 //    wardLogNeverInf - // wardLogNeverInf[time][ward] = int for count of never infected patients
 
-void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, unordered_map<string,int> &wardLookup, unordered_map<string,int> &ptLookup,
+void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, unordered_map<string,int> &wardLookup,
+                   unordered_map<int,string> &wardLookupRev, unordered_map<string,int> &ptLookup,
                    vector<vector<vector<int>>> &wardLogInf,
                    vector<vector<int>> &wardLogNeverInf,
                    int &maxTime, int &nWards, vector<int> &sampleTimes, vector<vector<int>> &hospitalWards, vector<int> &ward2Hospital, vector<vector<int>> &hospitalWardList) {
@@ -109,6 +110,7 @@ void importWardLog(string filePath, unordered_map<string,int> &hospitalLookup, u
         auto it = wardLookup.find(tmp_wardHosp);
         if (it==wardLookup.end()) {
             wardLookup.insert( { tmp_wardHosp, i }); //save name of ward
+            wardLookupRev.insert( { i, tmp_wardHosp }); //save reverse lookup
             int hChk = hospitalLookup.at(tmp_hospital); //save which hospital ward is in
             hospitalWardList[hChk].push_back(i);
             i++;

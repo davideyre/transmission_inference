@@ -1256,6 +1256,7 @@ int main(int argc, const char * argv[]) {
     
     //ward lookup that converts text ward names into integers starting at zero, hospitalLookup likewise
     unordered_map<string,int> wardLookup;
+    unordered_map<int,string> wardLookupRev;
     unordered_map<string,int> hospitalLookup;
     
     //last time to track
@@ -1271,7 +1272,7 @@ int main(int argc, const char * argv[]) {
     
     //import ward admission details
     filePath = path + "/input/wardLog.csv";
-    importWardLog(filePath, hospitalLookup, wardLookup, ptLookup, wardLogInf, wardLogNeverInf, maxTime, nWards, sampleTimes, hospitalWards, ward2Hospital, hospitalWardList);
+    importWardLog(filePath, hospitalLookup, wardLookup, wardLookupRev, ptLookup, wardLogInf, wardLogNeverInf, maxTime, nWards, sampleTimes, hospitalWards, ward2Hospital, hospitalWardList);
     
     //read in genetic data
     string filePathGenetic = path + "/input/geneticDistances_snps.txt";
@@ -1363,7 +1364,8 @@ int main(int argc, const char * argv[]) {
     
     //export the chain to a file
     const string mcmcLog = path + "/inference"; //path for log files
-    exportChain(chain, chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes, steps, mcmcLog, ptLookupRev);
+    exportChain(chain, chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes, steps, mcmcLog, ptLookupRev,
+                ptLocation, wardLookupRev);
     
     
     //report MCMC run time

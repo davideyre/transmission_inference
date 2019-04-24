@@ -10,7 +10,9 @@
 
 void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vector<int>> &chainInfSources, vector<vector<int>> &chainInfSourceTypes,
                  vector<vector<int>> &chainRecTimes, int steps, string filePath,
-                 unordered_map<int,string> &ptLookupRev) {
+                 unordered_map<int,string> &ptLookupRev,
+                 vector<vector<int>> &ptLocation, unordered_map<int,string> &wardLookupRev) {
+    
     
     FILE *fp;
     string fileName = filePath+"/chain_parameters.txt";
@@ -43,6 +45,39 @@ void exportChain(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector
         fprintf(fp, "\n");
     }
     fclose(fp);
+    
+    
+    
+    //write infection locations from chain
+    fileName = filePath+"/chain_inf_locations.txt";
+    headerText = "";
+    for (int j=0; j<nInf; j++){
+        string ptStr = ptLookupRev.at(j);
+        headerText += ptStr+"\t";
+    }
+    
+    headerText += "\n";
+    fp = fopen(fileName.c_str(), "wb");
+    fprintf(fp, headerText.c_str()); //header
+    for(int i=0; i<steps; i++) {
+        for (int j=0; j<nInf; j++){
+            int loc = ptLocation[j][chainInfTimes[i][j]];
+            string wardStr = "";
+            if(loc==-1) {
+                wardStr = "Community";
+            }
+            else {
+                wardStr = wardLookupRev.at(loc);
+            }
+            fprintf(fp, "%s\t", wardStr.c_str());
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+    
+    
+    
+    
     
     //write recovery times
     fileName = filePath+"/chain_rec_times.txt";
