@@ -5,6 +5,7 @@ build/
 transmission_inference.xcodeproj
 sim_data/
 nejm_data*/
+nejm/
 
 # R
 .Rhistory
