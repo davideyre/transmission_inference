@@ -105,6 +105,18 @@ cd /users/bag/deyre/analysis/transmission_inference/src
 g++ -o ../bin/transmission_test *.cpp -std=c++11 -lRmath -I /apps/well/R/3.2.2/lib64/R/include -L /apps/well/R/3.2.2/lib64 -lpthread -Wl,-rpath,/apps/well/R/3.2.2/lib64 -O2
 ```
 
+To compile without genetic data being considered
+
+```
+module purge
+module load R/3.2.2
+module load gcc/5.4.0
+cd /users/bag/deyre/analysis/transmission_inference/src
+g++ -o ../bin/transmission_test_no_genetic *.cpp -std=c++11 -lRmath -I /apps/well/R/3.2.2/lib64/R/include -L /apps/well/R/3.2.2/lib64 -lpthread -Wl,-rpath,/apps/well/R/3.2.2/lib64 -O2 -Dno_genetic
+```
+
+
+
 ### Compile of linux - Ophelia
 Once off  to install R and required packages for RMath and reporting
 ```

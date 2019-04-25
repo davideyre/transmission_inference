@@ -267,7 +267,7 @@ double llRecover(int nInfPatients, vector<int> &sampleTimes, vector<int> &recTim
     return ll;
 }
 
-
+#ifndef no_genetic
 
 //genetic log likelihood for single patient pair
 double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
@@ -416,7 +416,21 @@ double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &i
     return ll;
 }
 
+#else
+double llGenetic(vector<int> &infTimes, vector<int> &sampleTimes, vector<int> &infSources, vector<int> &infSourceType,
+                 vector<vector<double>> &geneticDist, int nInfPatients, Parm &parm) {
+    double ll = 0.00;
+    return ll;
+}
 
+double llGeneticSingle(vector<int> &sampleTimes, int patient, int transmissionSource, vector<int> infSourceType,
+                       vector<vector<double>> &geneticDist, int nInfPatients, Parm &parm) {
+    double ll = 0.00;
+    return ll;
+}
+    
+
+#endif
 
 
 
