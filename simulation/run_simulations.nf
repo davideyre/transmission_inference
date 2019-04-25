@@ -3,6 +3,10 @@
 /*
 Example to run (from root of repository):
 nextflow run simulation/run_simulations.nf --simDirPath sim_data/50_scenarios --infBin bin/transmission_test --iter 50000 --checkMCMC reporting/checkMCMC.R -profile cluster -resume
+
+Another example with binary without genetic likelihood
+nextflow run simulation/run_simulations.nf --simDirPath sim_data/50_scenarios_no_genetic --infBin bin/transmission_test_no_genetic --iter 50000 --checkMCMC reporting/checkMCMC.R -profile cluster -resume
+
 */
 
 
