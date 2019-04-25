@@ -2,7 +2,7 @@
 
 /*
 Example to run (from root of repository):
-nextflow run simulation/run_simulations.nf --simDirPath sim_data/50_scenarios --rscript reporting/heuristic_classifier.R -profile cluster -resume 
+nextflow run simulation/run_heuristic.nf --simDirPath sim_data/50_scenarios --rscript reporting/heuristic_classifier.R -profile cluster -resume 
 */
 
 
