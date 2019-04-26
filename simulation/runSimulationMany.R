@@ -1,5 +1,6 @@
 rm(list = ls())
 Sys.setenv(PATH="/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")
+setwd("/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/simulation")
 source('simulation.R')
 
 #dependencies
@@ -31,6 +32,29 @@ alnLength = 1000; mutationRate = 1 #mutations per genome per year, aln-length - 
 # create dataframe to hold output
 options(stringsAsFactors = FALSE)
 scenario_list = data.frame()
+
+
+#scenario 0 - dense ward transmission only
+bgroundBeta = 0.002; wardBeta = 0.01; hospBeta = 0.000; commBeta = 0.000
+spore.p = 1; spore.multiplier = 0 #spore decay - geometric distn; the relatively infectiousness of spores
+
+for (i in 1:1) {
+  randomSeed = as.numeric(gsub("0.", "", as.character(round(runif(1),8))))
+  simSettings = list(bgroundBeta=bgroundBeta, wardBeta=wardBeta, hospBeta=hospBeta, commBeta=commBeta,
+                     pStartPos=pStartPos, sample.size=sample.size, sample.mu=sample.mu, 
+                     rec.size=rec.size, rec.mu=rec.mu, 
+                     spore.p=spore.p, spore.multiplier=spore.multiplier, 
+                     directNe=directNe, introNe=introNe, bottleneck=bottleneck,
+                     nWardsPerHospital=nWardsPerHospital, nHospitals=nHospitals, nPopulation=nPopulation, 
+                     pAdmit=pAdmit, losMean=losMean,
+                     maxTime=maxTime, randomSeed=randomSeed, outDirRoot=outDirRoot,
+                     alnLength=alnLength, mutationRate=mutationRate)
+  src_summary = runSim(simSettings)
+  scenario_list = rbind(scenario_list, c("hosp_bg__ward", randomSeed, nPopulation, src_summary["0"], src_summary["1"],
+                                         src_summary["2"], src_summary["3"], src_summary["4"], src_summary["5"]))
+}
+
+
 
 
 #scenario 1 - ward transmission only
