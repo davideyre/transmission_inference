@@ -595,3 +595,5 @@ gelman.plot(chainList)
 dev.off()
 
 
+print(gelman.diag(chainList))
+
