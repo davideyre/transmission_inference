@@ -236,10 +236,12 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             printf("Accepted Moves\n beta0: %d\tbeta1: %d\tbeta2: %d\tsampleSize: %d\tsampleMu: %d\tdirectNe: %d\tintroNe: %d\tmu: %d\t betaComm: %d\nsporeProb: %d\tsporeMultiplier: %d\tpStartInf: %d\trecSize %d\trecMu %d\n",
                    nAccepted[0], nAccepted[1], nAccepted[2], nAccepted[3], nAccepted[4], nAccepted[5], nAccepted[6], nAccepted[7], nAccepted[8], nAccepted[9], nAccepted[13], nAccepted[10], nAccepted[11], nAccepted[12]);
             for (int j=0; j<14; j++) {
-                if(nAccepted[j]<20) {
-                    sigma[j] = sigma[j] * 0.8;
-                } else if (nAccepted[j]>40) {
-                    sigma[j] = sigma[j] * 1.25;
+                if(j!=11 & j!=12) { //don't do adpative updates to recSize and recMu
+                    if(nAccepted[j]<20) {
+                        sigma[j] = sigma[j] * 0.8;
+                    } else if (nAccepted[j]>40) {
+                        sigma[j] = sigma[j] * 1.25;
+                    }
                 }
                 nAccepted[j] = 0;
             }
@@ -1328,8 +1330,8 @@ int main(int argc, const char * argv[]) {
     startSigma.probStartInfLogit = 0.05;
     startSigma.betaComm = 0.0001;
     startSigma.sporeProbLogit = 0.1;
-    startSigma.recSize = 0.1;
-    startSigma.recMu = 1;
+    startSigma.recSize = 1;
+    startSigma.recMu = 10;
     startSigma.sporeMultiplier = 0.05;
 
     
