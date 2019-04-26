@@ -31,6 +31,12 @@
 
 #include <sys/time.h>
 
+//for directory handling
+#include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
+
+
 using namespace std;
 
 
@@ -1357,14 +1363,53 @@ int main(int argc, const char * argv[]) {
     //        inPtDays, ptLocation, wardI, nPatients, nWards, maxTime);
     
     
+    //set up output directory before running MCMC chain
+    const string mcmcLogRoot = path + "/inference";
+    const string mcmcLogDir = mcmcLogRoot + "/seed_" + to_string(rndSeed);
+    
+    int dir_err = 0;
+    int dir_err1 = 0;
+    int dir_err2 = 0;
+    
+    DIR* dir = opendir(mcmcLogRoot.c_str());
+    if (dir) { //directory found
+        closedir(dir);
+    }
+    else if (ENOENT == errno) //directory not found
+    {
+        dir_err1 = mkdir(mcmcLogRoot.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); //make directory
+    }
+    else //another error
+    {
+        dir_err = -1;
+    }
+    
+    DIR* subdir = opendir(mcmcLogDir.c_str());
+    if (subdir) { //directory found
+        closedir(subdir);
+    }
+    else if (ENOENT == errno) //directory not found
+    {
+        dir_err2 = mkdir(mcmcLogDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); //make directory
+    }
+    else //another error
+    {
+        dir_err = -1;
+    }
+
+    if (-1 == dir_err | -1 == dir_err1 | -1 == dir_err2)
+    {
+        printf("Error creating output directories.");
+        exit(1);
+    }
+    
     doMCMC(chain, chainInfTimes, chainRecTimes, chainInfSources, chainInfSourceTypes, steps, startParm, startSigma,
            sampleTimes, wardLogInf, wardLogNeverInf, nInfPatients, nNeverInfPatients, nWards, maxTime, geneticDist,
            infTimes, infSources, infSourceTypes, recoverTimes, ptLookup, wardLookup, hospitalWards, ward2Hospital, hospitalWardList);
     
     
     //export the chain to a file
-    const string mcmcLog = path + "/inference"; //path for log files
-    exportChain(chain, chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes, steps, mcmcLog, ptLookupRev,
+    exportChain(chain, chainInfTimes, chainInfSources, chainInfSourceTypes, chainRecTimes, steps, mcmcLogDir, ptLookupRev,
                 ptLocation, wardLookupRev);
     
     

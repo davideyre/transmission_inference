@@ -33,10 +33,13 @@ infBin = file(params.infBin)
 iter = params.iter
 checkMCMC = file(params.checkMCMC)
 
+chainReplicates=3
+
 process runInference {
 
 	input:
 		file simDir from simList
+		each x from 1..chainReplicates //run the process this many times
 	output:
 		file simDir into simRun
 	
@@ -46,6 +49,7 @@ process runInference {
 
 }
 
+/*
 process compare {
 
 	input:
@@ -56,5 +60,5 @@ process compare {
 	"""
 
 }
-
+*/
 
