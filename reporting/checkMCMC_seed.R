@@ -572,9 +572,9 @@ simId = tail(strsplit(pathRoot, '/')[[1]], n=1)
 seedList = list.dirs(path = paste(pathRoot,"/inference", sep=""), full.names = F, recursive = F)
 
 #report each seed separately
-# for (seed in seedList[1:1]) {
-#   runReport(pathRoot, seed)
-# }
+for (seed in seedList[1:1]) {
+  runReport(pathRoot, seed)
+}
 
 chainList = mcmc.list()
 i=1
@@ -595,5 +595,6 @@ gelman.plot(chainList)
 dev.off()
 
 
-print(gelman.diag(chainList))
+gelman = gelman.diag(chainList)
+capture.output(gelman, file = paste(pathRoot, "inference/covergence_factors.txt", sep=""))
 
