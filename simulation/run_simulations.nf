@@ -33,18 +33,18 @@ infBin = file(params.infBin)
 iter = params.iter
 checkMCMC = file(params.checkMCMC)
 
-chainReplicates=3
+seedList = [42, 1966, 2917]
 
 process runInference {
 
 	input:
 		file simDir from simList
-		each x from 1..chainReplicates //run the process this many times
+		each seed from seedList
 	output:
 		file simDir into simRun
 	
 	"""
-	$infBin -i $iter -p $simDir
+	$infBin -i $iter -p $simDir -s $seed
 	"""
 
 }
