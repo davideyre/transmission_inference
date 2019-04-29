@@ -677,7 +677,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             proposedSporePatientI = currentSporePatientI;
             
             //propose new recovery time
-            int sdRecTime = 5;
+            int sdRecTime = 15;
             int proposedRecTime = proposeRecoveryTime(proposedPatient, currentRecTimes[proposedPatient],
                                                       onwardTransmission, sampleTimes, maxTime, minTime, sdRecTime, ptLocation, currentInfTimes);
             
@@ -940,7 +940,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 // 4B) sample new recovery times as well, to avoid recovery times being fixed by on-ward transmission requirements
                 proposedRecTimes = currentRecTimes;
                 for(int node : nodeSet) {
-                    int sdDisruptRecTime = 5;
+                    int sdDisruptRecTime = 5; //keep this small to avoid rejecting too many moves on this basis
                     int proposedRecoveryTime = proposeRecoveryTime(node, currentRecTimes[node], proposedOnwardTransmission,
                                                                    sampleTimes, maxTime, minTime, sdDisruptRecTime, ptLocation, proposedInfTimes);
                     if(proposedRecoveryTime == std::numeric_limits<int>::min()) {
