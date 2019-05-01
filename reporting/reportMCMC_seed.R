@@ -34,12 +34,11 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   mcmcLog = paste(pathRoot, "inference/", seed, "/chain_parameters.txt", sep="")
   chain = read.table(mcmcLog, header=T)
   
-  burnIn = nrow(chain) * burnIn.factor
+  burnIn = (nrow(chain) * burnIn.factor) +1
   
   finalChain = chain[burnIn:nrow(chain),]
   finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
   finalChain = mcmc(finalChain[seq(1, nrow(finalChain), by = thin.factor),], start=burnIn, end=nrow(chain), thin=thin.factor)
-  
   
   parmChainFile = paste(pathRoot, "inference/", seed, "/parm_plots.pdf", sep="")
   pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
@@ -397,33 +396,89 @@ pathRoot = paste(opt$directory, "/", sep="")
 
 simId = tail(strsplit(pathRoot, '/')[[1]], n=1)
 seedList = list.dirs(path = paste(pathRoot,"/inference", sep=""), full.names = F, recursive = F)
-
+seedList = seedList[(which(seedList!="seed_combined"))]
 
 #report each seed separately
 for (seed in seedList) {
-  runReport(pathRoot, seed, burnIn.factor, thin.factor)
+  #runReport(pathRoot, seed, burnIn.factor, thin.factor)
 }
 
+#create folder with merged data
+dir.create(paste(pathRoot, "inference/seed_combined", sep=""))
+
 chainList = mcmc.list()
+chainListParm = mcmc.list()
+
 i=1
 for (seed in seedList) {
   mcmcLog = paste(pathRoot, "inference/", seed, "/chain_parameters.txt", sep="")
+  infTimeLog = paste(pathRoot, "inference/", seed, "/chain_inf_times.txt", sep="")
+  recTimeLog = paste(pathRoot, "inference/", seed, "/chain_rec_times.txt", sep="")
+  infSourceLog = paste(pathRoot, "inference/", seed, "/chain_inf_sources.txt", sep="")
+  infSourceTypesLog = paste(pathRoot, "inference/", seed, "/chain_inf_source_types.txt", sep="")
+  
   chain = read.table(mcmcLog, header=T)
-  burnIn = nrow(chain) * burnIn.factor
+  all.inf.infTimes = read.table(infTimeLog, header=T)
+  all.rec.recTimes = read.table(recTimeLog, header=T)
+  all.inf.infSources = read.table(infSourceLog, header=T)
+  all.inf.infSourceTypes = read.table(infSourceTypesLog, header=T)
+  rowN = nrow(chain)
+  burnIn = (rowN * burnIn.factor)+1
+  
   finalChain = chain[burnIn:nrow(chain),]
   finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
-  thinChain = mcmc(finalChain[seq(1, nrow(finalChain), by = thin.factor),], thin=thin.factor)
-  chainList[[i]] = thinChain
+  thinChain = finalChain[seq(1, nrow(finalChain), by = thin.factor),]
+  infTimes = all.inf.infTimes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
+  recTimes = all.inf.infTimes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
+  infSources = all.inf.infSources[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
+  infSourceTypes = all.inf.infSourceTypes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
+  
+  chainList[[i]] = mcmc(thinChain, thin=thin.factor)
+  chainListParm[[i]] = mcmc(thinChain, thin=thin.factor)[,1:14]
+  
+  if (i==1) {
+    mergedChain = thinChain
+    mergedInfTimes = infTimes
+    mergedRecTimes = recTimes
+    mergedInfSources = infSources
+    mergedInfSourceTypes = infSourceTypes
+  } else {
+    mergedChain = rbind(mergedChain, thinChain)
+    mergedInfTimes = rbind(mergedInfTimes, infTimes)
+    mergedRecTimes = rbind(mergedRecTimes, recTimes)
+    mergedInfSources = rbind(mergedInfSources, infSources)
+    mergedInfSourceTypes = rbind(mergedInfSourceTypes, infSourceTypes)
+  }
   i = i +1
 }
+
+#save chains
+write.table(mergedChain[,1:19], paste(pathRoot, "inference/seed_combined/chain_parameters.txt", sep=""), row.names = F, sep="\t")
+write.table(mergedInfTimes, paste(pathRoot, "inference/seed_combined/chain_inf_times.txt", sep=""), row.names = F, sep="\t")
+write.table(mergedRecTimes, paste(pathRoot, "inference/seed_combined/chain_rec_times.txt", sep=""), row.names = F, sep="\t")
+write.table(mergedInfSources, paste(pathRoot, "inference/seed_combined/chain_inf_sources.txt", sep=""), row.names = F, sep="\t")
+write.table(mergedInfSourceTypes, paste(pathRoot, "inference/seed_combined/chain_inf_source_types.txt", sep=""), row.names = F, sep="\t")
+
+#save converagance plots for parameters, posterior and likelihoods
 parmChainFile = paste(pathRoot, "inference/covergence_plots.pdf", sep="")
 pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
 plot(chainList)
 gelman.plot(chainList)
 dev.off()
 
+#save converagance plots for parameters only
+parmChainFile = paste(pathRoot, "inference/covergence_plots_parm.pdf", sep="")
+pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
+plot(chainListParm)
+gelman.plot(chainListParm)
+dev.off()
 
-gelman = gelman.diag(chainList)
+#save gelman diagonal to file
+gelman = gelman.diag(chainListParm)
 capture.output(gelman, file = paste(pathRoot, "inference/covergence_factors.txt", sep=""))
+
+#run reporting on merged data
+runReport(pathRoot, seed="seed_combined", burnIn.factor=0, thin.factor=1)
+
 
 
