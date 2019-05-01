@@ -69,9 +69,9 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   infTimeLog = paste(pathRoot, "inference/", seed, "/chain_inf_times.txt", sep="")
   inf.infTimes = read.table(infTimeLog, header=T)
   #remove burn in and thin
-  inf.infTimes = inf.infTimes[burnIn:nrow(inf.infTimes),]
   inf.infTimes = mcmc(inf.infTimes[seq(1, nrow(inf.infTimes), by = thin.factor),], 
                       start=burnIn, end=nrow(inf.infTimes), thin=thin.factor)
+  
   #mean infection times
   inf.meanInfTimes = apply( inf.infTimes , 2 , mean )
   inf.meanInfTimes = inf.meanInfTimes +1 #convert back to numbering from 1 rather than zero
@@ -86,7 +86,6 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   recTimeLog = paste(pathRoot, "inference/", seed, "/chain_rec_times.txt", sep="")
   rec.recTimes = read.table(recTimeLog, header=T)
   # remove burn in and thin
-  rec.recTimes = rec.recTimes[burnIn:nrow(rec.recTimes),]
   rec.recTimes = mcmc(rec.recTimes[seq(1, nrow(rec.recTimes), by = thin.factor),], 
                       start=burnIn, end=nrow(rec.recTimes), thin=thin.factor)
   
