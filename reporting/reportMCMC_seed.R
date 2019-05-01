@@ -460,14 +460,14 @@ write.table(mergedInfSources, paste(pathRoot, "inference/seed_combined/chain_inf
 write.table(mergedInfSourceTypes, paste(pathRoot, "inference/seed_combined/chain_inf_source_types.txt", sep=""), row.names = F, sep="\t")
 
 #save converagance plots for parameters, posterior and likelihoods
-parmChainFile = paste(pathRoot, "inference/covergence_plots.pdf", sep="")
+parmChainFile = paste(pathRoot, "inference/seed_combined/covergence_plots.pdf", sep="")
 pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
 plot(chainList)
 gelman.plot(chainList)
 dev.off()
 
 #save converagance plots for parameters only
-parmChainFile = paste(pathRoot, "inference/covergence_plots_parm.pdf", sep="")
+parmChainFile = paste(pathRoot, "inference/seed_combined/covergence_plots_parm.pdf", sep="")
 pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
 plot(chainListParm)
 gelman.plot(chainListParm)
@@ -475,7 +475,7 @@ dev.off()
 
 #save gelman diagonal to file
 gelman = gelman.diag(chainListParm)
-capture.output(gelman, file = paste(pathRoot, "inference/covergence_factors.txt", sep=""))
+capture.output(gelman, file = paste(pathRoot, "inference/seed_combined/covergence_factors.txt", sep=""))
 
 #run reporting on merged data
 runReport(pathRoot, seed="seed_combined", burnIn.factor=0, thin.factor=1)
