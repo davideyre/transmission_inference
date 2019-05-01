@@ -41,7 +41,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   finalChain = mcmc(finalChain[seq(1, nrow(finalChain), by = thin.factor),], start=burnIn, end=nrow(chain), thin=thin.factor)
   
   
-  parmChainFile = paste(pathRoot, "inference/", seed, "/inference/parm_plots.pdf", sep="")
+  parmChainFile = paste(pathRoot, "inference/", seed, "/parm_plots.pdf", sep="")
   pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
   
   plot(finalChain,ask=FALSE)
@@ -62,11 +62,11 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   parmSummary = cbind(rownames(parmSummary), parmSummary)
   colnames(parmSummary) = c("parameter", "mean", "lower", "upper", "ess")
   parmSummary = as.data.frame(parmSummary, row.names=1:nrow(parmSummary))
-  parmFile = paste(pathRoot, "inference/", seed, "/inference/parm_summary.csv", sep="")
+  parmFile = paste(pathRoot, "inference/", seed, "/parm_summary.csv", sep="")
   write.csv(parmSummary, parmFile, row.names=F)
   
   #analyse infection times
-  infTimeLog = paste(pathRoot, "inference/", seed, "/inference/chain_inf_times.txt", sep="")
+  infTimeLog = paste(pathRoot, "inference/", seed, "/chain_inf_times.txt", sep="")
   inf.infTimes = read.table(infTimeLog, header=T)
   #remove burn in and thin
   inf.infTimes = inf.infTimes[burnIn:nrow(inf.infTimes),]
@@ -83,7 +83,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   infTimes.summary = cbind(inf.meanInfTimes, inf.infTimes.hpd)
   
   #analyse recovery times
-  recTimeLog = paste(pathRoot, "inference/", seed, "/inference/chain_rec_times.txt", sep="")
+  recTimeLog = paste(pathRoot, "inference/", seed, "/chain_rec_times.txt", sep="")
   rec.recTimes = read.table(recTimeLog, header=T)
   # remove burn in and thin
   rec.recTimes = rec.recTimes[burnIn:nrow(rec.recTimes),]
@@ -100,7 +100,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   recTimes.summary = cbind(rec.meanrecTimes, rec.recTimes.hpd)
   
   ##plot ESS and differences for infection times and recovery times
-  infRecFile = paste(pathRoot, "inference/", seed, "/inference/inf_rec_plots.pdf", sep="")
+  infRecFile = paste(pathRoot, "inference/", seed, "/inf_rec_plots.pdf", sep="")
   pdf(infRecFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
   par(mfrow = c(2,2))
   hist(ess.infTimes)
@@ -112,7 +112,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   
   
   #### source type analysis ####
-  infSourceTypesLog = paste(pathRoot, "inference/", seed, "/inference//chain_inf_source_types.txt", sep="")
+  infSourceTypesLog = paste(pathRoot, "inference/", seed, "/chain_inf_source_types.txt", sep="")
   all.inf.infSourceTypes = read.table(infSourceTypesLog, header=T)
   rowN = nrow(all.inf.infSourceTypes)
   #remove burn in and thin
@@ -168,13 +168,13 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   summary.srctype = cbind(table(src.compare.map), apply( d , 2 , mean ), HPDinterval(as.mcmc(d), prob=0.95))
   summary.srctype = cbind(rownames(summary.srctype), summary.srctype)
   colnames(summary.srctype) = c("source_type", "map", "mean", "lower", "upper")
-  srcTypeFile = paste(pathRoot, "inference/", seed, "/inference/source_type_summary.csv", sep="")
+  srcTypeFile = paste(pathRoot, "inference/", seed, "/source_type_summary.csv", sep="")
   write.csv(summary.srctype, srcTypeFile, row.names=F)
   
   
   
   ### EXACT SOURCE MATCHES
-  infSourceLog = paste(pathRoot, "inference/", seed, "/inference/chain_inf_sources.txt", sep="")
+  infSourceLog = paste(pathRoot, "inference/", seed, "/chain_inf_sources.txt", sep="")
   all.inf.infSources = read.table(infSourceLog, header=T)
   rowN = nrow(all.inf.infSources)
   inf.infSources = all.inf.infSources[burnIn:rowN,]
@@ -220,7 +220,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   infSrc.summary = as.data.frame(cbind(infSrc.summary, infSourceType.map, snpList, minSNPs, ess.infTimes))
   colnames(infSrc.summary) = c("recipient", "mode_source", "mode_source_type","SNPs_to_mode", "minSNPs", "ESS_inf_times")
   
-  srcFile = paste(pathRoot, "inference/", seed, "/inference/source_summary.csv", sep="")
+  srcFile = paste(pathRoot, "inference/", seed, "/source_summary.csv", sep="")
   write.csv(infSrc.summary, srcFile, row.names=F)
   
   
@@ -341,7 +341,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   }
   
   #save plots to pdf - 4 per page
-  srcPlotFile = paste(pathRoot, "inference/", seed, "/inference/source_plots.pdf", sep="")
+  srcPlotFile = paste(pathRoot, "inference/", seed, "/source_plots.pdf", sep="")
   glist = lapply(plot, ggplotGrob)
   ggsave(srcPlotFile, marrangeGrob(glist, layout_matrix=matrix(c(1,2,3,3), 2), nrow=2, ncol=2), width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
   
@@ -372,7 +372,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   }
   
   #graph summary
-  pdf(file=paste(pathRoot, "inference/", seed, "/inference/transmission_snp_network.pdf", sep=""),  width=297/25.4, height=210/25.4)
+  pdf(file=paste(pathRoot, "inference/", seed, "/transmission_snp_network.pdf", sep=""),  width=297/25.4, height=210/25.4)
   plot(g, layout=layout_with_kk(g, epsilon=0, maxiter=50000, kkconst=200))
   dev.off()
  
