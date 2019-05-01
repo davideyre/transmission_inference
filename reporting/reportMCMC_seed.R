@@ -17,7 +17,7 @@ Mode <- function(x) {
 logistic = function(x) {return(1/(1+exp(-x)))}
 
 
-runReport = function(pathRoot, seed) {
+runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   
   #read in genetic distances
   geneticDist = read.table(file=paste(pathRoot, "input/geneticDistances_snps.txt", sep=""))
@@ -34,25 +34,27 @@ runReport = function(pathRoot, seed) {
   mcmcLog = paste(pathRoot, "inference/", seed, "/chain_parameters.txt", sep="")
   chain = read.table(mcmcLog, header=T)
   
-  burnIn = nrow(chain) * 0.2
+  burnIn = nrow(chain) * burnIn.factor
   
   finalChain = chain[burnIn:nrow(chain),]
   finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
+  finalChain = mcmc(finalChain[seq(1, nrow(finalChain), by = thin.factor),], start=burnIn, end=nrow(chain), thin=thin.factor)
+  
   
   parmChainFile = paste(pathRoot, "inference/", seed, "/inference/parm_plots.pdf", sep="")
   pdf(parmChainFile, width=29.7/2.54, height=21/2.54, useDingbats=FALSE)
   
-  plot(as.mcmc(finalChain[,]),ask=FALSE)
+  plot(finalChain,ask=FALSE)
   dev.off()
   
   #get mean
   mean = apply( finalChain , 2 , mean )
   
   #get 95% HPD interval
-  hpd = HPDinterval(as.mcmc(finalChain), prob=0.95)
+  hpd = HPDinterval(finalChain, prob=0.95)
   
   #get ESS
-  ess = effectiveSize(as.mcmc(finalChain))
+  ess = effectiveSize(finalChain)
   
   #print parameter summary and save to file
   parmSummary = cbind(mean, hpd, ess)
@@ -66,27 +68,35 @@ runReport = function(pathRoot, seed) {
   #analyse infection times
   infTimeLog = paste(pathRoot, "inference/", seed, "/inference/chain_inf_times.txt", sep="")
   inf.infTimes = read.table(infTimeLog, header=T)
+  #remove burn in and thin
   inf.infTimes = inf.infTimes[burnIn:nrow(inf.infTimes),]
+  inf.infTimes = mcmc(inf.infTimes[seq(1, nrow(inf.infTimes), by = thin.factor),], 
+                      start=burnIn, end=nrow(inf.infTimes), thin=thin.factor)
+  #mean infection times
   inf.meanInfTimes = apply( inf.infTimes , 2 , mean )
   inf.meanInfTimes = inf.meanInfTimes +1 #convert back to numbering from 1 rather than zero
   
   #get ESS for infection times
-  ess.infTimes = effectiveSize(as.mcmc(inf.infTimes))
+  ess.infTimes = effectiveSize(inf.infTimes)
   #get HPD
-  inf.infTimes.hpd = HPDinterval(as.mcmc(inf.infTimes))  +1 #convert back to numbering from 1 rather than zero
+  inf.infTimes.hpd = HPDinterval(inf.infTimes)  +1 #convert back to numbering from 1 rather than zero
   infTimes.summary = cbind(inf.meanInfTimes, inf.infTimes.hpd)
   
   #analyse recovery times
   recTimeLog = paste(pathRoot, "inference/", seed, "/inference/chain_rec_times.txt", sep="")
   rec.recTimes = read.table(recTimeLog, header=T)
+  # remove burn in and thin
   rec.recTimes = rec.recTimes[burnIn:nrow(rec.recTimes),]
+  rec.recTimes = mcmc(rec.recTimes[seq(1, nrow(rec.recTimes), by = thin.factor),], 
+                      start=burnIn, end=nrow(rec.recTimes), thin=thin.factor)
+  
   rec.meanrecTimes = apply( rec.recTimes , 2 , mean )
   rec.meanrecTimes = rec.meanrecTimes +1 #convert back to numbering from 1 rather than zero
   
   #get ESS for recection times
-  ess.recTimes = effectiveSize(as.mcmc(rec.recTimes))
+  ess.recTimes = effectiveSize(rec.recTimes)
   #get HPD
-  rec.recTimes.hpd = HPDinterval(as.mcmc(rec.recTimes))  +1 #convert back to numbering from 1 rather than zero
+  rec.recTimes.hpd = HPDinterval(rec.recTimes)  +1 #convert back to numbering from 1 rather than zero
   recTimes.summary = cbind(rec.meanrecTimes, rec.recTimes.hpd)
   
   ##plot ESS and differences for infection times and recovery times
@@ -105,7 +115,9 @@ runReport = function(pathRoot, seed) {
   infSourceTypesLog = paste(pathRoot, "inference/", seed, "/inference//chain_inf_source_types.txt", sep="")
   all.inf.infSourceTypes = read.table(infSourceTypesLog, header=T)
   rowN = nrow(all.inf.infSourceTypes)
+  #remove burn in and thin
   inf.infSourceTypes = all.inf.infSourceTypes[burnIn:rowN,]
+  inf.infSourceTypes = inf.infSourceTypes[seq(1, nrow(inf.infSourceTypes), by = thin.factor),]
   
   #a - row per patient, column per transmission type
   a = matrix(0, nrow=ncol(inf.infSourceTypes), ncol=6)
@@ -166,6 +178,7 @@ runReport = function(pathRoot, seed) {
   all.inf.infSources = read.table(infSourceLog, header=T)
   rowN = nrow(all.inf.infSources)
   inf.infSources = all.inf.infSources[burnIn:rowN,]
+  inf.infSources = inf.infSources[seq(1, nrow(inf.infSources), by = thin.factor),]
   inf.infSources.mode = apply(inf.infSources, 2, Mode)
   
   rowCount = nrow(inf.infSources)
@@ -367,22 +380,29 @@ runReport = function(pathRoot, seed) {
 
 #allow path to be hard coded, but also allow this to be changed at run time
 pathRoot = "/Users/davideyre/Drive/academic/research/transmission_modelling/cdiff_transmission_inference/xcode_project/sim_data/50_scenarios/simulation_22789326"
+burnIn.factor = 0.2
+thin.factor = 10
 
 #parse command line options 
 option_list = list(
   make_option( c("-d", "--directory"), type="character", default=pathRoot, 
-               metavar="character") )
+               metavar="character"),
+  make_option( c("-b", "--burnin"), type="integer", default=burnIn.factor, 
+               help="burn in"),
+  make_option( c("-t", "--thin"), type="double", default=thin.factor, 
+               help="thin chains by saving 1 in x iterations")
+  )
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 pathRoot = paste(opt$directory, "/", sep="")
 
 simId = tail(strsplit(pathRoot, '/')[[1]], n=1)
-
 seedList = list.dirs(path = paste(pathRoot,"/inference", sep=""), full.names = F, recursive = F)
+
 
 #report each seed separately
 for (seed in seedList) {
-  #runReport(pathRoot, seed)
+  runReport(pathRoot, seed, burnIn.factor, thin.factor)
 }
 
 chainList = mcmc.list()
@@ -390,10 +410,10 @@ i=1
 for (seed in seedList) {
   mcmcLog = paste(pathRoot, "inference/", seed, "/chain_parameters.txt", sep="")
   chain = read.table(mcmcLog, header=T)
-  burnIn = nrow(chain) * 0.2
+  burnIn = nrow(chain) * burnIn.factor
   finalChain = chain[burnIn:nrow(chain),]
   finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
-  thinChain = mcmc(finalChain[seq(1, nrow(finalChain), by = 10),], thin=10)
+  thinChain = mcmc(finalChain[seq(1, nrow(finalChain), by = thin.factor),], thin=thin.factor)
   chainList[[i]] = thinChain
   i = i +1
 }
