@@ -236,7 +236,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             printf("Accepted Moves\n beta0: %d\tbeta1: %d\tbeta2: %d\tsampleSize: %d\tsampleMu: %d\tdirectNe: %d\tintroNe: %d\tmu: %d\t betaComm: %d\nsporeProb: %d\tsporeMultiplier: %d\tpStartInf: %d\trecSize %d\trecMu %d\n",
                    nAccepted[0], nAccepted[1], nAccepted[2], nAccepted[3], nAccepted[4], nAccepted[5], nAccepted[6], nAccepted[7], nAccepted[8], nAccepted[9], nAccepted[13], nAccepted[10], nAccepted[11], nAccepted[12]);
             for (int j=0; j<14; j++) {
-                if(j!=11 & j!=12 & i<(steps/0.2)) { //don't do adpative updates to recSize and recMu and only do for first 20% of chain
+                if(j!=3 & j!=4 & j!=11 & j!=12 & i<(steps/0.2)) {
+                    //don't do adpative updates to recSize and recMu and only do for first 20% of chain
                     if(nAccepted[j]<20) {
                         sigma[j] = sigma[j] * 0.8;
                     } else if (nAccepted[j]>40) {
@@ -1305,7 +1306,7 @@ int main(int argc, const char * argv[]) {
     startParm.betaBgroundHosp = 0.0005;
     startParm.betaWard = 0.0005;
     startParm.betaHosp = 0.0005;
-    startParm.sampleSize = 1;
+    startParm.sampleSize = 0.5;
     startParm.sampleMu = 30;
     startParm.directNe =  1;
     startParm.introNe = 500;
@@ -1322,8 +1323,8 @@ int main(int argc, const char * argv[]) {
     startSigma.betaBgroundHosp = 0.0001;
     startSigma.betaWard = 0.0001;
     startSigma.betaHosp = 0.0001;
-    startSigma.sampleSize = 1;
-    startSigma.sampleMu = 3;
+    startSigma.sampleSize = 0.3;
+    startSigma.sampleMu = 10;
     startSigma.directNe =  0.1;
     startSigma.introNe = 100;
     startSigma.mu = 2/365.25/10;
