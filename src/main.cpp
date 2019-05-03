@@ -313,12 +313,9 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             }
             if(parmIndex==4) {
                 proposedParm[3] = currentParm[3] + rnorm(0 , sigma[3]);
-                if(proposedParm[3] < 0) {
-                    proposedParm[3] = currentParm[3];
-                }
             }
             
-            if(proposedValue <= 0 & parmIndex !=9 & parmIndex !=10 & parmIndex !=13) {
+            if(proposedValue <= 0 & parmIndex !=3 & parmIndex !=9 & parmIndex !=10 & parmIndex !=13) {
                 //if invalid proposed value skip this step - probabilities on logit scale so can be negative
                 chain[i][parmIndex] = chain[i-1][parmIndex];
             }
@@ -1321,7 +1318,7 @@ int main(int argc, const char * argv[]) {
     startParm.betaBgroundHosp = 0.0005;
     startParm.betaWard = 0.0005;
     startParm.betaHosp = 0.0005;
-    startParm.sampleSize = 0.5;
+    startParm.sampleSize = log(1);
     startParm.sampleMu = 30;
     startParm.directNe =  1;
     startParm.introNe = 500;
@@ -1338,7 +1335,7 @@ int main(int argc, const char * argv[]) {
     startSigma.betaBgroundHosp = 0.0001;
     startSigma.betaWard = 0.0001;
     startSigma.betaHosp = 0.0001;
-    startSigma.sampleSize = 0.3;
+    startSigma.sampleSize = 1;
     startSigma.sampleMu = 10;
     startSigma.directNe =  0.1;
     startSigma.introNe = 100;

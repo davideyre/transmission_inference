@@ -140,4 +140,7 @@ double getStartInfP(Parm &parm);
 //function to report spore multiplier
 double getSporeMultiplier(Parm &parm);
 
+//function to report sampleShape
+double getSampleSize(Parm &parm);
+
 #endif /* struct_h */

@@ -233,7 +233,7 @@ double llTrans(vector<vector<int>> &wardEver, vector<vector<int>> &hospitalWards
 double llSample(int nInfPatients, vector<int> &infTimes, vector<int> &sampleTimes, Parm &parm) {
    
     // neg. binomial distributed time between infection and sampling
-    double sampleSize = parm.sampleSize;
+    double sampleSize = getSampleSize(parm);
     double sampleMu = parm.sampleMu;
     double sampleProb = sampleSize / (sampleSize + sampleMu);
     
@@ -443,7 +443,8 @@ double getPrior(Parm &parm) {
     double priorBetaComm = dgamma(parm.betaComm, 2, 0.002, 1);
     
     //interval from infection to sampling - set to be relatively imformative
-    double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
+    //double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
+    double priorSampleSize = dnorm(parm.sampleSize, 1.8, 0.7, 1); //most weight between 0 and 10
     double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-30
     
     //genetic priors - base directNe on within host diversity estimates, and my on previous SNPs per year

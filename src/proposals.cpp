@@ -141,8 +141,8 @@ int proposeInfectionTimeInitial(int proposedPatient, vector<int> &sampleTimes, P
     //as all initial infections are set to be from background, don't need to check for onward transmission
     
     //propose infection time sampling from negative binomial distribution
-    double sampleProb = parm.sampleSize / (parm.sampleSize + parm.sampleMu);
-    int proposedInfTime = sampleTimes[proposedPatient] - rnbinom(parm.sampleSize, sampleProb);
+    double sampleProb = getSampleSize(parm) / (getSampleSize(parm) + parm.sampleMu);
+    int proposedInfTime = sampleTimes[proposedPatient] - rnbinom(getSampleSize(parm), sampleProb);
     //temp over-rule
     if(proposedInfTime<0) {
         proposedInfTime = 0;

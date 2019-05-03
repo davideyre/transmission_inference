@@ -45,3 +45,9 @@ double getSporeMultiplier(Parm &parm) {
     double sporeMultiplier = logistic(parm.sporeMultiplier);
     return (sporeMultiplier);
 }
+
+//function to report sampleShape
+double getSampleSize(Parm &parm) {
+    double sampleSize = exp(parm.sampleSize);
+    return (sampleSize);
+}
