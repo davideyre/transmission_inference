@@ -1323,7 +1323,7 @@ int main(int argc, const char * argv[]) {
     startSigma.betaBgroundHosp = 0.0001;
     startSigma.betaWard = 0.0001;
     startSigma.betaHosp = 0.0001;
-    startSigma.sampleSize = 0.3;
+    startSigma.sampleSize = 1;
     startSigma.sampleMu = 10;
     startSigma.directNe =  0.1;
     startSigma.introNe = 100;
