@@ -304,16 +304,6 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             
             proposedParm = currentParm; proposedParm[parmIndex] = proposedValue;
             
-            //joint updates for sample parameters (3 and 4) - but ensure joint proposal doesn't propose value less than zero
-            if(parmIndex==3) {
-                proposedParm[4] = currentParm[4] + rnorm(0 , sigma[4]);
-                if(proposedParm[4] < 0) {
-                    proposedParm[4] = currentParm[4];
-                }
-            }
-            if(parmIndex==4) {
-                proposedParm[3] = currentParm[3] + rnorm(0 , sigma[3]);
-            }
             
             if(proposedValue <= 0 & parmIndex !=3 & parmIndex !=9 & parmIndex !=10 & parmIndex !=13) {
                 //if invalid proposed value skip this step - probabilities on logit scale so can be negative
@@ -340,7 +330,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
                 //3. Accept proposed jump with probability pAccept
                 if ( log(runif(0,1)) < probAccept ) {
                     
-                    chain[i] = proposedParm; // accept the proposed jump
+                    chain[i][parmIndex] = proposedParm[parmIndex]; // accept the proposed jump
                     nAccepted[parmIndex] += 1; // increment the accepted counter
                     //printf("Move accepted for parameter %d at iteration %d (current: %0.4f, proposed %0.4f\n", parmIndex, i, currentParm[parmIndex], proposedValue);
                     currentParm = proposedParm; //update for next parameter
@@ -450,7 +440,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             double hastingsRatio = 0; //store log hastings ratio
             
             //propose infection infection time
-            double sdInfTime = 5;
+            double sdInfTime = 8;
  
             if(runif(0,1)<0.1) {
                 sdInfTime = 25; // for 1 in 10 updates propose a bigger SD to improve chances of moving between adjacent admissions
