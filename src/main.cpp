@@ -442,8 +442,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             //propose infection infection time
             double sdInfTime = 5;
  
-            if(runif(0,1)<0.1) {
-                sdInfTime = 25; // for 1 in 10 updates propose a bigger SD to improve chances of moving between adjacent admissions
+            if(runif(0,1)<0.5) {
+                sdInfTime = 25; // for 1 in 2 updates propose a bigger SD to improve chances of moving between adjacent admissions
             }
              
              //sd for normal distribution for infection time updates
@@ -1325,8 +1325,8 @@ int main(int argc, const char * argv[]) {
     startSigma.betaBgroundHosp = 0.0001;
     startSigma.betaWard = 0.0001;
     startSigma.betaHosp = 0.0001;
-    startSigma.sampleSize = 0.8;
-    startSigma.sampleMu = 8;
+    startSigma.sampleSize = 1;
+    startSigma.sampleMu = 15;
     startSigma.directNe =  0.1;
     startSigma.introNe = 100;
     startSigma.mu = 2/365.25/10;
