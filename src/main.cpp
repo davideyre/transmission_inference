@@ -57,7 +57,7 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
     // vector<int> &infTimes, vector<int> &infSources, vector<int> &infSourceTypes, vector<int> &recoveryTimes
     
     
-    int updateN = round(nInfPatients*0.1); // select a subset of patients to update times for at each iteration, e.g. 10%
+    int updateN = round(nInfPatients*0.2); // select a subset of patients to update times for at each iteration, e.g. 20%
     bool debugPt = false;
     
 
@@ -236,8 +236,8 @@ void doMCMC(vector<Parm> &chain, vector<vector<int>> &chainInfTimes, vector<vect
             printf("Accepted Moves\n beta0: %d\tbeta1: %d\tbeta2: %d\tsampleSize: %d\tsampleMu: %d\tdirectNe: %d\tintroNe: %d\tmu: %d\t betaComm: %d\nsporeProb: %d\tsporeMultiplier: %d\tpStartInf: %d\trecSize %d\trecMu %d\n",
                    nAccepted[0], nAccepted[1], nAccepted[2], nAccepted[3], nAccepted[4], nAccepted[5], nAccepted[6], nAccepted[7], nAccepted[8], nAccepted[9], nAccepted[13], nAccepted[10], nAccepted[11], nAccepted[12]);
             for (int j=0; j<14; j++) {
-                if(j!=3 & j!=4 & i<(steps/0.2)) {
-                    //only do for first 20% of chain, and not for sample parameters
+                if(i<(steps/0.2)) {
+                    //only do for first 20% of chain
                     if(nAccepted[j]<20) {
                         sigma[j] = sigma[j] * 0.8;
                     } else if (nAccepted[j]>40) {

@@ -444,8 +444,8 @@ double getPrior(Parm &parm) {
     
     //interval from infection to sampling - set to be relatively imformative
     //double priorSampleSize = dgamma(parm.sampleSize, 3, 1/0.5, 1); //favours lower values of size parameter
-    //double priorSampleSize = dnorm(parm.sampleSize, 1.8, 0.7, 1); //most weight between 0 and 10
-    double priorSampleSize = dnorm(parm.sampleSize, -1, 0.01, 1); //tight to improve convergence as test
+    double priorSampleSize = dnorm(parm.sampleSize, 0.7, 0.5, 1); //most weight between 0 and 10
+    //double priorSampleSize = dnorm(parm.sampleSize, -1, 0.01, 1); //tight to improve convergence as test
     double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-30
     
     //genetic priors - base directNe on within host diversity estimates, and my on previous SNPs per year
