@@ -398,10 +398,7 @@ simId = tail(strsplit(pathRoot, '/')[[1]], n=1)
 seedList = list.dirs(path = paste(pathRoot,"/inference", sep=""), full.names = F, recursive = F)
 seedList = seedList[(which(seedList!="seed_combined"))]
 
-#report each seed separately
-for (seed in seedList) {
-  #runReport(pathRoot, seed, burnIn.factor, thin.factor)
-}
+
 
 #create folder with merged data
 dir.create(paste(pathRoot, "inference/seed_combined", sep=""))
@@ -480,5 +477,8 @@ capture.output(gelman, file = paste(pathRoot, "inference/seed_combined/covergenc
 #run reporting on merged data
 runReport(pathRoot, seed="seed_combined", burnIn.factor=0, thin.factor=1)
 
-
+#report each seed separately
+for (seed in seedList) {
+  runReport(pathRoot, seed, burnIn.factor, thin.factor)
+}
 
