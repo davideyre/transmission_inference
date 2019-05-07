@@ -16,7 +16,7 @@ for (st in stList) {
     out = rbind(out, df)
   }
 }
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/merged_summary/parm_compare_by_st.csv"
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/parm_compare_by_st.csv"
 write.csv(out, outFile, row.names = F)
 
 
@@ -33,7 +33,7 @@ for (st in stList) {
     out = rbind(out, df)
   }
 }
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/merged_summary/trans_src_type_compare_by_st.csv"
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_src_type_compare_by_st.csv"
 write.csv(out, outFile, row.names = F)
 
 ##collect transmission summaries
@@ -70,7 +70,7 @@ for (i in 1:nrow(out.comb.mat)) {
 }
 
 #save file with one row per iteration and a count of each route/ward combination for each column
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/merged_summary/trans_location.csv"
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_location.csv"
 write.csv(s.df, outFile, row.names = F)
 
 #read in lookup table that can join specialty to ward
@@ -104,13 +104,13 @@ for (i in 1:nrow(spec.list)) { #each iteration
 spec.summary = cbind(location=u.spec, mean=apply(spec.list, 2, mean), 
                      lower=apply(spec.list, 2, quantile, probs=0.025), 
                      upper=apply(spec.list, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/merged_summary/trans_spec_summary.csv"
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_spec_summary.csv"
 write.csv(spec.summary, outFile, row.names = F)
 
 spec.summary.trans = cbind(location=u.spec, mean=apply(spec.list.trans, 2, mean), 
                            lower=apply(spec.list.trans, 2, quantile, probs=0.025), 
                            upper=apply(spec.list.trans, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/merged_summary/trans_spec_src_summary.csv"
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_spec_src_summary.csv"
 write.csv(spec.summary.trans, outFile, row.names = F)
 
 
@@ -130,7 +130,7 @@ for (i in 1:nrow(hospital.list)) { #each iteration
 hospital.summary = cbind(location=u.hospital, mean=apply(hospital.list, 2, mean), 
                          lower=apply(hospital.list, 2, quantile, probs=0.025), 
                          upper=apply(hospital.list, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/merged_summary/trans_hospital_summary.csv"
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_hospital_summary.csv"
 write.csv(hospital.summary, outFile, row.names = F)
 
 
