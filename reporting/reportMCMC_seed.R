@@ -422,7 +422,7 @@ for (seed in seedList) {
   all.rec.recTimes = read.table(recTimeLog, header=T)
   all.inf.infSources = read.table(infSourceLog, header=T)
   all.inf.infSourceTypes = read.table(infSourceTypesLog, header=T)
-  all.inf.infLocation = read.table(infLocationLog, header=T)
+  all.inf.infLocation = read.table(infLocationLog, header=T, sep="\t", stringsAsFactors = F)
   rowN = nrow(chain)
   burnIn = (rowN * burnIn.factor)+1
   
