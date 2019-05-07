@@ -385,7 +385,7 @@ thin.factor = 10
 option_list = list(
   make_option( c("-d", "--directory"), type="character", default=pathRoot, 
                metavar="character"),
-  make_option( c("-b", "--burnin"), type="integer", default=burnIn.factor, 
+  make_option( c("-b", "--burnin"), type="double", default=burnIn.factor, 
                help="burn in"),
   make_option( c("-t", "--thin"), type="double", default=thin.factor, 
                help="thin chains by saving 1 in x iterations")
@@ -393,11 +393,13 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 pathRoot = paste(opt$directory, "/", sep="")
+burnIn.factor = opt$burnin
+thin.factor = opt$thin
 
 simId = tail(strsplit(pathRoot, '/')[[1]], n=1)
 seedList = list.dirs(path = paste(pathRoot,"/inference", sep=""), full.names = F, recursive = F)
+seedList = grep("seed*", seedList, value = TRUE) #require to include seed to allow to ignore some chains
 seedList = seedList[(which(seedList!="seed_combined"))]
-
 
 
 #create folder with merged data
