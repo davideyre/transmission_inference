@@ -169,12 +169,6 @@ for (st in stList) {
     out.src =cbind(out.src, df.src[,1:ncol(df.src)-1])
   }
 }
-#discard burn-in
-out = out[((nrow(out)*.2)+1):nrow(out),]
-out.src = out.src[((nrow(out.src)*.2)+1):nrow(out.src),]
-#thin by factor of 10
-out = out[seq(1, nrow(out), by = 10),]
-out.src = out.src[seq(1, nrow(out.src), by = 10),]
 
 out.mat = as.matrix(out)
 out.src.mat = as.matrix(out.src)
