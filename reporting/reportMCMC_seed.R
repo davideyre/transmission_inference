@@ -37,7 +37,7 @@ runReport = function(pathRoot, seed, burnIn.factor, thin.factor) {
   burnIn = (nrow(chain) * burnIn.factor) +1
   
   finalChain = chain[burnIn:nrow(chain),]
-  finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
+  finalChain = cbind(finalChain, exp(finalChain$sampleSize), logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
   finalChain = mcmc(finalChain[seq(1, nrow(finalChain), by = thin.factor),], start=burnIn, end=nrow(chain), thin=thin.factor)
   
   parmChainFile = paste(pathRoot, "inference/", seed, "/parm_plots.pdf", sep="")
