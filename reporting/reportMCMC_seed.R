@@ -415,12 +415,14 @@ for (seed in seedList) {
   recTimeLog = paste(pathRoot, "inference/", seed, "/chain_rec_times.txt", sep="")
   infSourceLog = paste(pathRoot, "inference/", seed, "/chain_inf_sources.txt", sep="")
   infSourceTypesLog = paste(pathRoot, "inference/", seed, "/chain_inf_source_types.txt", sep="")
+  infLocationLog = paste(pathRoot, "inference/", seed, "/chain_inf_locations.txt", sep="")
   
   chain = read.table(mcmcLog, header=T)
   all.inf.infTimes = read.table(infTimeLog, header=T)
   all.rec.recTimes = read.table(recTimeLog, header=T)
   all.inf.infSources = read.table(infSourceLog, header=T)
   all.inf.infSourceTypes = read.table(infSourceTypesLog, header=T)
+  all.inf.infLocation = read.table(infLocationLog, header=T)
   rowN = nrow(chain)
   burnIn = (rowN * burnIn.factor)+1
   
@@ -431,6 +433,7 @@ for (seed in seedList) {
   recTimes = all.inf.infTimes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
   infSources = all.inf.infSources[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
   infSourceTypes = all.inf.infSourceTypes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
+  infLocation = all.inf.infLocation[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
   
   chainList[[i]] = mcmc(thinChain, thin=thin.factor)
   chainListParm[[i]] = mcmc(thinChain, thin=thin.factor)[,1:14]
@@ -441,12 +444,14 @@ for (seed in seedList) {
     mergedRecTimes = recTimes
     mergedInfSources = infSources
     mergedInfSourceTypes = infSourceTypes
+    mergedInfLocation = infLocation
   } else {
     mergedChain = rbind(mergedChain, thinChain)
     mergedInfTimes = rbind(mergedInfTimes, infTimes)
     mergedRecTimes = rbind(mergedRecTimes, recTimes)
     mergedInfSources = rbind(mergedInfSources, infSources)
     mergedInfSourceTypes = rbind(mergedInfSourceTypes, infSourceTypes)
+    mergedInfLocation = rbind(mergedInfLocation, infLocation)
   }
   i = i +1
 }
@@ -457,6 +462,7 @@ write.table(mergedInfTimes, paste(pathRoot, "inference/seed_combined/chain_inf_t
 write.table(mergedRecTimes, paste(pathRoot, "inference/seed_combined/chain_rec_times.txt", sep=""), row.names = F, sep="\t")
 write.table(mergedInfSources, paste(pathRoot, "inference/seed_combined/chain_inf_sources.txt", sep=""), row.names = F, sep="\t")
 write.table(mergedInfSourceTypes, paste(pathRoot, "inference/seed_combined/chain_inf_source_types.txt", sep=""), row.names = F, sep="\t")
+write.table(mergedInfLocation, paste(pathRoot, "inference/seed_combined/chain_inf_locations.txt", sep=""), row.names = F, sep="\t")
 
 #save converagance plots for parameters, posterior and likelihoods
 parmChainFile = paste(pathRoot, "inference/seed_combined/covergence_plots.pdf", sep="")
