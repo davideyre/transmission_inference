@@ -174,30 +174,44 @@ out.mat = as.matrix(out)
 out.src.mat = as.matrix(out.src)
 
 out.comb = ifelse(out.src.mat==1 | out.src.mat==2 | out.src.mat==5, out.mat, NA)
+out.inpt = ifelse(out.src.mat==0 | out.src.mat==1 | out.src.mat==2 | out.src.mat==5, out.mat, NA)
 
-
+# hospital bground = 0
+# ward = 1
+# hospital-wide = 2
+# community bground = 3
+# (start positive = 4)
+# spore = 5
 
 
 #now have iterations as rows and cases as columns
 offset = as.Date("2007-01-14", "%Y-%m-%d")
 out.dt = as.matrix(offset+out.mat, nrow = nrow(out.mat), ncol = ncol(out.mat))
 out.dt.trans = as.matrix(offset+out.comb, nrow = nrow(out.comb), ncol = ncol(out.comb))
+out.dt.inpt = as.matrix(offset+out.inpt, nrow = nrow(out.inpt), ncol = ncol(out.inpt))
 colnames(out.dt) = colnames(out.mat)
 rownames(out.dt) = rownames(out.mat)
 colnames(out.dt.trans) = colnames(out.mat)
 rownames(out.dt.trans) = rownames(out.mat)
+colnames(out.dt.inpt) = colnames(out.mat)
+rownames(out.dt.inpt) = rownames(out.mat)
 out.q = matrix(as.character(as.yearqtr(out.dt, format = "%Y-%m-%d")), nrow = nrow(out.mat), ncol = ncol(out.mat))
 out.q.trans = matrix(as.character(as.yearqtr(out.dt.trans, format = "%Y-%m-%d")), nrow = nrow(out.mat), ncol = ncol(out.mat))
+out.q.inpt = matrix(as.character(as.yearqtr(out.dt.inpt, format = "%Y-%m-%d")), nrow = nrow(out.mat), ncol = ncol(out.mat))
 quarters = sort(unique(out.q[1,]))
 
 q.list = matrix(NA, nrow=nrow(out.q), ncol = length(quarters))
 q.list.trans = matrix(NA, nrow=nrow(out.q), ncol = length(quarters))
+q.list.inpt = matrix(NA, nrow=nrow(out.q), ncol = length(quarters))
 colnames(q.list) = quarters
 colnames(q.list.trans) = quarters
+colnames(q.list.inpt) = quarters
+
 for (i in 1:nrow(out.q)) {
   for(q in quarters) {
     q.list[i,q] = sum(out.q[i,]==q)
     q.list.trans[i,q] = sum(out.q.trans[i,]==q, na.rm=T)
+    q.list.inpt[i,q] = sum(out.q.inpt[i,]==q, na.rm=T)
   }
 }
 
@@ -213,3 +227,9 @@ q.summary.trans = cbind(quarter=quarters, mean=apply(q.list.trans, 2, mean),
                         upper=apply(q.list.trans, 2, quantile, probs=0.975))
 outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_quarter_whs_summary.csv"
 write.csv(q.summary.trans, outFile, row.names = F)
+
+q.summary.inpt = cbind(quarter=quarters, mean=apply(q.list.inpt, 2, mean), 
+                        lower=apply(q.list.inpt, 2, quantile, probs=0.025), 
+                        upper=apply(q.list.inpt, 2, quantile, probs=0.975))
+outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_quarter_inpt_summary.csv"
+write.csv(q.summary.inpt, outFile, row.names = F)
