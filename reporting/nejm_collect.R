@@ -2,11 +2,14 @@
 rm(list = ls())
 library(zoo)
 
+logistic = function(x) {return(1/(1+exp(-x)))}
+
 stList = c(1, 2, 3, 5, 6, 8, 10, 11, 42, 44, "_other")
+setwd("/home/davideyre/transmission_inference/nejm_backup_20190509/")
 
 # ##collect parameter estimates
 for (st in stList) {
-  path = paste("/home/davideyre/transmission_inference/nejm/st", st, "/inference/seed_combined/parm_summary.csv", sep="")
+  path = paste("st", st, "/inference/seed_combined/parm_summary.csv", sep="")
   df = read.csv(path)
   df = cbind(rep(paste("st", st, sep=""), nrow(df)), df)
   colnames(df)[1] = "st"
@@ -16,13 +19,13 @@ for (st in stList) {
     out = rbind(out, df)
   }
 }
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/parm_compare_by_st.csv"
+outFile = "merged_summary/parm_compare_by_st.csv"
 write.csv(out, outFile, row.names = F)
 
 
 ##collect transmission summaries
 for (st in stList) {
-  path = paste("/home/davideyre/transmission_inference/nejm/st", st, "/inference/seed_combined/source_type_summary.csv", sep="")
+  path = paste("st", st, "/inference/seed_combined/source_type_summary.csv", sep="")
   df = read.csv(path)
   df = cbind(rep(paste("st", st, sep=""), nrow(df)), df, df$mean/sum(df$map), df$lower/sum(df$map), df$upper/sum(df$map))
   colnames(df)[1] = "st"
@@ -33,14 +36,14 @@ for (st in stList) {
     out = rbind(out, df)
   }
 }
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_src_type_compare_by_st.csv"
+outFile = "merged_summary/trans_src_type_compare_by_st.csv"
 write.csv(out, outFile, row.names = F)
 
 ##collect transmission summaries
 for (st in stList) {
-  path.loc = paste("/home/davideyre/transmission_inference/nejm/st", st, "/inference/seed_combined/chain_inf_locations.txt", sep="")
+  path.loc = paste("st", st, "/inference/seed_combined/chain_inf_locations.txt", sep="")
   df.loc = read.table(path.loc, header=T, sep="\t", stringsAsFactors = F)
-  path.src = paste("/home/davideyre/transmission_inference/nejm/st", st, "/inference/seed_combined/chain_inf_source_types.txt", sep="")
+  path.src = paste("st", st, "/inference/seed_combined/chain_inf_source_types.txt", sep="")
   df.src = read.table(path.src, header=T, sep="\t", stringsAsFactors = F)
   if(st=="1") {
     out.loc = df.loc[,1:ncol(df.loc)-1]
@@ -70,11 +73,11 @@ for (i in 1:nrow(out.comb.mat)) {
 }
 
 #save file with one row per iteration and a count of each route/ward combination for each column
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_location.csv"
+outFile = "merged_summary/trans_location.csv"
 write.csv(s.df, outFile, row.names = F)
 
 #read in lookup table that can join specialty to ward
-spec.df = read.csv("/home/davideyre/transmission_inference/nejm/spec_lookup.csv", stringsAsFactors = F)
+spec.df = read.csv("spec_lookup.csv", stringsAsFactors = F)
 wards = gsub("^[0-9]_", "", wardList)
 spec.search = match(wards, spec.df$location)
 spec = spec.df[spec.search, "spec"]
@@ -104,13 +107,13 @@ for (i in 1:nrow(spec.list)) { #each iteration
 spec.summary = cbind(location=u.spec, mean=apply(spec.list, 2, mean), 
                      lower=apply(spec.list, 2, quantile, probs=0.025), 
                      upper=apply(spec.list, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_spec_summary.csv"
+outFile = "merged_summary/trans_spec_summary.csv"
 write.csv(spec.summary, outFile, row.names = F)
 
 spec.summary.trans = cbind(location=u.spec, mean=apply(spec.list.trans, 2, mean), 
                            lower=apply(spec.list.trans, 2, quantile, probs=0.025), 
                            upper=apply(spec.list.trans, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_spec_src_summary.csv"
+outFile = "merged_summary/trans_spec_src_summary.csv"
 write.csv(spec.summary.trans, outFile, row.names = F)
 
 
@@ -130,7 +133,7 @@ for (i in 1:nrow(hospital.list)) { #each iteration
 hospital.summary = cbind(location=u.hospital, mean=apply(hospital.list, 2, mean), 
                          lower=apply(hospital.list, 2, quantile, probs=0.025), 
                          upper=apply(hospital.list, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_hospital_summary.csv"
+outFile = "merged_summary/trans_hospital_summary.csv"
 write.csv(hospital.summary, outFile, row.names = F)
 
 
@@ -150,16 +153,16 @@ for (i in 1:nrow(hosp_spec.list)) { #each iteration
 hosp_spec.summary = cbind(location=u.hosp_spec, mean=apply(hosp_spec.list, 2, mean), 
                           lower=apply(hosp_spec.list, 2, quantile, probs=0.025), 
                           upper=apply(hosp_spec.list, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_hospital_spec_summary.csv"
+outFile = "merged_summary/trans_hospital_spec_summary.csv"
 write.csv(hosp_spec.summary, outFile, row.names = F)
 
 ## TRANSMISSION TIME ANALYSIS
 
 # get all transmission times where t=1 (14-Jan-2007)
 for (st in stList) {
-  path = paste("/home/davideyre/transmission_inference/nejm/st", st, "/inference/seed_combined/chain_inf_times.txt", sep="")
+  path = paste("st", st, "/inference/seed_combined/chain_inf_times.txt", sep="")
   df = read.table(path, header=T, sep="\t", stringsAsFactors = F)
-  path.src = paste("/home/davideyre/transmission_inference/nejm/st", st, "/inference/seed_combined/chain_inf_source_types.txt", sep="")
+  path.src = paste("st", st, "/inference/seed_combined/chain_inf_source_types.txt", sep="")
   df.src = read.table(path.src, header=T, sep="\t", stringsAsFactors = F)
   if(st=="1") {
     out = df[,1:ncol(df)-1]
@@ -219,17 +222,55 @@ for (i in 1:nrow(out.q)) {
 q.summary = cbind(quarter=quarters, mean=apply(q.list, 2, mean), 
                   lower=apply(q.list, 2, quantile, probs=0.025), 
                   upper=apply(q.list, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_quarter_summary.csv"
+outFile = "merged_summary/trans_quarter_summary.csv"
 write.csv(q.summary, outFile, row.names = F)
 
 q.summary.trans = cbind(quarter=quarters, mean=apply(q.list.trans, 2, mean), 
                         lower=apply(q.list.trans, 2, quantile, probs=0.025), 
                         upper=apply(q.list.trans, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_quarter_whs_summary.csv"
+outFile = "merged_summary/trans_quarter_whs_summary.csv"
 write.csv(q.summary.trans, outFile, row.names = F)
 
 q.summary.inpt = cbind(quarter=quarters, mean=apply(q.list.inpt, 2, mean), 
                         lower=apply(q.list.inpt, 2, quantile, probs=0.025), 
                         upper=apply(q.list.inpt, 2, quantile, probs=0.975))
-outFile = "/home/davideyre/transmission_inference/nejm/merged_summary/trans_quarter_inpt_summary.csv"
+outFile = "merged_summary/trans_quarter_inpt_summary.csv"
 write.csv(q.summary.inpt, outFile, row.names = F)
+
+
+
+#for each ST
+
+for (st in stList) {
+  #read in sampling times
+  path = paste("st", st, "/input/patientLog.csv", sep="")
+  df.sample = read.csv(path)
+  df.sample = df.sample[which(substr(df.sample$patient_id,1,1)=="C"),]
+  
+  #collect all the sampling intervals
+  path = paste("st", st, "/inference/seed_combined/chain_inf_times.txt", sep="")
+  df.inf = read.table(path, header=T, sep="\t", stringsAsFactors = F)
+  df.samplediff = -sweep(df.inf, 2, df.sample$t_sample)
+  outFile = paste("merged_summary/st", st, "_sampling_intervals.csv", sep="")
+  write.csv(df.samplediff, outFile, row.names = F)
+  
+  #collect all the recovery intervals
+  path = paste("st", st, "/inference/seed_combined/chain_rec_times.txt", sep="")
+  df.rec = read.table(path, header=T, sep="\t", stringsAsFactors = F)
+  df.recdiff = sweep(df.rec, 2, df.sample$t_sample)
+  outFile = paste("merged_summary/st", st, "_recovery_intervals.csv", sep="")
+  write.csv(df.recdiff, outFile, row.names = F)
+  
+  #read in spore.p values
+  path = paste("st", st, "/inference/seed_combined/chain_parameters.txt", sep="")
+  df.spore = read.table(path, header=T, sep="\t", stringsAsFactors = F)
+  df.spore = as.data.frame(logistic(df.spore$spore_prob_logit))
+  colnames(df.spore) = c("spore.p")
+  outFile = paste("merged_summary/st", st, "_spore_p.csv", sep="")
+  write.csv(df.spore, outFile, row.names = F)
+}
+
+
+
+#collect the values of spore.p
+
