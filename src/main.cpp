@@ -1310,9 +1310,9 @@ int main(int argc, const char * argv[]) {
     startParm.betaHosp = 0.0005;
     startParm.sampleSize = log(1);
     startParm.sampleMu = 30;
-    startParm.directNe =  1;
-    startParm.introNe = 500;
-    startParm.mu = 2/365.25;
+    startParm.directNe =  74;
+    startParm.introNe = 1000;
+    startParm.mu = 2*0.74/365.25;
     startParm.probStartInfLogit = logit(0.01);
     startParm.betaComm = 0.0005;
     startParm.sporeProbLogit = 0.5;
@@ -1327,9 +1327,9 @@ int main(int argc, const char * argv[]) {
     startSigma.betaHosp = 0.0001;
     startSigma.sampleSize = 1;
     startSigma.sampleMu = 15;
-    startSigma.directNe =  0.1;
+    startSigma.directNe =  10;
     startSigma.introNe = 100;
-    startSigma.mu = 2/365.25/10;
+    startSigma.mu = 0.74/365.25/5;
     startSigma.probStartInfLogit = 0.05;
     startSigma.betaComm = 0.0001;
     startSigma.sporeProbLogit = 0.1;

@@ -449,9 +449,16 @@ double getPrior(Parm &parm) {
     double priorSampleMu = dgamma(parm.sampleMu, 3, 1/0.1, 1); //up to 100, but most mass around 10-30
     
     //genetic priors - base directNe on within host diversity estimates, and my on previous SNPs per year
-    double priorDirectNe = dnorm(parm.directNe, 22.5, 0.1, 1); //within host diversity = 2.mu.Ne = 0.3, i.e Ne = 22.5
+    double priorDirectNe = dnorm(parm.directNe, 74.03717, 18.50929, 1); //within host diversity = 2.mu.Ne
+    // try to match nejm range = 0.30 (0.13-0.42), actually 0.3 (0.15 - 0.45) below
+    // 2.mu.Ne = 0.3, mu = 0.00202601, Ne = 0.3 / 0.004052019 = 74.03717 sd = 0.075/0.004052019 = 18.50929
+    
     double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
-    double priorMu = dnorm(parm.mu, 1/365.25, 0.05/365.25, 1); //relatively tight prior around 1 SNP per year
+    
+    double priorMu = dgamma(parm.mu, 6, 45.0475, 1);
+    //shape = 6, therefore first parm = 6
+    //rate = shape/mu = 6/0.74/365.25, and provide as reciprocal - 45.0475
+    // match nejm rate 0.74 (0.22 - 1.40) as close as possible mean = 0.74, 95% CI 0.27 - 1.44 per year, and convert to be per day
     
     //set logit transformed probabilties to be relatively uniform over 0 to 1, set priors on transformed scale to avoid Jacobian
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
@@ -461,8 +468,8 @@ double getPrior(Parm &parm) {
     double priorStartInfLogit = dnorm(parm.probStartInfLogit, -8, 1, 1); //mostly <1/2000 with some mass up to around 1/200
     
     //set recovery prior to be moderately informative
-    double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
-    double priorrecMu = dnorm(parm.recMu, 90, 3, 1); //longer recovery, mean 90 days, see in R: hist(rnbinom(1000,size=3,mu=90))
+    double priorRecSize = dnorm(parm.recSize, 3, 1, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
+    double priorrecMu = dnorm(parm.recMu, 90, 15, 1); //longer recovery, mean 90 days, see in R: hist(rnbinom(1000,size=3,mu=90))
     
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorSampleSize + priorSampleMu +
                     priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm +
