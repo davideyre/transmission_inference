@@ -430,7 +430,7 @@ for (seed in seedList) {
   finalChain = cbind(finalChain, logistic(finalChain$spore_prob_logit), logistic(finalChain$p_start_inf_logit))
   thinChain = finalChain[seq(1, nrow(finalChain), by = thin.factor),]
   infTimes = all.inf.infTimes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
-  recTimes = all.inf.infTimes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
+  recTimes = all.rec.recTimes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
   infSources = all.inf.infSources[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
   infSourceTypes = all.inf.infSourceTypes[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
   infLocation = all.inf.infLocation[burnIn:rowN,][seq(1, rowN-burnIn+1, by = thin.factor),]
