@@ -455,10 +455,8 @@ double getPrior(Parm &parm) {
     
     double priorIntroNe = dgamma(parm.introNe, 2, 10000, 1); //dexp(parm.introNe, 100, 1);
     
-    double priorMu = dgamma(parm.mu, 6, 45.0475, 1);
-    //shape = 6, therefore first parm = 6
-    //rate = shape/mu = 6/0.74/365.25, and provide as reciprocal - 45.0475
-    // match nejm rate 0.74 (0.22 - 1.40) as close as possible mean = 0.74, 95% CI 0.27 - 1.44 per year, and convert to be per day
+    double priorMu = dnorm(parm.mu, 0.8/365.25, 0.295/365.25, 1);
+    // match nejm rate 0.74 (0.22 - 1.40) as close as possible mean = 0.8, 95% CI 0.21 - 1.39 per year, and convert to be per day
     
     //set logit transformed probabilties to be relatively uniform over 0 to 1, set priors on transformed scale to avoid Jacobian
     double priorSporeProbLogit = dnorm(parm.sporeProbLogit, 0, 1.7, 1); //relatively uniform over 0 to 1
@@ -468,8 +466,8 @@ double getPrior(Parm &parm) {
     double priorStartInfLogit = dnorm(parm.probStartInfLogit, -8, 1, 1); //mostly <1/2000 with some mass up to around 1/200
     
     //set recovery prior to be moderately informative
-    double priorRecSize = dnorm(parm.recSize, 3, 1, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
-    double priorrecMu = dnorm(parm.recMu, 90, 15, 1); //longer recovery, mean 90 days, see in R: hist(rnbinom(1000,size=3,mu=90))
+    double priorRecSize = dnorm(parm.recSize, 3, 0.5, 1); //relatively tight prior around 3, i.e. likely between 2 and 4
+    double priorrecMu = dnorm(parm.recMu, 90, 15, 1); // recovery, mean 90 days, range 60-120 for mean
     
     double prior = priorBeta0 + priorBeta1 + priorBeta2 + priorSampleSize + priorSampleMu +
                     priorDirectNe + priorIntroNe + priorMu + priorStartInfLogit + priorBetaComm +

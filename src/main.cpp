@@ -1312,7 +1312,7 @@ int main(int argc, const char * argv[]) {
     startParm.sampleMu = 30;
     startParm.directNe =  74;
     startParm.introNe = 1000;
-    startParm.mu = 2*0.74/365.25;
+    startParm.mu = 0.74/365.25;
     startParm.probStartInfLogit = logit(0.01);
     startParm.betaComm = 0.0005;
     startParm.sporeProbLogit = 0.5;
