@@ -5,7 +5,7 @@ library(zoo)
 logistic = function(x) {return(1/(1+exp(-x)))}
 
 stList = c(1, 2, 3, 5, 6, 8, 10, 11, 42, 44, "_other")
-setwd("/home/davideyre/transmission_inference/nejm_backup_20190509/")
+setwd("/home/davideyre/transmission_inference/nejm/")
 
 # ##collect parameter estimates
 for (st in stList) {
